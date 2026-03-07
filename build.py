@@ -116,6 +116,7 @@ def build():
 
 <footer>
   <p>orange</p>
+  <p style="margin-top:0.5rem;font-size:0.75rem;opacity:0.45;">まあちらかってるじぶんをまとめるのもいいかなって　きみがいるなら</p>
 </footer>
 
 </body>
