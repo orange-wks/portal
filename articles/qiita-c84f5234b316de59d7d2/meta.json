@@ -1,0 +1,13 @@
+{
+  "title": "[Unity] 正確な時間間隔で効果音を出す",
+  "description": "メトロノームがほしい、そんな夜もあります。 - そうして心を落ち着けたいのです。   Unityで、たとえばメトロノームのように、正確な時間間隔で効果音を鳴らし...",
+  "date": "2019-04-23",
+  "tags": [
+    "C#",
+    "Unity"
+  ],
+  "cover": "../../assets/covers/qiita-default.png",
+  "platform": "Qiita",
+  "source_url": "https://qiita.com/orangewk/items/c84f5234b316de59d7d2",
+  "section": "archive"
+}

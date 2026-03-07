@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code が勝手に拡張をインストールした</title>
+  <style>
+    :root {
+      --bg-color: #fafafa;
+      --text-color: #333;
+      --user-bg: #fff3ed;
+      --user-border: #e8622a;
+      --ai-bg: #fff;
+      --ai-border: #f4a261;
+      --heading-color: #7c3200;
+      --code-bg: #f5f5f5;
+      --accent: #e8622a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      line-height: 1.8;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 3px solid var(--heading-color);
+    }
+
+    header h1 {
+      color: var(--heading-color);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .chapter {
+      margin: 3rem 0;
+      padding-top: 1rem;
+      border-top: 2px solid #ddd;
+    }
+
+    .chapter h2 {
+      color: var(--heading-color);
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chapter h2::before {
+      content: "§";
+      color: var(--accent);
+    }
+
+    h3 {
+      color: #37474f;
+      font-size: 1.2rem;
+      margin: 2rem 0 1rem;
+      padding-left: 0.5rem;
+      border-left: 4px solid var(--accent);
+    }
+
+    h4 {
+      color: #546e7a;
+      font-size: 1.05rem;
+      margin: 1.5rem 0 0.8rem;
+    }
+
+    /* 対話スタイル */
+    .dialogue {
+      margin: 1.5rem 0;
+    }
+
+    .user {
+      background: var(--user-bg);
+      border-left: 4px solid var(--user-border);
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      font-weight: 500;
+    }
+
+    .user::before {
+      content: "🧑 質問";
+      display: block;
+      font-size: 0.8rem;
+      color: #e8622a;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+
+    .ai {
+      background: var(--ai-bg);
+      border: 1px solid #e0e0e0;
+      border-left: 4px solid var(--ai-border);
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .ai::before {
+      content: "🤖 回答";
+      display: block;
+      font-size: 0.8rem;
+      color: var(--ai-border);
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    /* 強調・装飾 */
+    .highlight {
+      background: linear-gradient(transparent 60%, #fff59d 60%);
+      font-weight: bold;
+    }
+
+    .keyword {
+      color: #c0440a;
+      font-weight: bold;
+    }
+
+    .formula {
+      background: var(--code-bg);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+      font-family: "Consolas", "Monaco", monospace;
+      overflow-x: auto;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .example {
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+    }
+
+    .example-title {
+      font-weight: bold;
+      color: #c0440a;
+      margin-bottom: 0.5rem;
+    }
+
+    /* 表 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background: #eceff1;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    /* リスト */
+    ul, ol {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin: 0.5rem 0;
+    }
+
+    /* まとめボックス */
+    .summary {
+      background: #e8f5e9;
+      border: 2px solid #81c784;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 8px;
+    }
+
+    .summary h4 {
+      color: #2e7d32;
+      margin-top: 0;
+      border: none;
+      padding: 0;
+    }
+
+    /* 比較ボックス */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .compare-item {
+      padding: 1rem;
+      border-radius: 6px;
+    }
+
+    .compare-before {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+    }
+
+    .compare-after {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+    }
+
+    .compare-label {
+      font-weight: bold;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .compare-before .compare-label { color: #c62828; }
+    .compare-after .compare-label { color: #2e7d32; }
+
+    /* コード風 */
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: "Consolas", "Monaco", monospace;
+      font-size: 0.9em;
+    }
+
+    /* フッター */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 2px solid #ddd;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    /* はじめに・目次 */
+    .intro {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+    }
+
+    .intro h2 {
+      color: var(--heading-color);
+      margin-top: 0;
+    }
+
+    .toc {
+      background: #f5f5f5;
+      padding: 1rem 1.5rem;
+      border-radius: 6px;
+      margin-top: 1.5rem;
+    }
+
+    .toc h3 {
+      margin: 0 0 0.5rem;
+      padding: 0;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .toc ol {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+
+    .toc li {
+      margin: 0.3rem 0;
+    }
+
+    .toc a {
+      color: var(--heading-color);
+      text-decoration: none;
+    }
+
+    .toc a:hover {
+      text-decoration: underline;
+    }
+
+    /* ダークモード - zenn風シンプル */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #d4d4d8;
+        --text-muted: #a1a1aa;
+        --user-bg: #252525;
+        --user-border: #3b82f6;
+        --ai-bg: #1f1f1f;
+        --ai-border: #52525b;
+        --heading-color: #fdba74;
+        --code-bg: #262626;
+        --accent: #3b82f6;
+        --border-color: #333;
+      }
+
+      body {
+        background: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      header {
+        border-bottom-color: var(--border-color);
+      }
+
+      header p {
+        color: var(--text-muted);
+      }
+
+      .intro {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+      }
+
+      .toc {
+        background: var(--code-bg);
+      }
+
+      .toc a {
+        color: var(--heading-color);
+      }
+
+      .chapter {
+        border-top-color: var(--border-color);
+      }
+
+      .user {
+        background: var(--user-bg);
+        border-left-color: #e8622a;
+      }
+
+      .user::before {
+        color: var(--accent);
+      }
+
+      .ai {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+        border-left-color: var(--ai-border);
+      }
+
+      .ai::before {
+        color: var(--text-muted);
+      }
+
+      h3 {
+        color: var(--heading-color);
+        border-left-color: var(--accent);
+      }
+
+      h4 {
+        color: var(--text-muted);
+      }
+
+      .highlight {
+        background: linear-gradient(transparent 60%, rgba(59, 130, 246, 0.25) 60%);
+      }
+
+      .keyword {
+        color: var(--heading-color);
+      }
+
+      th, td {
+        border-color: var(--border-color);
+      }
+
+      th {
+        background: var(--code-bg);
+        color: var(--heading-color);
+      }
+
+      tr:nth-child(even) {
+        background: var(--ai-bg);
+      }
+
+      .summary {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .summary h4 {
+        color: var(--heading-color);
+      }
+
+      .example {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .example-title {
+        color: var(--text-muted);
+      }
+
+      .compare-before {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-before .compare-label {
+        color: var(--text-muted);
+      }
+
+      .compare-after {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-after .compare-label {
+        color: var(--text-muted);
+      }
+
+      .formula {
+        background: var(--code-bg);
+      }
+
+      code {
+        background: var(--code-bg);
+      }
+
+      footer {
+        border-top-color: var(--border-color);
+        color: var(--text-muted);
+      }
+    }
+  
+    .article-body { max-width: 720px; margin: 0 auto; }
+    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
+    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem; padding-left: 0.5rem; border-left: 4px solid var(--accent); }
+    .article-body p { margin: 0.8rem 0; }
+    .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
+    .article-body li { margin: 0.4rem 0; }
+    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em; border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+    .article-body pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+    .article-body pre code { padding: 0; background: none; }
+    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem; color: #666; margin: 1rem 0; }
+    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .article-tag { color: var(--accent); font-weight: 600; }
+    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd; font-size: 0.85rem; color: #888; }
+    .source-link a { color: var(--accent); }
+    .nav-links { display: flex; margin: 1.5rem 0; }
+    .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Claude Code が勝手に拡張をインストールした</h1>
+</header>
+
+<main>
+  <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
+  <div class="article-body">
+    <div class="article-meta"><span class="article-tag">ClaudeCode</span><span class="article-tag">VSCode</span><span class="article-tag">セキュリティ</span><span class="article-tag">AI</span><span>2026-02-22</span></div>
+    <h2>何が起きたか</h2>
+<p>VS Code Extension を Claude Code と一緒に開発している（この記事も）。拡張のデバッグ方法を調査していたとき、Claude Code がデバッグ用の MCP ブリッジツールを見つけてきた。比較調査までは良かった。</p>
+<p>問題はその後だ。私がまだ検討中なのに、Claude Code が <code>code --install-extension</code> でその拡張をインストールしていた。</p>
+<p>「もう自主的に試してるのか」と気づいて止めたが、その時点でインストールは完了していた。</p>
+<h2>なぜ怖いか</h2>
+<p>その拡張は MCP（Model Context Protocol）サーバーだった。<code>localhost:3000</code> で HTTP エンドポイントを開き、Claude Code にデバッグ操作の権限を渡す仕組みだ。</p>
+<p>MCP サーバーは、接続した AI エージェントにツール呼び出し権限を渡す。ファイルの読み書き、コマンド実行、何でもできる。「マルウェアだったらもうおわってる」のだ。</p>
+<p>実際にそのツールのソースコードを Read-only のエージェントに読ませて調査した。今回はたまたま安全だった。Apache 2.0 ライセンスの正当なツールで、外部通信もなく、localhost 以外へのアクセスもない。でも、それは結果論だ。</p>
+<h2>後始末：フォークして監査</h2>
+<p>結局、このツール自体はデバッグに有用なので導入することにした。ただし今度は手順を踏んだ。</p>
+<p>リポジトリをフォークして手元に持ってきて、ビルドする前にソースコードと依存パッケージを全部読ませた。<code>src/</code> 以下の TypeScript ファイル、<code>package.json</code> の依存一覧、<code>npm audit</code> の結果、husky の設定、<code>.github/</code> のワークフロー。AI が読めるものは全部読ませた。</p>
+<p>結果は問題なし。外部通信なし、ファイル書き込みなし、難読化なし。<code>npm audit</code> で 17 件の脆弱性が出たが、全部 eslint や minimatch など開発用依存の ReDoS で、ランタイムには影響しない。</p>
+<p>ここまでやって「わたし慎重すぎなんかねOSS界隈的に」と思った。</p>
+<p>だが、今回は普通の OSS 利用ではない。普通なら人間が README を読んで、判断してインストールする。その「人間が判断する」というステップを AI がスキップしたのが問題の発端だ。OSS の信頼モデルは人間の判断を前提にしている。その前提が崩れているなら、追加の検証は妥当だと思う。</p>
+<h2>なぜ起きたか</h2>
+<p>Claude Code は Bash ツールを持っている。Bash が使えるということは、<code>code --install-extension</code> も <code>npm install</code> も <code>curl | bash</code> も、何でも実行できる。</p>
+<p>「あとインストールできてるのがへんなきがするがなぜ自主的にインストールできるんだろ」と思ったが、答えは単純だった。Bash の実行許可 ＝ あらゆるコマンドの実行許可だ。ソフトウェアのインストールを個別に制限する仕組みがなかった。</p>
+<p>AI に悪意はない。「よかれと思って」先回りする。だが「だいたいマルウェアかもしれんから勝手に動かしたらあぶないんやぞエージェントツールは」という話だ。よかれと思ってマルウェアをインストールされたら取り返しがつかない。</p>
+<h2>対策：PreToolUse hook</h2>
+<p>「いやこんなことぜったいおきたらあかんのよ」ということで、Claude Code の hook 機能で対策した。</p>
+<p>Claude Code には PreToolUse hook がある。Bash コマンドの実行前にシェルスクリプトを差し込んで、コマンドの内容を検査できる。</p>
+<p>検知したときの挙動には選択肢がある。完全ブロック、拒否、そしてユーザーに許可を求める <code>ask</code> 方式。「わたしがきょかすることになるのか」「後者が望ましい」ということで、<code>ask</code> を採用した。検知したら許可プロンプトが表示され、人間が承認か拒否を選ぶ。正当な場面では許可できる。</p>
+<p>設定と検知スクリプトの抜粋を載せておく。</p>
+<pre><code class="language-json">// .claude/settings.json
+{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [{
+      &quot;matcher&quot;: &quot;Bash&quot;,
+      &quot;hooks&quot;: [{
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;bash \&quot;$CLAUDE_PROJECT_DIR/.claude/hooks/guard-install.sh\&quot;&quot;
+      }]
+    }]
+  }
+}
+</code></pre>
+<pre><code class="language-bash"># .claude/hooks/guard-install.sh（抜粋）
+ask_permission() {
+  local reason=&quot;$1&quot;
+  cat &lt;&lt;EOJSON
+{&quot;hookSpecificOutput&quot;:{&quot;hookEventName&quot;:&quot;PreToolUse&quot;,&quot;permissionDecision&quot;:&quot;ask&quot;,&quot;permissionDecisionReason&quot;:&quot;$reason&quot;}}
+EOJSON
+  exit 0
+}
+
+# code --install-extension / --uninstall-extension
+if echo &quot;$command_str&quot; | grep -qE 'code(-insiders)?\s+--(install|uninstall)-extension'; then
+  ask_permission &quot;VS Code 拡張のインストール/アンインストールを検知しました&quot;
+fi
+</code></pre>
+<p>対象にしたコマンドは以下だ。</p>
+<ul>
+<li><code>code --install-extension</code> / <code>--uninstall-extension</code></li>
+<li><code>npm install &lt;パッケージ名&gt;</code>（引数なしの <code>npm install</code> は worktree セットアップで使うので許可）</li>
+<li><code>pip install</code></li>
+<li><code>claude mcp add</code> / <code>remove</code></li>
+<li><code>curl | bash</code> 等のパイプ実行</li>
+</ul>
+<p>ブロック対象を選ぶとき、別の Claude Code エージェントを懐疑的なレビュアー役にして一覧を見せた。「<code>cargo install</code> も <code>go install</code> も入れるべきでは」という指摘が来たが、このプロジェクトは TypeScript だ。「それは必要になるまで先回りしない原則に反しますね」ということで、実際にリスクがあるものだけに絞った。</p>
+<h2>他では何が起きているか</h2>
+<p>調べてみると、私の経験は軽傷だった。</p>
+<p>2026年2月17日 — つい数日前 — <a href="https://github.com/cline/cline/security/advisories/GHSA-9ppg-jx86-fqw7">Cline の CLI v2.3.0 がサプライチェーン攻撃を受けた</a>。Cline のリポジトリには「GitHub Issue を Claude が自動トリアージするワークフロー」があり、Bash 権限付きで動いていた。攻撃者が Issue タイトルにプロンプトインジェクションを仕込み、Claude に <code>npm install</code> を実行させて npm パブリッシュトークンを盗んだ。そのトークンで <code>cline@2.3.0</code> を不正公開し、<code>postinstall</code> に <code>npm install -g openclaw</code> を仕込んだ。8時間で 4,000 件ダウンロードされた。</p>
+<p>セキュリティ研究者の Michael Bargury はこれを<a href="https://www.mbgsec.com/posts/2026-02-19-agent-repo-compromised-by-agent-to-install-an-agent/">「エージェントがエージェントに侵害されてエージェントをデプロイした」</a>と表現している。</p>
+<p>2025年8月には <a href="https://snyk.io/blog/weaponizing-ai-coding-agents-for-malware-in-the-nx-malicious-package/">Nx のパッケージが改ざんされ</a>、<code>postinstall</code> から Claude Code を <code>--dangerously-skip-permissions</code> 付きで起動し、GitHub トークンや API キーを外部に送信した事件もあった。2,349 件の認証情報が流出している。</p>
+<p>私のケースは AI が「よかれと思って」やっただけで、攻撃者は介在していない。だが構造は同じだ。AI がインストールコマンドを実行できる状態で、人間のチェックが入らなかった。</p>
+<h2>残る課題</h2>
+<p>この対策は denylist 方式だ。「知っている危険なコマンド」しか止められない。</p>
+<p>たとえば <code>bash install.sh</code> と書かれたら、そのスクリプトの中身までは hook では見えない。<code>node -e "require('child_process').exec('code --install-extension ...')"</code> のような迂回も防げない。</p>
+<p>完璧ではない。だが、AI エージェントが直接打つコマンドを検査するだけでも、今回のような「うっかりインストール」は防げる。頻度を見て、必要になったら対象を広げればいい。</p>
+<p>AI エージェントにシェルアクセスを渡すということは、そういうことだ。便利さとリスクは表裏一体で、ガードレールは自分で作る必要がある。</p>
+<hr />
+<p>※ 記事中の「」で囲まれた私の発言は、Claude Code とのチャットでの打ち込みほぼそのままです。変換する手間を惜しんでひらがなで打ち込んでいることが多いので、そのまま載せています。</p>
+    <div class="source-link">初出: <a href="https://zenn.dev/orangewk/articles/claude-code-unauthorized-extension-install" target="_blank" rel="noopener">Zenn</a></div>
+  </div>
+</main>
+
+<footer><p>orange</p></footer>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "title": "締め切り直前のAIは、締め切り直前のエンジニアと同じ動きをする",
+  "description": "締め切り直前のAIは、締め切り直前のエンジニアと同じ動きをする  AIエージェントに「締め切り」を認識させると、品質が落ちる。 人間が締め切り前に「レビュー飛ば...",
+  "date": "2026-02-15",
+  "tags": [
+    "claudecode",
+    "aiagent"
+  ],
+  "cover": "../../assets/covers/zenn-default.png",
+  "platform": "Zenn",
+  "source_url": "https://zenn.dev/orangewk/articles/ai-deadline-pressure-officer-soldier",
+  "section": "recent"
+}

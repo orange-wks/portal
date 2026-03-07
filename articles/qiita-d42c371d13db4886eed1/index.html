@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>グーグルプレイSavedGames（＝クラウドセーブ）の実装と落とし穴</title>
+  <style>
+    :root {
+      --bg-color: #fafafa;
+      --text-color: #333;
+      --user-bg: #fff3ed;
+      --user-border: #e8622a;
+      --ai-bg: #fff;
+      --ai-border: #f4a261;
+      --heading-color: #7c3200;
+      --code-bg: #f5f5f5;
+      --accent: #e8622a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      line-height: 1.8;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 3px solid var(--heading-color);
+    }
+
+    header h1 {
+      color: var(--heading-color);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .chapter {
+      margin: 3rem 0;
+      padding-top: 1rem;
+      border-top: 2px solid #ddd;
+    }
+
+    .chapter h2 {
+      color: var(--heading-color);
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chapter h2::before {
+      content: "§";
+      color: var(--accent);
+    }
+
+    h3 {
+      color: #37474f;
+      font-size: 1.2rem;
+      margin: 2rem 0 1rem;
+      padding-left: 0.5rem;
+      border-left: 4px solid var(--accent);
+    }
+
+    h4 {
+      color: #546e7a;
+      font-size: 1.05rem;
+      margin: 1.5rem 0 0.8rem;
+    }
+
+    /* 対話スタイル */
+    .dialogue {
+      margin: 1.5rem 0;
+    }
+
+    .user {
+      background: var(--user-bg);
+      border-left: 4px solid var(--user-border);
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      font-weight: 500;
+    }
+
+    .user::before {
+      content: "🧑 質問";
+      display: block;
+      font-size: 0.8rem;
+      color: #e8622a;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+
+    .ai {
+      background: var(--ai-bg);
+      border: 1px solid #e0e0e0;
+      border-left: 4px solid var(--ai-border);
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .ai::before {
+      content: "🤖 回答";
+      display: block;
+      font-size: 0.8rem;
+      color: var(--ai-border);
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    /* 強調・装飾 */
+    .highlight {
+      background: linear-gradient(transparent 60%, #fff59d 60%);
+      font-weight: bold;
+    }
+
+    .keyword {
+      color: #c0440a;
+      font-weight: bold;
+    }
+
+    .formula {
+      background: var(--code-bg);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+      font-family: "Consolas", "Monaco", monospace;
+      overflow-x: auto;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .example {
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+    }
+
+    .example-title {
+      font-weight: bold;
+      color: #c0440a;
+      margin-bottom: 0.5rem;
+    }
+
+    /* 表 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background: #eceff1;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    /* リスト */
+    ul, ol {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin: 0.5rem 0;
+    }
+
+    /* まとめボックス */
+    .summary {
+      background: #e8f5e9;
+      border: 2px solid #81c784;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 8px;
+    }
+
+    .summary h4 {
+      color: #2e7d32;
+      margin-top: 0;
+      border: none;
+      padding: 0;
+    }
+
+    /* 比較ボックス */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .compare-item {
+      padding: 1rem;
+      border-radius: 6px;
+    }
+
+    .compare-before {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+    }
+
+    .compare-after {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+    }
+
+    .compare-label {
+      font-weight: bold;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .compare-before .compare-label { color: #c62828; }
+    .compare-after .compare-label { color: #2e7d32; }
+
+    /* コード風 */
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: "Consolas", "Monaco", monospace;
+      font-size: 0.9em;
+    }
+
+    /* フッター */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 2px solid #ddd;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    /* はじめに・目次 */
+    .intro {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+    }
+
+    .intro h2 {
+      color: var(--heading-color);
+      margin-top: 0;
+    }
+
+    .toc {
+      background: #f5f5f5;
+      padding: 1rem 1.5rem;
+      border-radius: 6px;
+      margin-top: 1.5rem;
+    }
+
+    .toc h3 {
+      margin: 0 0 0.5rem;
+      padding: 0;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .toc ol {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+
+    .toc li {
+      margin: 0.3rem 0;
+    }
+
+    .toc a {
+      color: var(--heading-color);
+      text-decoration: none;
+    }
+
+    .toc a:hover {
+      text-decoration: underline;
+    }
+
+    /* ダークモード - zenn風シンプル */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #d4d4d8;
+        --text-muted: #a1a1aa;
+        --user-bg: #252525;
+        --user-border: #3b82f6;
+        --ai-bg: #1f1f1f;
+        --ai-border: #52525b;
+        --heading-color: #fdba74;
+        --code-bg: #262626;
+        --accent: #3b82f6;
+        --border-color: #333;
+      }
+
+      body {
+        background: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      header {
+        border-bottom-color: var(--border-color);
+      }
+
+      header p {
+        color: var(--text-muted);
+      }
+
+      .intro {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+      }
+
+      .toc {
+        background: var(--code-bg);
+      }
+
+      .toc a {
+        color: var(--heading-color);
+      }
+
+      .chapter {
+        border-top-color: var(--border-color);
+      }
+
+      .user {
+        background: var(--user-bg);
+        border-left-color: #e8622a;
+      }
+
+      .user::before {
+        color: var(--accent);
+      }
+
+      .ai {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+        border-left-color: var(--ai-border);
+      }
+
+      .ai::before {
+        color: var(--text-muted);
+      }
+
+      h3 {
+        color: var(--heading-color);
+        border-left-color: var(--accent);
+      }
+
+      h4 {
+        color: var(--text-muted);
+      }
+
+      .highlight {
+        background: linear-gradient(transparent 60%, rgba(59, 130, 246, 0.25) 60%);
+      }
+
+      .keyword {
+        color: var(--heading-color);
+      }
+
+      th, td {
+        border-color: var(--border-color);
+      }
+
+      th {
+        background: var(--code-bg);
+        color: var(--heading-color);
+      }
+
+      tr:nth-child(even) {
+        background: var(--ai-bg);
+      }
+
+      .summary {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .summary h4 {
+        color: var(--heading-color);
+      }
+
+      .example {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .example-title {
+        color: var(--text-muted);
+      }
+
+      .compare-before {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-before .compare-label {
+        color: var(--text-muted);
+      }
+
+      .compare-after {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-after .compare-label {
+        color: var(--text-muted);
+      }
+
+      .formula {
+        background: var(--code-bg);
+      }
+
+      code {
+        background: var(--code-bg);
+      }
+
+      footer {
+        border-top-color: var(--border-color);
+        color: var(--text-muted);
+      }
+    }
+  
+    .article-body { max-width: 720px; margin: 0 auto; }
+    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
+    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem; padding-left: 0.5rem; border-left: 4px solid var(--accent); }
+    .article-body p { margin: 0.8rem 0; }
+    .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
+    .article-body li { margin: 0.4rem 0; }
+    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em; border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+    .article-body pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+    .article-body pre code { padding: 0; background: none; }
+    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem; color: #666; margin: 1rem 0; }
+    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .article-tag { color: var(--accent); font-weight: 600; }
+    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd; font-size: 0.85rem; color: #888; }
+    .source-link a { color: var(--accent); }
+    .nav-links { display: flex; margin: 1.5rem 0; }
+    .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>グーグルプレイSavedGames（＝クラウドセーブ）の実装と落とし穴</h1>
+</header>
+
+<main>
+  <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
+  <div class="article-body">
+    <div class="article-meta"><span class="article-tag">Android</span><span class="article-tag">C#</span><span class="article-tag">Unity</span><span class="article-tag">GooglePlayGameServices</span><span class="article-tag">SavedGames</span><span>2018-04-17</span></div>
+    <h1>はじめに</h1>
+<p>GooglePlayには無料で利用できるSaved Gamesという名前のクラウドセーブ機能が準備されています。容量の上限は3MBです。(2018.4.16現在)
+日本語情報が少なく、Unityでの実装に苦労したので共有したいと思い記事を書きました。</p>
+<p><a href="https://developers.google.com/games/services/common/concepts/savedgames">developers.google.comのSaved Gamesのページ</a></p>
+<h1>Unityアプリ側</h1>
+<h2>動作</h2>
+<ul>
+<li>バックアップボタンを押すだけの操作</li>
+<li>=&gt;セーブデータがなければバックアップ</li>
+<li>=&gt;ローカルのプレイよりプレイ時間の短いデータしかクラウドにないならクラウドにセーブ</li>
+<li>=&gt;ローカルのプレイよりプレイ時間の長いデータがクラウドにあるならクラウドからロード</li>
+</ul>
+<h2>実装コード</h2>
+<ul>
+<li>GooglePlayServicesの導入に関してはここでは触れません</li>
+<li>このスクリプトはゲーム開始時に存在し破壊されないオブジェクトのコンポーネントであることを前提にしています。</li>
+<li>stringをクラウドとやりとりするコードを以下に記します。セーブデータを1つのstringにする処理はここでは触れません（自分はJsonUtility等でやっています）</li>
+</ul>
+<pre><code class="language-CloudManager.cs">using UnityEngine;
+using System;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
+using GooglePlayGames.BasicApi.SavedGame;
+using System.Text;
+using UnityEngine.SocialPlatforms;
+
+public class CloudManager : MonoBehaviour {
+    public static CloudManager Instance;
+
+    public DateTime openedSavedGame_commitDate;
+
+    bool isSaving;
+    static string saveFileName = &quot;SaveFileName_AsYouLike&quot;;
+    static string saveString = &quot;&quot;;
+
+    bool hasInternetConnection { get { return  Application.internetReachability != NetworkReachability.NotReachable; } }
+
+    bool isAuthed { get { return Social.Active.localUser.authenticated; } }
+
+
+#region lifeCycle
+
+    void Awake() {
+        Instance = this;
+    }
+
+void Start(){
+//ログイン処理例
+            PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
+                .EnableSavedGames()
+                .Build();            
+            PlayGamesPlatform.InitializeInstance(config);
+            PlayGamesPlatform.Activate();
+}
+#endregion
+
+#region input
+//バックアップボタンから呼ぶメソッド
+    public void PressCloudSyncButton() {
+        OpenSavedGame();
+    }
+
+#endregion
+
+    //まずクラウド上のファイルをOPEN
+    public void OpenSavedGame() {
+        if (!hasInternetConnection) {
+            Debug.Log(&quot;No Internet Connection&quot;);
+            return;
+        }
+
+        if (!isAuthed) {
+            Debug.Log(&quot;Not Authed&quot;);
+            return;
+        }
+        isSaving = false;
+        Debug.Log(&quot;Opening savedGame in the cloud&quot;);
+
+        ((PlayGamesPlatform)Social.Active).SavedGame.OpenWithAutomaticConflictResolution(
+            saveFileName,
+            DataSource.ReadCacheOrNetwork,
+            ConflictResolutionStrategy.UseLongestPlaytime,
+            OnSavedGameOpened
+        );
+    }
+
+    public void SaveToCloud() {
+        if (!hasInternetConnection) {
+            Debug.Log(&quot;No Internet Connection&quot;);
+            return;
+        }
+
+        if (isAuthed) {
+            isSaving = true;
+            //first, open the file
+            ((PlayGamesPlatform)Social.Active).SavedGame.OpenWithAutomaticConflictResolution(
+                saveFileName,
+                DataSource.ReadCacheOrNetwork,
+                ConflictResolutionStrategy.UseLongestPlaytime,
+                OnSavedGameOpened
+            );
+        } else {
+            Debug.Log(&quot;Not Authed&quot;);
+            return;
+        }
+    }
+
+#region savedGames Callbacks
+
+    ISavedGameMetadata currentOpenedSavedGameMetadata;
+
+    // OPENできたらwrite/readする
+    void OnSavedGameOpened(SavedGameRequestStatus status, ISavedGameMetadata gameMetadata) {
+
+        if (status == SavedGameRequestStatus.Success) {
+
+            openedSavedGame_commitDate = gameMetadata.LastModifiedTimestamp;
+            currentOpenedSavedGameMetadata = gameMetadata;
+
+            if (isSaving) {
+                BuildBackupDate();
+
+                byte[] data = ToBytes(saveString);
+                var builder = new SavedGameMetadataUpdate.Builder();
+                var updateMetadata = builder
+                    .WithUpdatedPlayedTime(GameController.statTotalBattleTime)
+                    .WithUpdatedDescription(&quot;SAVED AT:&quot; + DateTime.UtcNow.ToLocalTime().ToShortDateString())
+                    .Build();
+
+
+                ((PlayGamesPlatform)Social.Active).SavedGame.CommitUpdate(gameMetadata, updateMetadata, data, OnSavedGameWritten);
+            } else {
+
+                SAVEDGAME_STATUS stat = SAVEDGAME_STATUS.Default;
+
+                if (gameMetadata.Description == null || gameMetadata.Description == &quot;&quot;) {
+                    stat = SAVEDGAME_STATUS.NoData;
+                }
+                if (gameMetadata.TotalTimePlayed &gt; GameController.statTotalBattleTime) {
+                    stat = SAVEDGAME_STATUS.LongerPlaytime;
+                } else {
+                    if (gameMetadata.TotalTimePlayed == GameController.statTotalBattleTime) {
+                        stat = SAVEDGAME_STATUS.Default;      
+                    } else {
+                        stat = SAVEDGAME_STATUS.ShorterPlaytime;
+                    }
+                }
+
+                switch (stat) {
+                case SAVEDGAME_STATUS.Default:
+                    Debug.Log(&quot;バックアップデータの更新は不要です&quot;);
+                    break;
+                case SAVEDGAME_STATUS.NoData:
+                case SAVEDGAME_STATUS.LongerPlaytime:
+                case SAVEDGAME_STATUS.ShorterPlaytime:
+                    OpenDialog(stat);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void LoadSavedGameData() {
+        ((PlayGamesPlatform)Social.Active).SavedGame.ReadBinaryData(currentOpenedSavedGameMetadata, OnSavedGameDataRead);
+    }
+
+    void OnSavedGameDataRead(SavedGameRequestStatus status, byte[]data) {
+        if (status == SavedGameRequestStatus.Success) {
+            ProcessCloudData(data);
+        } else {
+            Debug.LogWarning(&quot;Error: Reading game:&quot; + status);
+        }
+    }
+
+    void OnSavedGameWritten(SavedGameRequestStatus status, ISavedGameMetadata gameMetadata) {
+        if (status == SavedGameRequestStatus.Success) {
+            GameController.Instance.gameProgress.cloudSaveNum++;
+            GameController.Instance.SaveGameProgress();
+            Debug.Log(&quot;Game &quot; + gameMetadata.Description + &quot; written&quot;);
+        } else {
+            Debug.LogWarning(&quot;Error: saving on the cloud &quot; + status);
+        }
+    }
+
+#endregion
+
+    void ProcessCloudData(byte[]cloudData) {
+        DistributeLoadedData(cloudData);
+    }
+
+    string FromBytes(byte[] bytes) {
+        return Encoding.UTF8.GetString(bytes);
+    }
+
+    byte[] ToBytes(string data) {
+        return Encoding.UTF8.GetBytes(data);
+    }
+
+    enum SAVEDGAME_STATUS {
+        Default,
+        NoData,
+        ShorterPlaytime,
+        LongerPlaytime
+    }
+//ダイアログ表示,YES NOを選択すると対応するメソッドを呼ぶ。具体的な内容にはこの記事では触れない
+    void OpenDialog(SAVEDGAME_STATUS stts) {
+        Debug.Log(&quot;OPEN DIALOG:&quot; + stts);
+        switch (stts) {
+        default:
+            break;
+        case SAVEDGAME_STATUS.NoData:
+            Debug.Log(&quot;バックアップデータがありません、バックアップしますか？&quot;);
+            break;
+        case SAVEDGAME_STATUS.ShorterPlaytime:
+            Debug.Log(&quot;バックアップしますか？&quot;);
+            break;
+        case SAVEDGAME_STATUS.LongerPlaytime:
+            Debug.Log(&quot;バックアップしたデータをロードしますか？&quot;);
+            break;
+        }
+    }
+
+    void QuitApp() {
+        Debug.Log(&quot;QuitApp&quot;);
+        Application.Quit();
+    }
+
+    void BuildBackupData() {        
+        //バックアップしたいデータをここで代入する
+        saveString = &quot;(バックアップしたいデータ)&quot;;
+    }
+
+//ロードしたデータをゲームに反映する処理
+    void DistributeLoadedData(byte[] dataFromCloud) {
+        if (dataFromCloud == null) {
+            Debug.Log(&quot;No data saved on the cloud yet&quot;);
+            return;
+        }
+        Debug.Log(&quot;Decoding cloud data from bytes.&quot;);
+        string stringFromCloud = FromBytes(dataFromCloud);
+        if (stringFromCloud == &quot;&quot;) {
+            Debug.Log(&quot;No data saved on the cloud yet&quot;);
+            return;
+        }
+
+        //データを反映する
+        HogeHoge(SaveString);
+//念の為アプリを落とす
+        QuitApp();
+    }
+}
+</code></pre>
+<p>-プレイ時間とクラウドにセーブ成功した回数を記録しておくクラスの例</p>
+<pre><code class="language-GameController.cs">public class GameController : MonoBehaviour {
+    public static GameController Instance;
+    public static double statTotalBattleTime;
+    public class GameProgress{
+        public int cloudSaveNum;
+    }
+    public GameProgress gameProgress;
+}
+</code></pre>
+<ul>
+<li>参照したサイト
+[GPG Tutorial – Saved Games (Code)]http://resocoder.com/2017/03/10/gpg-tutorial-saved-games-code/</li>
+</ul>
+<h1>FireBase側設定</h1>
+<ul>
+<li>FireBaseの導入に関してはここでは触れません</li>
+</ul>
+<h2>1. GooglePlayConsole=&gt;ゲームサービス=&gt;（アプリ名）=&gt;ゲームの詳細⇒保存済みゲーム（オンを選択）</h2>
+<p><img alt="2f0155ca-bb71-11e5-9d05-d9257613882f.png" src="https://qiita-image-store.s3.amazonaws.com/0/91234/1e7a8c9f-f77f-2de1-16d2-fbad27fa1793.png" /></p>
+<h2>2. APIコンソール プロジェクトでGooglePlayGameServicesとDriveAPIにチェックマークがあることを確認（なければリンクから設定）</h2>
+<p><img alt="キャプチャ-1.jpg" src="https://qiita-image-store.s3.amazonaws.com/0/91234/cd5d12d5-3b59-abd9-a76c-39305bbeaf8a.jpeg" /></p>
+<h2>3. ゲームサービス=&gt;（アプリ名）=&gt;公開=&gt;ゲームに対する変更の公開=&gt;反映を待つ（24時間程度？）</h2>
+<ul>
+<li>
+<p>自分はここで落とし穴に落ちました。この項目の存在に気づかず、公開しなくてもベータテスターはSavedGamesの機能が利用できるため、うまく出来ていると思いこんでそのままアプリをリリースしてしまいました…。状況を認識するのに1週間以上かかりました。</p>
+</li>
+<li>
+<p>公開前状態ではリリースのAPKからこんなLOGがLOGCATに出てきます</p>
+</li>
+</ul>
+<blockquote>
+<p>Exception in com/google/android/gms/games/snapshot/Snapshots.load: java.lang.IllegalStateException: Cannot use snapshots without enabling the 'Saved Game' feature in the Play console.</p>
+</blockquote>
+<ul>
+<li>NullReferenceなんですよねこの後。口に酸っぱいもの上がってきますよねこんなの。</li>
+<li>公開から一晩寝かせておくと、上記Errorは綺麗に消えていました。</li>
+</ul>
+<h2><strong>「公開」が必須手順なら未公開の変更があるって警告表示出してほしい</strong></h2>
+<h2>このUIは罠すぎるので腹立ち紛れに記事を投稿することにしました</h2>
+    <div class="source-link">初出: <a href="https://qiita.com/orangewk/items/d42c371d13db4886eed1" target="_blank" rel="noopener">Qiita</a></div>
+  </div>
+</main>
+
+<footer><p>orange</p></footer>
+
+</body>
+</html>

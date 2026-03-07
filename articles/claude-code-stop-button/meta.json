@@ -1,0 +1,13 @@
+{
+  "title": "Claude Codeの停止ボタン、何が起きて何が起きないか",
+  "description": "Claude Codeを使っていて、こんな経験はないだろうか。   「あ、違う方向に進んでる。止めなきゃ」  そこでESCを押す。または、怖くて押せずに最後まで...",
+  "date": "2026-02-26",
+  "tags": [
+    "claudecode",
+    "ai"
+  ],
+  "cover": "../../assets/covers/zenn-default.png",
+  "platform": "Zenn",
+  "source_url": "https://zenn.dev/orangewk/articles/claude-code-stop-button",
+  "section": "recent"
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Yojo（養生）パターン — AI コーダーにシャドーマスクをつける ～時間とトークンの浪費をストップ～",
+  "description": "TL;DR  設計変更のとき、AI コーダーに旧設計・旧コードを見せない状態を作ってから実装させる。 「旧設計を無視して」と指示するのではなく、そもそも視野に入...",
+  "date": "2026-03-05",
+  "tags": [
+    "AI",
+    "ContextEngineering"
+  ],
+  "cover": "../../assets/covers/zenn-default.png",
+  "platform": "Zenn",
+  "source_url": "https://zenn.dev/orangewk/articles/yojo-pattern-shadow-mask-for-ai-coder",
+  "section": "recent"
+}

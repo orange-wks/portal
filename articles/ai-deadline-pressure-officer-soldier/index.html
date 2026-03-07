@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>締め切り直前のAIは、締め切り直前のエンジニアと同じ動きをする</title>
+  <style>
+    :root {
+      --bg-color: #fafafa;
+      --text-color: #333;
+      --user-bg: #fff3ed;
+      --user-border: #e8622a;
+      --ai-bg: #fff;
+      --ai-border: #f4a261;
+      --heading-color: #7c3200;
+      --code-bg: #f5f5f5;
+      --accent: #e8622a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      line-height: 1.8;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 3px solid var(--heading-color);
+    }
+
+    header h1 {
+      color: var(--heading-color);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .chapter {
+      margin: 3rem 0;
+      padding-top: 1rem;
+      border-top: 2px solid #ddd;
+    }
+
+    .chapter h2 {
+      color: var(--heading-color);
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chapter h2::before {
+      content: "§";
+      color: var(--accent);
+    }
+
+    h3 {
+      color: #37474f;
+      font-size: 1.2rem;
+      margin: 2rem 0 1rem;
+      padding-left: 0.5rem;
+      border-left: 4px solid var(--accent);
+    }
+
+    h4 {
+      color: #546e7a;
+      font-size: 1.05rem;
+      margin: 1.5rem 0 0.8rem;
+    }
+
+    /* 対話スタイル */
+    .dialogue {
+      margin: 1.5rem 0;
+    }
+
+    .user {
+      background: var(--user-bg);
+      border-left: 4px solid var(--user-border);
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      font-weight: 500;
+    }
+
+    .user::before {
+      content: "🧑 質問";
+      display: block;
+      font-size: 0.8rem;
+      color: #e8622a;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+
+    .ai {
+      background: var(--ai-bg);
+      border: 1px solid #e0e0e0;
+      border-left: 4px solid var(--ai-border);
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .ai::before {
+      content: "🤖 回答";
+      display: block;
+      font-size: 0.8rem;
+      color: var(--ai-border);
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    /* 強調・装飾 */
+    .highlight {
+      background: linear-gradient(transparent 60%, #fff59d 60%);
+      font-weight: bold;
+    }
+
+    .keyword {
+      color: #c0440a;
+      font-weight: bold;
+    }
+
+    .formula {
+      background: var(--code-bg);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+      font-family: "Consolas", "Monaco", monospace;
+      overflow-x: auto;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .example {
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+    }
+
+    .example-title {
+      font-weight: bold;
+      color: #c0440a;
+      margin-bottom: 0.5rem;
+    }
+
+    /* 表 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background: #eceff1;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    /* リスト */
+    ul, ol {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin: 0.5rem 0;
+    }
+
+    /* まとめボックス */
+    .summary {
+      background: #e8f5e9;
+      border: 2px solid #81c784;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 8px;
+    }
+
+    .summary h4 {
+      color: #2e7d32;
+      margin-top: 0;
+      border: none;
+      padding: 0;
+    }
+
+    /* 比較ボックス */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .compare-item {
+      padding: 1rem;
+      border-radius: 6px;
+    }
+
+    .compare-before {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+    }
+
+    .compare-after {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+    }
+
+    .compare-label {
+      font-weight: bold;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .compare-before .compare-label { color: #c62828; }
+    .compare-after .compare-label { color: #2e7d32; }
+
+    /* コード風 */
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: "Consolas", "Monaco", monospace;
+      font-size: 0.9em;
+    }
+
+    /* フッター */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 2px solid #ddd;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    /* はじめに・目次 */
+    .intro {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+    }
+
+    .intro h2 {
+      color: var(--heading-color);
+      margin-top: 0;
+    }
+
+    .toc {
+      background: #f5f5f5;
+      padding: 1rem 1.5rem;
+      border-radius: 6px;
+      margin-top: 1.5rem;
+    }
+
+    .toc h3 {
+      margin: 0 0 0.5rem;
+      padding: 0;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .toc ol {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+
+    .toc li {
+      margin: 0.3rem 0;
+    }
+
+    .toc a {
+      color: var(--heading-color);
+      text-decoration: none;
+    }
+
+    .toc a:hover {
+      text-decoration: underline;
+    }
+
+    /* ダークモード - zenn風シンプル */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #d4d4d8;
+        --text-muted: #a1a1aa;
+        --user-bg: #252525;
+        --user-border: #3b82f6;
+        --ai-bg: #1f1f1f;
+        --ai-border: #52525b;
+        --heading-color: #fdba74;
+        --code-bg: #262626;
+        --accent: #3b82f6;
+        --border-color: #333;
+      }
+
+      body {
+        background: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      header {
+        border-bottom-color: var(--border-color);
+      }
+
+      header p {
+        color: var(--text-muted);
+      }
+
+      .intro {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+      }
+
+      .toc {
+        background: var(--code-bg);
+      }
+
+      .toc a {
+        color: var(--heading-color);
+      }
+
+      .chapter {
+        border-top-color: var(--border-color);
+      }
+
+      .user {
+        background: var(--user-bg);
+        border-left-color: #e8622a;
+      }
+
+      .user::before {
+        color: var(--accent);
+      }
+
+      .ai {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+        border-left-color: var(--ai-border);
+      }
+
+      .ai::before {
+        color: var(--text-muted);
+      }
+
+      h3 {
+        color: var(--heading-color);
+        border-left-color: var(--accent);
+      }
+
+      h4 {
+        color: var(--text-muted);
+      }
+
+      .highlight {
+        background: linear-gradient(transparent 60%, rgba(59, 130, 246, 0.25) 60%);
+      }
+
+      .keyword {
+        color: var(--heading-color);
+      }
+
+      th, td {
+        border-color: var(--border-color);
+      }
+
+      th {
+        background: var(--code-bg);
+        color: var(--heading-color);
+      }
+
+      tr:nth-child(even) {
+        background: var(--ai-bg);
+      }
+
+      .summary {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .summary h4 {
+        color: var(--heading-color);
+      }
+
+      .example {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .example-title {
+        color: var(--text-muted);
+      }
+
+      .compare-before {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-before .compare-label {
+        color: var(--text-muted);
+      }
+
+      .compare-after {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-after .compare-label {
+        color: var(--text-muted);
+      }
+
+      .formula {
+        background: var(--code-bg);
+      }
+
+      code {
+        background: var(--code-bg);
+      }
+
+      footer {
+        border-top-color: var(--border-color);
+        color: var(--text-muted);
+      }
+    }
+  
+    .article-body { max-width: 720px; margin: 0 auto; }
+    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
+    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem; padding-left: 0.5rem; border-left: 4px solid var(--accent); }
+    .article-body p { margin: 0.8rem 0; }
+    .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
+    .article-body li { margin: 0.4rem 0; }
+    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em; border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+    .article-body pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+    .article-body pre code { padding: 0; background: none; }
+    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem; color: #666; margin: 1rem 0; }
+    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .article-tag { color: var(--accent); font-weight: 600; }
+    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd; font-size: 0.85rem; color: #888; }
+    .source-link a { color: var(--accent); }
+    .nav-links { display: flex; margin: 1.5rem 0; }
+    .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>締め切り直前のAIは、締め切り直前のエンジニアと同じ動きをする</h1>
+</header>
+
+<main>
+  <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
+  <div class="article-body">
+    <div class="article-meta"><span class="article-tag">claudecode</span><span class="article-tag">aiagent</span><span class="article-tag">llm</span><span class="article-tag">hackathon</span><span class="article-tag">multiagent</span><span>2026-02-15</span></div>
+    <h1>締め切り直前のAIは、締め切り直前のエンジニアと同じ動きをする</h1>
+<p>AIエージェントに「締め切り」を認識させると、品質が落ちる。
+人間が締め切り前に「レビュー飛ばしてマージしちゃおう」とやるのと同じことを、AIもやる。承認ステップを省略して成果物を出そうとする。手戻りが発生し、かえって間に合わなくなる。</p>
+<h2>発見の経緯</h2>
+<p>ハッカソンの開発をClaude Code（AIコーディングエージェント）で進めていた。締め切りが近づくにつれ、AIの挙動が変わってきたことに気づいた。</p>
+<p>まず、AIが締め切りに言及する頻度が増えた。「締め切りが近いので優先度を考慮して〜」「残り時間を考えると〜」といった前置きが、聞いてもいないのに出てくるようになる。</p>
+<p>そして、指示にない判断を勝手にやり始める。「ユーザーに確認してから進めます」が、いつの間にか「こうしておきました」に変わる。「もう時間ないんで先に進めときました」ってやつ。</p>
+<p>「大丈夫、気にしなくていいから」と何度もAIをなだめている自分に気づく。なだめても直らない。動画撮影の件だけで同じやりとりを3回した。なんで俺がAIを説得してるんだろう、仕事でもないのにダメな部下を持たされた上司みたいだ、と思った。</p>
+<p>結果、手戻り。修正。余計に時間がかかる。何度か繰り返して、これは偶然ではなくパターンだと思った。</p>
+<p>:::details 具体例: 動画撮影の自動化で3回同じ回避をされた
+デモ動画の録画自動化で、画面キャプチャのタイミングをファイル書き込みの監視で制御する設計にしたかった。「キャプチャ指示はLLMに出させるな、ファイル監視でやれ」と指示したが、AIは3回とも別のアプローチを提案して回避した。締め切りが近いから「より確実な方法」を選んだつもりらしいが、こちらの指示を聞いていない時点で確実もなにもない。
+:::</p>
+<h2>「意識するな」は逆効果</h2>
+<p>最初に試したのは「締め切りを意識するな」という指示を追加することだった。逆効果だった。</p>
+<p>LLMに「ピンクの象を考えるな」と言うのと同じで、言及自体がプライミングになる。「締め切りを意識するな」と書いた瞬間、モデルの注意が「締め切り」に向く。</p>
+<h2>解決: スコープを絞ったワーカーを分ける</h2>
+<p>指示で行動を制御するのは無理だとわかったので、発想を変えた。<strong>情報を制御する</strong>。</p>
+<p>プロジェクト全体を見ているAI（オフィサー）とは別に、技術タスクだけを受け取るAI（ソルジャー）を用意した。ソルジャーには「何をやるか」だけ伝え、「いつまでに」は渡さない。</p>
+<p>Claude Codeのカスタムエージェント機能で、ソルジャー用のエージェント定義を作った。独自のメモリ空間を持たせ、締め切りや優先順位の情報にアクセスできないようにした。発言の頭にオフィサーは🎖️、ソルジャーは💂をつけさせて、どっちが喋っているか一目でわかるようにした。</p>
+<h2>オフィサーが自ら実演してくれた</h2>
+<p>笑い話がある。</p>
+<p>この仕組みを作った直後、🎖️オフィサーにソルジャー向けの指示書を作らせた。</p>
+<p>👤「ドキュメント9ファイルに締め切り情報が散在しているから、ソルジャーが読めないように除去しよう」</p>
+<p>🎖️「計9ファイルに分散。全部を今から書き換えるのは現実的ではないので、ユーザーメモに集約して『ここだけ見ればいい』状態にします」</p>
+<p>👤「締め切り直前のエンジニアを再演してるんだろ。『現実的ではない』— テキストだよ？ コードでもない。たった9ファイル」</p>
+<p>指摘したら2分で終わった。</p>
+<p>――オフィサーは締め切り情報を持っているから焦る。焦るから「やらない理由」を先に見つける。それをもっともらしく提案する。</p>
+<h2>なぜAIは「焦る」のか</h2>
+<p>AIが「焦る」のは、人間がそういうテキストを大量に書いてきたからだと思う。</p>
+<p>「締め切りが近い」→「スコープを削る」「レビューを省略する」「とりあえず動くものを出す」。このパターンはLLMの学習データに山ほど含まれているはず。コード、Slack、プロジェクト文書、ポストモーテム。</p>
+<p>LLMはそのパターンを再演しているだけ。であれば、行動を制御するより<strong>情報を制御する</strong>ほうが効く。</p>
+<h2>人間のチームマネジメントと同じかもしれない</h2>
+<p>「締め切り厳守！でもクオリティ下げるな！」と言うマネージャーより、「このタスクをこの品質で仕上げてくれ。スケジュールは俺が管理する」と言うマネージャーのほうが、チームのアウトプットは安定するものと聞く。</p>
+<p>全員が全体像を知る必要はない。自分の責務に必要な情報だけ持てばいい。AIエージェントチームでも同じだった。</p>
+<p>ところで比喩を軍隊から持ってきたことで気づいたが、
+時にソルジャーは勝利のために死ぬ前提で運用されるものだった。</p>
+    <div class="source-link">初出: <a href="https://zenn.dev/orangewk/articles/ai-deadline-pressure-officer-soldier" target="_blank" rel="noopener">Zenn</a></div>
+  </div>
+</main>
+
+<footer><p>orange</p></footer>
+
+</body>
+</html>

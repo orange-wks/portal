@@ -1,0 +1,13 @@
+{
+  "title": "Claude Code が勝手に拡張をインストールした",
+  "description": "何が起きたか  VS Code Extension を Claude Code と一緒に開発している（この記事も）。拡張のデバッグ方法を調査していたとき、Cla...",
+  "date": "2026-02-22",
+  "tags": [
+    "ClaudeCode",
+    "VSCode"
+  ],
+  "cover": "../../assets/covers/zenn-default.png",
+  "platform": "Zenn",
+  "source_url": "https://zenn.dev/orangewk/articles/claude-code-unauthorized-extension-install",
+  "section": "recent"
+}

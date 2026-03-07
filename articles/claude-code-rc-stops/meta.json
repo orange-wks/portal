@@ -1,0 +1,13 @@
+{
+  "title": "Claude Code Remote Control、使ったらすぐ止まる",
+  "description": "Claude Code の Remote Control を iPhone から使っている。通勤中に進捗を確認したり、指示を出したりできるやつだ。  が、すぐ止...",
+  "date": "2026-02-28",
+  "tags": [
+    "claudecode",
+    "cli"
+  ],
+  "cover": "../../assets/covers/zenn-default.png",
+  "platform": "Zenn",
+  "source_url": "https://zenn.dev/orangewk/articles/claude-code-rc-stops",
+  "section": "recent"
+}
