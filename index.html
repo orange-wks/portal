@@ -13,47 +13,27 @@
       --border: #e5e5e5;
       --accent: #e8622a;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
     }
-
     header {
       padding: 3rem 2rem 2rem;
       max-width: 960px;
       margin: 0 auto;
       border-bottom: 1px solid var(--border);
     }
-
-    header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    header p {
-      margin-top: 0.4rem;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 2.5rem 2rem 4rem;
-    }
-
+    header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+    header p { margin-top: 0.4rem; color: var(--muted); font-size: 0.9rem; }
+    main { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.5rem;
     }
-
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -65,60 +45,16 @@
       flex-direction: column;
       transition: box-shadow 0.2s, transform 0.2s;
     }
-
-    .card:hover {
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-      transform: translateY(-2px);
-    }
-
-    .card-image {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      display: block;
-      background: #f0ede8;
-    }
-
-    .card-body {
-      padding: 1.2rem 1.3rem 1.4rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .card-meta {
-      font-size: 0.78rem;
-      color: var(--muted);
-      display: flex;
-      gap: 0.8rem;
-    }
-
-    .card-tag {
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 700;
-      line-height: 1.5;
-    }
-
-    .card-desc {
-      font-size: 0.85rem;
-      color: var(--muted);
-      line-height: 1.6;
-      margin-top: auto;
-      padding-top: 0.4rem;
-    }
-
-    footer {
-      text-align: center;
-      padding: 2rem;
-      color: var(--muted);
-      font-size: 0.8rem;
-      border-top: 1px solid var(--border);
+    .card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .card-image { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #f0ede8; }
+    .card-body { padding: 1.2rem 1.3rem 1.4rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+    .card-meta { font-size: 0.78rem; color: var(--muted); display: flex; gap: 0.8rem; align-items: center; }
+    .card-tag { color: var(--accent); font-weight: 600; }
+    .card-title { font-size: 1rem; font-weight: 700; line-height: 1.5; }
+    .card-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-top: auto; padding-top: 0.4rem; }
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border); }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #1a1a1a; --surface: #222; --text: #d4d4d8; --muted: #666; --border: #333; }
     }
   </style>
 </head>
@@ -133,18 +69,23 @@
   <div class="grid">
 
     <a class="card" href="articles/llm-mechanism/">
-      <img class="card-image" src="articles/llm-mechanism/cover.png" alt="LLM記事カバー">
+      <img class="card-image" src="articles/llm-mechanism/cover.png" alt="AIに「お前どうやって喋ってるの？」って聞いてみた — 納得するまで問い詰めた">
       <div class="card-body">
         <div class="card-meta">
           <span class="card-tag">AI</span>
-          <span>2026年2月</span>
-      
+          <span>2026-02</span>
+        </div>
+        <div class="card-title">AIに「お前どうやって喋ってるの？」って聞いてみた — 納得するまで問い詰めた</div>
+        <div class="card-desc">ワードベクトルからRLHFまで、Geminiに根掘り葉掘り聞いた対話記録。</div>
+      </div>
+    </a>
+
     <a class="card" href="articles/llm-mechanism-2/">
-      <img class="card-image" src="articles/llm-mechanism-2/cover.png" alt="LLM Part2カバー">
+      <img class="card-image" src="articles/llm-mechanism-2/cover.png" alt="AIに「お前どうやって喋ってるの？」— Part 2: 画像生成から意味空間まで">
       <div class="card-body">
         <div class="card-meta">
           <span class="card-tag">AI</span>
-          <span>2026年2月</span>
+          <span>2026-02</span>
         </div>
         <div class="card-title">AIに「お前どうやって喋ってるの？」— Part 2: 画像生成から意味空間まで</div>
         <div class="card-desc">画像生成のロジック、長文生成、ロングコンテキスト、RAGまで。</div>
@@ -152,20 +93,14 @@
     </a>
 
     <a class="card" href="articles/llm-mechanism-3/">
-      <img class="card-image" src="articles/llm-mechanism-3/cover.png" alt="LLM Part3カバー">
+      <img class="card-image" src="articles/llm-mechanism-3/cover.png" alt="AIに「お前どうやって喋ってるの？」— Part 3: モデルの違いから制御システムまで">
       <div class="card-body">
         <div class="card-meta">
           <span class="card-tag">AI</span>
-          <span>2026年2月</span>
+          <span>2026-02</span>
         </div>
         <div class="card-title">AIに「お前どうやって喋ってるの？」— Part 3: モデルの違いから制御システムまで</div>
         <div class="card-desc">GPT・Claude・Geminiの違い、RLHFの比喩、オープンモデルの実態まで。</div>
-      </div>
-    </a>
-
-  </div>
-        <div class="card-title">AIに「お前どうやって喋ってるの？」って聞いてみた — 納得するまで問い詰めた</div>
-        <div class="card-desc">ワードベクトルからRLHFまで、Geminiに根掘り葉掘り聞いた対話記録。</div>
       </div>
     </a>
 

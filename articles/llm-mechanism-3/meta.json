@@ -1,0 +1,8 @@
+{
+  "title": "AIに「お前どうやって喋ってるの？」— Part 3: モデルの違いから制御システムまで",
+  "description": "GPT・Claude・Geminiの違い、RLHFの比喩、オープンモデルの実態まで。",
+  "date": "2026-02",
+  "tags": ["AI"],
+  "cover": "cover.png",
+  "order": 3
+}
