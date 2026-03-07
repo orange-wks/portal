@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude向けVSCode拡張 Terminal Session Recall を公開した</title>
+  <style>
+    :root {
+      --bg-color: #fafafa;
+      --text-color: #333;
+      --heading-color: #7c3200;
+      --code-bg: #f5f5f5;
+      --accent: #e8622a;
+      --border-color: #ddd;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      line-height: 1.8;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 3px solid var(--heading-color);
+    }
+
+    header h1 {
+      color: var(--heading-color);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 2px solid var(--border-color);
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .article-body { max-width: 720px; margin: 0 auto; }
+    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem;
+        padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
+    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem;
+        padding-left: 0.5rem; border-left: 4px solid var(--accent); }
+    .article-body p { margin: 0.8rem 0; }
+    .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
+    .article-body li { margin: 0.4rem 0; }
+    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em;
+        border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+    .article-body pre { background: var(--code-bg); padding: 1rem;
+        border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+    .article-body pre code { padding: 0; background: none; }
+    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem;
+        color: #666; margin: 1rem 0; }
+    .article-body img { max-width: 100%; border-radius: 6px; }
+    .article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .article-body th, .article-body td { border: 1px solid #ddd; padding: 0.6rem; }
+    .article-body th { background: #f5f5f5; }
+    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem;
+        display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .article-tag { color: var(--accent); font-weight: 600; }
+    .nav-links { display: flex; margin: 1.5rem 0; }
+    .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+    .mermaid { margin: 1.5rem 0; text-align: center; }
+    .links { margin-top: 2rem; }
+    .links li { margin: 0.3rem 0; }
+    .links a { color: var(--accent); }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #d4d4d8;
+        --heading-color: #fdba74;
+        --code-bg: #262626;
+        --accent: #3b82f6;
+        --border-color: #333;
+      }
+
+      header { border-bottom-color: var(--border-color); }
+      .article-body th { background: var(--code-bg); color: var(--heading-color); }
+      .article-body td { border-color: var(--border-color); }
+      .article-body th { border-color: var(--border-color); }
+      .article-body blockquote { border-left-color: var(--border-color); color: #a1a1aa; }
+      footer { border-top-color: var(--border-color); color: #a1a1aa; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Claude向けVSCode拡張 Terminal Session Recall を公開した</h1>
+</header>
+
+<main>
+  <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
+  <div class="article-body">
+    <div class="article-meta"><span class="article-tag">ClaudeCode</span><span class="article-tag">VSCode</span><span>2026-03-08</span></div>
+
+    <p><a href="https://marketplace.visualstudio.com/items?itemName=orange-creatives.terminal-session-recall">Terminal Session Recall</a> は、VSCode の統合ターミナル上で動いている Claude Code CLI のセッションを自動復元する拡張機能。VSCode を再起動するとターミナルのプロセスが死ぬ。複数セッションを並行して使っていると、毎回 <code>--resume</code> し直すのが面倒だった。この拡張はセッションの状態を追跡し、起動時に自動で復元する。</p>
+
+    <h2>操作の起点</h2>
+    <p>VSCode のどこから操作するか。設計時に6箇所の候補を検討して、最終的に <strong>ステータスバー</strong> を選んだ。</p>
+    <p>クリックすると Quick Pick メニューが開き、セッションの一覧・新規作成・再開ができる。ターミナルのすぐ下にあるので視線の移動が小さい。</p>
+
+    <h2>UX</h2>
+
+    <h3>ステータスバー兼メニューボタン</h3>
+    <p>ステータスバーの右側に、現在のプロジェクトの Claude セッション数が表示される。</p>
+    <pre><code>$(terminal) Claude: 2 live · 1 idle</code></pre>
+    <ul>
+      <li><strong>live</strong> — ターミナルが開いていて CLI が動いているセッション</li>
+      <li><strong>idle</strong> — ターミナルを閉じたが復元可能なセッション</li>
+    </ul>
+    <p>クリックすると Quick Pick メニューが開く。</p>
+
+    <h3>Quick Pick メニュー</h3>
+    <p>セッションは Active / Resumable / Completed の3欄に分類される。各セッションには最初のプロンプト、ファイルサイズ、経過時間が表示される。</p>
+    <ul>
+      <li><strong>Active セッション</strong> — 選択するとそのターミナルにフォーカスする</li>
+      <li><strong>Resumable / Completed セッション</strong> — 選択すると <code>claude --resume</code> で再開する</li>
+    </ul>
+    <p>セッションに <code>/rename</code> で名前をつけておくと、一覧から探しやすくなる。</p>
+
+    <h3>自動復元</h3>
+    <p>VSCode が再起動すると、前回 active だったセッションを自動で復元する。朝 VSCode を開くだけで、昨日の続きから作業できる。</p>
+    <div class="mermaid">
+sequenceDiagram
+    participant U as ユーザー
+    participant V as VSCode
+    participant E as 拡張
+    participant C as Claude CLI
+
+    U->>V: VSCode を開く
+    V->>E: activate()
+    E->>E: globalState から active セッションを取得
+    loop 各 active セッション
+        E->>V: ターミナル作成
+        E->>C: claude --resume session-id
+        C-->>V: 前回の会話の続き
+    end
+    E->>V: ステータスバー更新
+    </div>
+    <p>復元対象は直近 24 時間以内のセッションに限定される（設定で変更可能）。</p>
+
+    <h2>仕組み</h2>
+
+    <h3>セッションの追跡</h3>
+    <p>拡張が新しいセッションを作るとき、UUID を生成して <code>claude --session-id &lt;uuid&gt;</code> で CLI を起動する。UUID は CLI 起動前に VSCode の <code>globalState</code> に保存する。この順序により、ターミナル作成中に VSCode がクラッシュしてもセッション ID は失われない。</p>
+    <div class="mermaid">
+flowchart LR
+    A["UUID 生成"] --> B["globalState に保存"]
+    B --> C["ターミナル作成"]
+    C --> D["claude --session-id uuid"]
+    </div>
+
+    <h3>セッションの発見</h3>
+    <p>拡張を経由せずターミナルで直接 <code>claude</code> を実行したセッションも、Quick Pick に表示される。<code>~/.claude/history.jsonl</code> を読み取り専用で参照し、現在のワークスペースに対応するセッションを自動で発見する。</p>
+
+    <h3>状態遷移</h3>
+    <div class="mermaid">
+stateDiagram-v2
+    [*] --> Active: New Session または Resume
+    Active --> Inactive: ターミナルを閉じた
+    Active --> Completed: CLI が正常終了（/exit など）
+    Inactive --> Active: Quick Pick で再開
+    Completed --> Active: Quick Pick で再開
+    </div>
+    <table>
+      <thead>
+        <tr><th>状態</th><th>自動復元</th><th>Quick Pick</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Active</td><td>する</td><td>Active 欄</td></tr>
+        <tr><td>Inactive</td><td>しない</td><td>Resumable 欄</td></tr>
+        <tr><td>Completed</td><td>しない</td><td>Completed 欄</td></tr>
+      </tbody>
+    </table>
+
+    <h3>データアクセス</h3>
+    <p>この拡張は <code>~/.claude/</code> を <strong>読み取り専用</strong> でアクセスする。書き込み、削除、認証情報の参照は行わない。</p>
+    <div class="mermaid">
+flowchart TB
+    subgraph read["読み取り対象"]
+        H["history.jsonl セッション履歴"]
+        P["projects/slug/ ディレクトリ一覧"]
+        S["*.jsonl ファイルサイズ（stat のみ）"]
+    end
+    subgraph noaccess["アクセスしない"]
+        A["認証トークン"]
+        K["API キー"]
+        C["会話内容"]
+    end
+    E["拡張"] -->|"read-only"| read
+    E -.-x|"x"| noaccess
+    </div>
+
+    <p>しばらくドッグフーディングしてきたが、そろそろよさそうなので v1.0.0 として公開した。</p>
+
+    <h2>インストール</h2>
+    <p>VS Code Marketplace からインストールできる。</p>
+    <p><strong><a href="https://marketplace.visualstudio.com/items?itemName=orange-creatives.terminal-session-recall">Terminal Session Recall — VS Marketplace</a></strong></p>
+    <p>前提: Claude Code CLI がインストール済みで PATH に通っていること。</p>
+
+    <h3>設定</h3>
+    <table>
+      <thead>
+        <tr><th>設定</th><th>デフォルト</th><th>説明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>autoRestore</code></td><td><code>true</code></td><td>VSCode 起動時に中断セッションを自動復元</td></tr>
+        <tr><td><code>autoRestoreMaxAge</code></td><td><code>24</code></td><td>自動復元の対象とする最大経過時間（時間）</td></tr>
+        <tr><td><code>claudePath</code></td><td><code>"claude"</code></td><td>Claude CLI のパス</td></tr>
+      </tbody>
+    </table>
+
+    <h2>制限事項</h2>
+    <ul>
+      <li><strong>別プロジェクトのセッションは表示されない。</strong> 開いているワークスペースに対応するセッションだけが対象。</li>
+      <li><strong>読み取り専用。</strong> セッションの削除は Claude CLI 側で行う。</li>
+    </ul>
+
+    <h2>リンク</h2>
+    <ul class="links">
+      <li><a href="https://marketplace.visualstudio.com/items?itemName=orange-creatives.terminal-session-recall">VS Marketplace</a></li>
+      <li><a href="https://github.com/orangewk/terminal-session-recall">GitHub</a></li>
+      <li>ライセンス: MIT</li>
+    </ul>
+
+  </div>
+</main>
+
+<footer><p>orange</p></footer>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
+  });
+</script>
+
+</body>
+</html>

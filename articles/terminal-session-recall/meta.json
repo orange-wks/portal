@@ -1,0 +1,8 @@
+{
+  "title": "Claude向けVSCode拡張 Terminal Session Recall を公開した",
+  "description": "VSCode の統合ターミナル上で動いている Claude Code CLI のセッションを自動復元する拡張機能を作って公開した。",
+  "date": "2026-03-08",
+  "tags": ["ClaudeCode", "VSCode"],
+  "cover": "cover.png",
+  "section": "recent"
+}
