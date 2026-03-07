@@ -452,18 +452,29 @@
     }
   
     .article-body { max-width: 720px; margin: 0 auto; }
-    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
-    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem; padding-left: 0.5rem; border-left: 4px solid var(--accent); }
+    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem;
+        padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
+    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem;
+        padding-left: 0.5rem; border-left: 4px solid var(--accent); }
     .article-body p { margin: 0.8rem 0; }
     .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
     .article-body li { margin: 0.4rem 0; }
-    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em; border-radius: 3px; font-family: monospace; font-size: 0.9em; }
-    .article-body pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em;
+        border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+    .article-body pre { background: var(--code-bg); padding: 1rem;
+        border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
     .article-body pre code { padding: 0; background: none; }
-    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem; color: #666; margin: 1rem 0; }
-    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem;
+        color: #666; margin: 1rem 0; }
+    .article-body img { max-width: 100%; border-radius: 6px; }
+    .article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .article-body th, .article-body td { border: 1px solid #ddd; padding: 0.6rem; }
+    .article-body th { background: #f5f5f5; }
+    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem;
+        display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
     .article-tag { color: var(--accent); font-weight: 600; }
-    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd; font-size: 0.85rem; color: #888; }
+    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd;
+        font-size: 0.85rem; color: #888; }
     .source-link a { color: var(--accent); }
     .nav-links { display: flex; margin: 1.5rem 0; }
     .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
@@ -478,43 +489,52 @@
 <main>
   <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
   <div class="article-body">
-    <div class="article-meta"><span class="article-tag">claudecode</span><span class="article-tag">cli</span><span class="article-tag">remotecontrol</span><span>2026-02-28</span></div>
-    <p>Claude Code の Remote Control を iPhone から使っている。通勤中に進捗を確認したり、指示を出したりできるやつだ。</p>
-<p>が、すぐ止まる。</p>
-<h2>止まる</h2>
-<p>初回、3 ターンくらいで iPhone の画面が進まなくなった。PC に戻ると選択肢が出ていた。PC 側で選ぶと続いた。</p>
-<p>別の日は 1 時間くらい続いた。設計の話をしていて、plan mode の承認ダイアログが出たところで止まった。Chrome リモートデスクトップで PC に繋いで承認した。iPhone から操作するための機能なのに、結局 PC を触っている。</p>
-<h2>原因を調べた</h2>
-<p>最初は AskUserQuestion（ボタン式の選択肢 UI）を疑った。GitHub にも関連 Issue がいくつかある。</p>
-<p>RC 経由で実際に試したら、2 択も 3 択も 4 択も普通に選べた。これは問題ない。</p>
-<p>止まるのは <strong>Y/N のパーミッションダイアログ</strong>だった。ファイル編集の許可、plan mode の承認。これらが iPhone に表示されない。何も出ない。セッションが止まる。</p>
-<p>Issue はある。</p>
-<ul>
-<li><a href="https://github.com/anthropics/claude-code/issues/15686">#15686</a> — plan mode が iOS でハングする。パーミッションプロンプトが表示されない</li>
-<li><a href="https://github.com/anthropics/claude-code/issues/29214">#29214</a> — <code>--dangerously-skip-permissions</code> でもモバイルにプロンプトが出る</li>
+    <div class="article-meta"><span class="article-tag">CLI</span><span class="article-tag">Claude Code</span><span class="article-tag">remotecontrol</span><span>2026-03-01</span></div>
+    <p data-line="0" class="code-line">Claude Code の Remote Control を iPhone から使っている。通勤中に進捗を確認したり、指示を出したりできるやつだ。</p>
+<p data-line="2" class="code-line">が、すぐ止まる。</p>
+<h2 id="%E6%AD%A2%E3%81%BE%E3%82%8B" data-line="4" class="code-line">
+<a class="header-anchor-link" href="#%E6%AD%A2%E3%81%BE%E3%82%8B" aria-hidden="true"></a> 止まる</h2>
+<p data-line="6" class="code-line">初回、3 ターンくらいで iPhone の画面が進まなくなった。PC に戻ると選択肢が出ていた。PC 側で選ぶと続いた。</p>
+<p data-line="8" class="code-line">別の日は 1 時間くらい続いた。設計の話をしていて、plan mode の承認ダイアログが出たところで止まった。Chrome リモートデスクトップで PC に繋いで承認した。iPhone から操作するための機能なのに、結局 PC を触っている。</p>
+<h2 id="%E5%8E%9F%E5%9B%A0%E3%82%92%E8%AA%BF%E3%81%B9%E3%81%9F" data-line="10" class="code-line">
+<a class="header-anchor-link" href="#%E5%8E%9F%E5%9B%A0%E3%82%92%E8%AA%BF%E3%81%B9%E3%81%9F" aria-hidden="true"></a> 原因を調べた</h2>
+<p data-line="12" class="code-line">最初は AskUserQuestion（ボタン式の選択肢 UI）を疑った。GitHub にも関連 Issue がいくつかある。</p>
+<p data-line="14" class="code-line">RC 経由で実際に試したら、2 択も 3 択も 4 択も普通に選べた。これは問題ない。</p>
+<p data-line="16" class="code-line">止まるのは <strong>Y/N のパーミッションダイアログ</strong>だった。ファイル編集の許可、plan mode の承認。これらが iPhone に表示されない。何も出ない。セッションが止まる。</p>
+<p data-line="18" class="code-line">Issue はある。</p>
+<ul data-line="20" class="code-line">
+<li data-line="20" class="code-line">
+<a href="https://github.com/anthropics/claude-code/issues/15686" target="_blank" rel="nofollow noopener noreferrer">#15686</a> — plan mode が iOS でハングする。パーミッションプロンプトが表示されない</li>
+<li data-line="21" class="code-line">
+<a href="https://github.com/anthropics/claude-code/issues/29214" target="_blank" rel="nofollow noopener noreferrer">#29214</a> — <code>--dangerously-skip-permissions</code> でもモバイルにプロンプトが出る</li>
 </ul>
-<p><code>--dangerously-skip-permissions</code> で回避しようとしても、逆にモバイル側にプロンプトが出てくるバグがある。塞がっている。</p>
-<h2>回避策</h2>
-<p>RC からは直接ファイル編集や Bash を叩かず、サブエージェントを発射する。</p>
-<pre><code>iPhone → RC → Claude → サブエージェント(bypassPermissions) → 実作業
-</code></pre>
-<p>サブエージェントは自分のパーミッションで動くので、RC 側にダイアログが出ない。</p>
-<p>やってみたらいくつかわかった。</p>
-<ul>
-<li><code>mode: "dontAsk"</code> だとバックグラウンドの Bash が全拒否される。<code>bypassPermissions</code> が要る</li>
-<li>親セッションの直接 Bash は RC でもダイアログが出ない。<code>git status</code> や <code>npm run test</code> は直接叩ける</li>
-<li>サブエージェントは破壊的操作（<code>git push --force</code> 等）を自己判断で拒否する。これは親セッションで直接やる</li>
-<li><code>bypassPermissions</code> は PreToolUse フックで防御できる</li>
+<p data-line="23" class="code-line"><code>--dangerously-skip-permissions</code> で回避しようとしても、逆にモバイル側にプロンプトが出てくるバグがある。塞がっている。</p>
+<h2 id="%E5%9B%9E%E9%81%BF%E7%AD%96" data-line="25" class="code-line">
+<a class="header-anchor-link" href="#%E5%9B%9E%E9%81%BF%E7%AD%96" aria-hidden="true"></a> 回避策</h2>
+<p data-line="27" class="code-line">RC からは直接ファイル編集や Bash を叩かず、サブエージェントを発射する。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="29"><span class="line"><span>iPhone → RC → Claude → サブエージェント(bypassPermissions) → 実作業</span></span>
+<span class="line"><span></span></span></code></pre></div><p data-line="33" class="code-line">サブエージェントは自分のパーミッションで動くので、RC 側にダイアログが出ない。</p>
+<p data-line="35" class="code-line">やってみたらいくつかわかった。</p>
+<ul data-line="37" class="code-line">
+<li data-line="37" class="code-line">
+<code>mode: "dontAsk"</code> だとバックグラウンドの Bash が全拒否される。<code>bypassPermissions</code> が要る</li>
+<li data-line="38" class="code-line">親セッションの直接 Bash は RC でもダイアログが出ない。<code>git status</code> や <code>npm run test</code> は直接叩ける</li>
+<li data-line="39" class="code-line">サブエージェントは破壊的操作（<code>git push --force</code> 等）を自己判断で拒否する。これは親セッションで直接やる</li>
+<li data-line="40" class="code-line">
+<code>bypassPermissions</code> は PreToolUse フックで防御できる</li>
 </ul>
-<p>RC を「操作端末」ではなく「発射台」として使う。読み取りと非破壊コマンドは直接、書き込みはサブエージェント経由、破壊的操作は親セッションで直接。</p>
-<h2>通知か回避か</h2>
-<p>RC が止まる問題に対して、アプローチは 2 つある。</p>
-<p><strong>通知</strong>: セッションが止まったら iPhone に push 通知を送る。Bark や ntfy.sh を hook から飛ばす方法がいくつか紹介されている。止まった事実は早くわかるが、結局 PC に戻って操作する。</p>
-<p><strong>回避</strong>: そもそも止まる原因を消す。この記事のサブエージェント方式。パーミッションダイアログが出ない構造にする。</p>
-<p>どちらか片方では完結しない。回避策で止まる頻度を下げつつ、それでも止まったら通知で気づく。</p>
-<h2>まとめ</h2>
-<p>RC で止まる原因は AskUserQuestion ではなく Y/N ダイアログ。紹介記事でよく見る「指示を出して結果を見る」だけなら止まらない。パーミッションや承認が絡むと止まる。</p>
-<p>使っていてオススメしている人たちは、たぶんそこまで使っていない。</p>
+<p data-line="42" class="code-line">RC を「操作端末」ではなく「発射台」として使う。読み取りと非破壊コマンドは直接、書き込みはサブエージェント経由、破壊的操作は親セッションで直接。</p>
+<h2 id="%E9%80%9A%E7%9F%A5%E3%81%8B%E5%9B%9E%E9%81%BF%E3%81%8B" data-line="44" class="code-line">
+<a class="header-anchor-link" href="#%E9%80%9A%E7%9F%A5%E3%81%8B%E5%9B%9E%E9%81%BF%E3%81%8B" aria-hidden="true"></a> 通知か回避か</h2>
+<p data-line="46" class="code-line">RC が止まる問題に対して、アプローチは 2 つある。</p>
+<p data-line="48" class="code-line"><strong>通知</strong>: セッションが止まったら iPhone に push 通知を送る。Bark や ntfy.sh を hook から飛ばす方法がいくつか紹介されている。止まった事実は早くわかるが、結局 PC に戻って操作する。</p>
+<p data-line="50" class="code-line"><strong>回避</strong>: そもそも止まる原因を消す。この記事のサブエージェント方式。パーミッションダイアログが出ない構造にする。</p>
+<p data-line="52" class="code-line">どちらか片方では完結しない。回避策で止まる頻度を下げつつ、それでも止まったら通知で気づく。</p>
+<h2 id="%E3%81%BE%E3%81%A8%E3%82%81" data-line="54" class="code-line">
+<a class="header-anchor-link" href="#%E3%81%BE%E3%81%A8%E3%82%81" aria-hidden="true"></a> まとめ</h2>
+<p data-line="56" class="code-line">RC で止まる原因は AskUserQuestion ではなく Y/N ダイアログ。紹介記事でよく見る「指示を出して結果を見る」だけなら止まらない。パーミッションや承認が絡むと止まる。</p>
+<p data-line="58" class="code-line">使っていてオススメしている人たちは、たぶんそこまで使っていない。</p>
+
     <div class="source-link">初出: <a href="https://zenn.dev/orangewk/articles/claude-code-rc-stops" target="_blank" rel="noopener">Zenn</a></div>
   </div>
 </main>

@@ -452,18 +452,29 @@
     }
   
     .article-body { max-width: 720px; margin: 0 auto; }
-    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
-    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem; padding-left: 0.5rem; border-left: 4px solid var(--accent); }
+    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem;
+        padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
+    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem;
+        padding-left: 0.5rem; border-left: 4px solid var(--accent); }
     .article-body p { margin: 0.8rem 0; }
     .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
     .article-body li { margin: 0.4rem 0; }
-    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em; border-radius: 3px; font-family: monospace; font-size: 0.9em; }
-    .article-body pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em;
+        border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+    .article-body pre { background: var(--code-bg); padding: 1rem;
+        border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
     .article-body pre code { padding: 0; background: none; }
-    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem; color: #666; margin: 1rem 0; }
-    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem;
+        color: #666; margin: 1rem 0; }
+    .article-body img { max-width: 100%; border-radius: 6px; }
+    .article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .article-body th, .article-body td { border: 1px solid #ddd; padding: 0.6rem; }
+    .article-body th { background: #f5f5f5; }
+    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem;
+        display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
     .article-tag { color: var(--accent); font-weight: 600; }
-    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd; font-size: 0.85rem; color: #888; }
+    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd;
+        font-size: 0.85rem; color: #888; }
     .source-link a { color: var(--accent); }
     .nav-links { display: flex; margin: 1.5rem 0; }
     .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
@@ -478,344 +489,366 @@
 <main>
   <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
   <div class="article-body">
-    <div class="article-meta"><span class="article-tag">AI</span><span class="article-tag">ContextEngineering</span><span class="article-tag">開発手法</span><span class="article-tag">ClaudeCode</span><span>2026-03-05</span></div>
-    <h2>TL;DR</h2>
-<p>設計変更のとき、AI コーダーに旧設計・旧コードを<strong>見せない状態を作ってから</strong>実装させる。
-「旧設計を無視して」と指示するのではなく、<strong>そもそも視野に入れない</strong>。
+    <div class="article-meta"><span class="article-tag">AI</span><span class="article-tag">開発手法</span><span class="article-tag">Claude Code</span><span class="article-tag">contextengineering</span><span>2026-03-05</span></div>
+    <h2 id="tl%3Bdr" data-line="0" class="code-line">
+<a class="header-anchor-link" href="#tl%3Bdr" aria-hidden="true"></a> TL;DR</h2>
+<p data-line="2" class="code-line">設計変更のとき、AI コーダーに旧設計・旧コードを<strong>見せない状態を作ってから</strong>実装させる。<br>
+「旧設計を無視して」と指示するのではなく、<strong>そもそも視野に入れない</strong>。<br>
 競走馬のシャドーマスクと同じ原理。</p>
-<hr />
-<h2>1. 問題: AI コーディング特有のアンチパターン</h2>
-<p>AI コーディングツールで設計変更をやると、毎回同じところで詰まる。8ヶ月これに付き合った。音楽プレイヤーの実装を統一しようとしたら、場所ごとに違う実装で置いてあって気づいて「？？？」だらけ。プロトタイプなのにデータの互換性とか API の後方互換とか意味ない、そもそもユーザーいないんだから、って何回言っても後方互換されている。念を押して設計変更して、念を押して実装させて、実装が済んだら前の設計のままだったこともある。</p>
-<p>モデルを最新に変えても直らない。原因はモデルの性能ではなく、コンテキスト設計の構造問題だった。たぶん人類に貢献するはずなので共有する。</p>
-<h3>1.1 設計変更を AI に頼むとこうなる</h3>
-<pre><code>やってほしいこと:  旧設計 → 新設計に完全置き換え
-
-実際に起きること:  旧設計 + 新設計を「両立する実装」を頻繁に生成
-</code></pre>
-<p>具体的な症状:</p>
-<ul>
-<li><strong>無意味な後方互換レイヤーを追加</strong>（「旧 API も念のため残しておきます」）</li>
-<li><strong>二重実装が発生</strong>（新旧両方の処理が混在）</li>
-<li><strong>旧設計の残骸を放置</strong>（旧フィールド、旧クラスが残る）</li>
-<li><strong>「これは Breaking Change です」と過剰警告して怠業</strong></li>
+<hr data-line="6" class="code-line">
+<h2 id="1.-%E5%95%8F%E9%A1%8C%3A-ai-%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E7%89%B9%E6%9C%89%E3%81%AE%E3%82%A2%E3%83%B3%E3%83%81%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" data-line="8" class="code-line">
+<a class="header-anchor-link" href="#1.-%E5%95%8F%E9%A1%8C%3A-ai-%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E7%89%B9%E6%9C%89%E3%81%AE%E3%82%A2%E3%83%B3%E3%83%81%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" aria-hidden="true"></a> 1. 問題: AI コーディング特有のアンチパターン</h2>
+<p data-line="10" class="code-line">AI コーディングツールで設計変更をやると、毎回同じところで詰まる。8ヶ月これに付き合った。音楽プレイヤーの実装を統一しようとしたら、場所ごとに違う実装で置いてあって気づいて「？？？」だらけ。プロトタイプなのにデータの互換性とか API の後方互換とか意味ない、そもそもユーザーいないんだから、って何回言っても後方互換されている。念を押して設計変更して、念を押して実装させて、実装が済んだら前の設計のままだったこともある。</p>
+<p data-line="12" class="code-line">モデルを最新に変えても直らない。原因はモデルの性能ではなく、コンテキスト設計の構造問題だった。たぶん人類に貢献するはずなので共有する。</p>
+<h3 id="1.1-%E8%A8%AD%E8%A8%88%E5%A4%89%E6%9B%B4%E3%82%92-ai-%E3%81%AB%E9%A0%BC%E3%82%80%E3%81%A8%E3%81%93%E3%81%86%E3%81%AA%E3%82%8B" data-line="14" class="code-line">
+<a class="header-anchor-link" href="#1.1-%E8%A8%AD%E8%A8%88%E5%A4%89%E6%9B%B4%E3%82%92-ai-%E3%81%AB%E9%A0%BC%E3%82%80%E3%81%A8%E3%81%93%E3%81%86%E3%81%AA%E3%82%8B" aria-hidden="true"></a> 1.1 設計変更を AI に頼むとこうなる</h3>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="16"><span class="line"><span>やってほしいこと:  旧設計 → 新設計に完全置き換え</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>実際に起きること:  旧設計 + 新設計を「両立する実装」を頻繁に生成</span></span>
+<span class="line"><span></span></span></code></pre></div><p data-line="22" class="code-line">具体的な症状:</p>
+<ul data-line="24" class="code-line">
+<li data-line="24" class="code-line">
+<strong>無意味な後方互換レイヤーを追加</strong>（「旧 API も念のため残しておきます」）</li>
+<li data-line="25" class="code-line">
+<strong>二重実装が発生</strong>（新旧両方の処理が混在）</li>
+<li data-line="26" class="code-line">
+<strong>旧設計の残骸を放置</strong>（旧フィールド、旧クラスが残る）</li>
+<li data-line="27" class="code-line"><strong>「これは Breaking Change です」と過剰警告して怠業</strong></li>
 </ul>
-<p>これは人間のコーダーが陥るミスとは質が違う。</p>
-<h3>1.2 なぜ起きるか — 旧設計コンテキスト汚染</h3>
-<p>LLM はコンテキストウィンドウに存在する情報を「守るべき仕様」として認識する。旧コードや旧設計書が視野に入った瞬間、それを保持しようとする方向に推論が引っ張られる。</p>
-<pre><code class="language-mermaid">flowchart TD
-    A[旧コード・旧設計書を読む] --&gt; B[「有効な仕様」と認識]
-    B --&gt; C[旧設計と矛盾しない実装を選ぶ]
-    C --&gt; D[二重実装・後方互換コードを生成]
-    D --&gt; E[「違う、やり直し」]
-    E --&gt; F[旧設計がまだ視野にある]
-    F --&gt; A
-</code></pre>
-<p>「旧設計は廃止です、無視してください」と指示しても効果が薄い。<strong>読んだ時点でコンテキストに入っている。</strong> ピンクの象を想像するな、と言われても想像してしまうのと同じだ。LLM は「無視すべき情報」を処理するためにまず読む。読めば影響を受ける。</p>
-<h3>1.3 「新規は得意、改修は苦手」の正体</h3>
-<p>AI コーディングの「改修が苦手」問題の大部分はこれだと思う。新規プロジェクトでは旧設計が存在しないから汚染が起きない。既存プロジェクトの改修では、旧コードが常に視野に入っているから汚染が避けられない。</p>
-<p><strong>モデルの性能問題ではなく、コンテキスト設計の構造問題。</strong> モデルを最新に変えても同じところで詰まる。</p>
-<h3>1.4 裏付けデータ</h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">データポイント</th>
-<th style="text-align: left;">出典</th>
+<p data-line="29" class="code-line">これは人間のコーダーが陥るミスとは質が違う。</p>
+<h3 id="1.2-%E3%81%AA%E3%81%9C%E8%B5%B7%E3%81%8D%E3%82%8B%E3%81%8B-%E2%80%94-%E6%97%A7%E8%A8%AD%E8%A8%88%E3%82%B3%E3%83%B3%E3%83%86%E3%82%AD%E3%82%B9%E3%83%88%E6%B1%9A%E6%9F%93" data-line="31" class="code-line">
+<a class="header-anchor-link" href="#1.2-%E3%81%AA%E3%81%9C%E8%B5%B7%E3%81%8D%E3%82%8B%E3%81%8B-%E2%80%94-%E6%97%A7%E8%A8%AD%E8%A8%88%E3%82%B3%E3%83%B3%E3%83%86%E3%82%AD%E3%82%B9%E3%83%88%E6%B1%9A%E6%9F%93" aria-hidden="true"></a> 1.2 なぜ起きるか — 旧設計コンテキスト汚染</h3>
+<p data-line="33" class="code-line">LLM はコンテキストウィンドウに存在する情報を「守るべき仕様」として認識する。旧コードや旧設計書が視野に入った瞬間、それを保持しようとする方向に推論が引っ張られる。</p>
+<span class="embed-block zenn-embedded zenn-embedded-mermaid"><iframe id="zenn-embedded__32ec2d2555be1" src="https://embed.zenn.studio/mermaid#zenn-embedded__32ec2d2555be1" data-content="flowchart%20TD%0A%20%20%20%20A%5B%E6%97%A7%E3%82%B3%E3%83%BC%E3%83%89%E3%83%BB%E6%97%A7%E8%A8%AD%E8%A8%88%E6%9B%B8%E3%82%92%E8%AA%AD%E3%82%80%5D%20--%3E%20B%5B%E3%80%8C%E6%9C%89%E5%8A%B9%E3%81%AA%E4%BB%95%E6%A7%98%E3%80%8D%E3%81%A8%E8%AA%8D%E8%AD%98%5D%0A%20%20%20%20B%20--%3E%20C%5B%E6%97%A7%E8%A8%AD%E8%A8%88%E3%81%A8%E7%9F%9B%E7%9B%BE%E3%81%97%E3%81%AA%E3%81%84%E5%AE%9F%E8%A3%85%E3%82%92%E9%81%B8%E3%81%B6%5D%0A%20%20%20%20C%20--%3E%20D%5B%E4%BA%8C%E9%87%8D%E5%AE%9F%E8%A3%85%E3%83%BB%E5%BE%8C%E6%96%B9%E4%BA%92%E6%8F%9B%E3%82%B3%E3%83%BC%E3%83%89%E3%82%92%E7%94%9F%E6%88%90%5D%0A%20%20%20%20D%20--%3E%20E%5B%E3%80%8C%E9%81%95%E3%81%86%E3%80%81%E3%82%84%E3%82%8A%E7%9B%B4%E3%81%97%E3%80%8D%5D%0A%20%20%20%20E%20--%3E%20F%5B%E6%97%A7%E8%A8%AD%E8%A8%88%E3%81%8C%E3%81%BE%E3%81%A0%E8%A6%96%E9%87%8E%E3%81%AB%E3%81%82%E3%82%8B%5D%0A%20%20%20%20F%20--%3E%20A" frameborder="0" scrolling="no" loading="lazy"></iframe></span><p data-line="45" class="code-line">「旧設計は廃止です、無視してください」と指示しても効果が薄い。<strong>読んだ時点でコンテキストに入っている。</strong> ピンクの象を想像するな、と言われても想像してしまうのと同じだ。LLM は「無視すべき情報」を処理するためにまず読む。読めば影響を受ける。</p>
+<h3 id="1.3-%E3%80%8C%E6%96%B0%E8%A6%8F%E3%81%AF%E5%BE%97%E6%84%8F%E3%80%81%E6%94%B9%E4%BF%AE%E3%81%AF%E8%8B%A6%E6%89%8B%E3%80%8D%E3%81%AE%E6%AD%A3%E4%BD%93" data-line="47" class="code-line">
+<a class="header-anchor-link" href="#1.3-%E3%80%8C%E6%96%B0%E8%A6%8F%E3%81%AF%E5%BE%97%E6%84%8F%E3%80%81%E6%94%B9%E4%BF%AE%E3%81%AF%E8%8B%A6%E6%89%8B%E3%80%8D%E3%81%AE%E6%AD%A3%E4%BD%93" aria-hidden="true"></a> 1.3 「新規は得意、改修は苦手」の正体</h3>
+<p data-line="49" class="code-line">AI コーディングの「改修が苦手」問題の大部分はこれだと思う。新規プロジェクトでは旧設計が存在しないから汚染が起きない。既存プロジェクトの改修では、旧コードが常に視野に入っているから汚染が避けられない。</p>
+<p data-line="51" class="code-line"><strong>モデルの性能問題ではなく、コンテキスト設計の構造問題。</strong> モデルを最新に変えても同じところで詰まる。</p>
+<h3 id="1.4-%E8%A3%8F%E4%BB%98%E3%81%91%E3%83%87%E3%83%BC%E3%82%BF" data-line="53" class="code-line">
+<a class="header-anchor-link" href="#1.4-%E8%A3%8F%E4%BB%98%E3%81%91%E3%83%87%E3%83%BC%E3%82%BF" aria-hidden="true"></a> 1.4 裏付けデータ</h3>
+<table data-line="55" class="code-line">
+<thead data-line="55" class="code-line">
+<tr data-line="55" class="code-line">
+<th style="text-align:left">データポイント</th>
+<th style="text-align:left">出典</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td style="text-align: left;">エージェントのコンテキストの <strong>60〜80%</strong> が無関係なデータで占められている</td>
-<td style="text-align: left;"><a href="https://www.flowhunt.io/blog/context-engineering-ai-agents-token-optimization/">FlowHunt</a></td>
+<tbody data-line="57" class="code-line">
+<tr data-line="57" class="code-line">
+<td style="text-align:left">エージェントのコンテキストの <strong>60〜80%</strong> が無関係なデータで占められている</td>
+<td style="text-align:left"><a href="https://www.flowhunt.io/blog/context-engineering-ai-agents-token-optimization/" target="_blank" rel="nofollow noopener noreferrer">FlowHunt</a></td>
 </tr>
-<tr>
-<td style="text-align: left;">200人チームで月 <strong>$22,000</strong> のトークン超過、うち <strong>70% がレガシーコードベース</strong>での作業</td>
-<td style="text-align: left;"><a href="https://altersquare.io/ai-coding-tools-2026-used-across-20-client-projects/">AlterSquare</a></td>
+<tr data-line="58" class="code-line">
+<td style="text-align:left">200人チームで月 <strong>$22,000</strong> のトークン超過、うち <strong>70% がレガシーコードベース</strong>での作業</td>
+<td style="text-align:left"><a href="https://altersquare.io/ai-coding-tools-2026-used-across-20-client-projects/" target="_blank" rel="nofollow noopener noreferrer">AlterSquare</a></td>
 </tr>
-<tr>
-<td style="text-align: left;">コンテキストルールの最適化だけで中央値コスト <strong>21% 削減</strong></td>
-<td style="text-align: left;"><a href="https://altersquare.io/ai-coding-tools-2026-used-across-20-client-projects/">AlterSquare</a></td>
+<tr data-line="59" class="code-line">
+<td style="text-align:left">コンテキストルールの最適化だけで中央値コスト <strong>21% 削減</strong>
+</td>
+<td style="text-align:left"><a href="https://altersquare.io/ai-coding-tools-2026-used-across-20-client-projects/" target="_blank" rel="nofollow noopener noreferrer">AlterSquare</a></td>
 </tr>
-<tr>
-<td style="text-align: left;">スマート検索（200K）で幻覚率 <strong>12%</strong> / ブルートフォース（1M）で <strong>28〜31%</strong></td>
-<td style="text-align: left;"><a href="https://www.augmentcode.com/tools/context-window-wars-200k-vs-1m-token-strategies">Augment Code</a></td>
+<tr data-line="60" class="code-line">
+<td style="text-align:left">スマート検索（200K）で幻覚率 <strong>12%</strong> / ブルートフォース（1M）で <strong>28〜31%</strong>
+</td>
+<td style="text-align:left"><a href="https://www.augmentcode.com/tools/context-window-wars-200k-vs-1m-token-strategies" target="_blank" rel="nofollow noopener noreferrer">Augment Code</a></td>
 </tr>
-<tr>
-<td style="text-align: left;">コンテキスト適正化で <strong>40〜60%</strong> のコスト削減</td>
-<td style="text-align: left;"><a href="https://evalics.com/blog/how-token-limits-and-context-size-affect-ai-automation-costs">Evalics</a></td>
+<tr data-line="61" class="code-line">
+<td style="text-align:left">コンテキスト適正化で <strong>40〜60%</strong> のコスト削減</td>
+<td style="text-align:left"><a href="https://evalics.com/blog/how-token-limits-and-context-size-affect-ai-automation-costs" target="_blank" rel="nofollow noopener noreferrer">Evalics</a></td>
 </tr>
-<tr>
-<td style="text-align: left;">リトライ・エラーで基本コストの <strong>20〜50% 増加</strong></td>
-<td style="text-align: left;"><a href="https://medium.com/@klaushofenbitzer/token-cost-trap-why-your-ai-agents-roi-breaks-at-scale-and-how-to-fix-it-4e4a9f6f5b9a">Token Cost Trap</a></td>
+<tr data-line="62" class="code-line">
+<td style="text-align:left">リトライ・エラーで基本コストの <strong>20〜50% 増加</strong>
+</td>
+<td style="text-align:left"><a href="https://medium.com/@klaushofenbitzer/token-cost-trap-why-your-ai-agents-roi-breaks-at-scale-and-how-to-fix-it-4e4a9f6f5b9a" target="_blank" rel="nofollow noopener noreferrer">Token Cost Trap</a></td>
 </tr>
 </tbody>
 </table>
-<p>特に注目すべきは<strong>レガシーコードベースがトークン超過の 70% を占める</strong>というデータ。Yojo パターンが直接ターゲットにしている領域だ。</p>
-<hr />
-<h2>2. 解決策: Yojo パターン</h2>
-<h3>2.1 養生とは</h3>
-<p>大きな改修工事をするとき、建築現場では「養生（ようじょう）」をする。ブルーシートを貼り、改修対象を囲い、改修対象外を保護し、作業範囲を明示して関係者以外の立ち入りを防ぐ。これなしに工事を始める現場はない。</p>
-<p>AI コーディングでも同じことをする。設計変更の前に、AI が旧設計・旧コードに触れないよう<strong>視野を制限してから</strong>実装させる。施工の前にやる行為だから、養生。</p>
-<p>名前は Yojo で統一した。海外の人にも打鍵してほしい。押しやすいし、なんか謎のマジックワードみたいでﾂﾖｲ。</p>
-<h3>2.2 シャドーマスクの原理</h3>
-<p>競走馬には<strong>シャドーマスク</strong>という器具がある。自分の影や周囲の雑多な視覚情報に驚かないよう、視野を物理的に制限する。</p>
-<ul>
-<li>馬は「影を無視しろ」と言われているのではない</li>
-<li><strong>最初から見えていない</strong></li>
+<p data-line="64" class="code-line">特に注目すべきは<strong>レガシーコードベースがトークン超過の 70% を占める</strong>というデータ。Yojo パターンが直接ターゲットにしている領域だ。</p>
+<hr data-line="66" class="code-line">
+<h2 id="2.-%E8%A7%A3%E6%B1%BA%E7%AD%96%3A-yojo-%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" data-line="68" class="code-line">
+<a class="header-anchor-link" href="#2.-%E8%A7%A3%E6%B1%BA%E7%AD%96%3A-yojo-%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" aria-hidden="true"></a> 2. 解決策: Yojo パターン</h2>
+<h3 id="2.1-%E9%A4%8A%E7%94%9F%E3%81%A8%E3%81%AF" data-line="70" class="code-line">
+<a class="header-anchor-link" href="#2.1-%E9%A4%8A%E7%94%9F%E3%81%A8%E3%81%AF" aria-hidden="true"></a> 2.1 養生とは</h3>
+<p data-line="72" class="code-line">大きな改修工事をするとき、建築現場では「養生（ようじょう）」をする。ブルーシートを貼り、改修対象を囲い、改修対象外を保護し、作業範囲を明示して関係者以外の立ち入りを防ぐ。これなしに工事を始める現場はない。</p>
+<p data-line="74" class="code-line">AI コーディングでも同じことをする。設計変更の前に、AI が旧設計・旧コードに触れないよう<strong>視野を制限してから</strong>実装させる。施工の前にやる行為だから、養生。</p>
+<p data-line="76" class="code-line">名前は Yojo で統一した。海外の人にも打鍵してほしい。押しやすいし、なんか謎のマジックワードみたいでﾂﾖｲ。</p>
+<h3 id="2.2-%E3%82%B7%E3%83%A3%E3%83%89%E3%83%BC%E3%83%9E%E3%82%B9%E3%82%AF%E3%81%AE%E5%8E%9F%E7%90%86" data-line="78" class="code-line">
+<a class="header-anchor-link" href="#2.2-%E3%82%B7%E3%83%A3%E3%83%89%E3%83%BC%E3%83%9E%E3%82%B9%E3%82%AF%E3%81%AE%E5%8E%9F%E7%90%86" aria-hidden="true"></a> 2.2 シャドーマスクの原理</h3>
+<p data-line="80" class="code-line">競走馬には<strong>シャドーマスク</strong>という器具がある。自分の影や周囲の雑多な視覚情報に驚かないよう、視野を物理的に制限する。</p>
+<ul data-line="82" class="code-line">
+<li data-line="82" class="code-line">馬は「影を無視しろ」と言われているのではない</li>
+<li data-line="83" class="code-line"><strong>最初から見えていない</strong></li>
 </ul>
-<p>AI コーダーも同じ。「旧設計を無視して」と指示するのではなく、<strong>最初から視野に入っていない状態で走らせる</strong>。</p>
-<h3>2.3 Yojo の 3 段階</h3>
-<p>建築の養生にも段階がある。AI コーディングでも同じだ。</p>
-<pre><code class="language-mermaid">flowchart LR
-    A[&quot;1. 調査&lt;br&gt;変更対象を特定&lt;br&gt;マーキング&quot;] --&gt; B[&quot;2. 養生&lt;br&gt;worktree を切る&lt;br&gt;文書層を書き換え&lt;br&gt;コードにマーク&quot;]
-    B --&gt; C[&quot;3. 施工&lt;br&gt;AI を走らせる&lt;br&gt;新設計のみで実装&quot;]
-</code></pre>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">段階</th>
-<th style="text-align: left;">やること</th>
-<th style="text-align: left;">触るもの</th>
+<p data-line="85" class="code-line">AI コーダーも同じ。「旧設計を無視して」と指示するのではなく、<strong>最初から視野に入っていない状態で走らせる</strong>。</p>
+<h3 id="2.3-yojo-%E3%81%AE-3-%E6%AE%B5%E9%9A%8E" data-line="87" class="code-line">
+<a class="header-anchor-link" href="#2.3-yojo-%E3%81%AE-3-%E6%AE%B5%E9%9A%8E" aria-hidden="true"></a> 2.3 Yojo の 3 段階</h3>
+<p data-line="89" class="code-line">建築の養生にも段階がある。AI コーディングでも同じだ。</p>
+<span class="embed-block zenn-embedded zenn-embedded-mermaid"><iframe id="zenn-embedded__bfa1e60f34448" src="https://embed.zenn.studio/mermaid#zenn-embedded__bfa1e60f34448" data-content="flowchart%20LR%0A%20%20%20%20A%5B%221.%20%E8%AA%BF%E6%9F%BB%3Cbr%3E%E5%A4%89%E6%9B%B4%E5%AF%BE%E8%B1%A1%E3%82%92%E7%89%B9%E5%AE%9A%3Cbr%3E%E3%83%9E%E3%83%BC%E3%82%AD%E3%83%B3%E3%82%B0%22%5D%20--%3E%20B%5B%222.%20%E9%A4%8A%E7%94%9F%3Cbr%3Eworktree%20%E3%82%92%E5%88%87%E3%82%8B%3Cbr%3E%E6%96%87%E6%9B%B8%E5%B1%A4%E3%82%92%E6%9B%B8%E3%81%8D%E6%8F%9B%E3%81%88%3Cbr%3E%E3%82%B3%E3%83%BC%E3%83%89%E3%81%AB%E3%83%9E%E3%83%BC%E3%82%AF%22%5D%0A%20%20%20%20B%20--%3E%20C%5B%223.%20%E6%96%BD%E5%B7%A5%3Cbr%3EAI%20%E3%82%92%E8%B5%B0%E3%82%89%E3%81%9B%E3%82%8B%3Cbr%3E%E6%96%B0%E8%A8%AD%E8%A8%88%E3%81%AE%E3%81%BF%E3%81%A7%E5%AE%9F%E8%A3%85%22%5D" frameborder="0" scrolling="no" loading="lazy"></iframe></span><table data-line="97" class="code-line">
+<thead data-line="97" class="code-line">
+<tr data-line="97" class="code-line">
+<th style="text-align:left">段階</th>
+<th style="text-align:left">やること</th>
+<th style="text-align:left">触るもの</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong>調査</strong></td>
-<td style="text-align: left;">変更対象の設計書・指示書・コードを特定、マーキング</td>
-<td style="text-align: left;">まだ何も書き換えない</td>
+<tbody data-line="99" class="code-line">
+<tr data-line="99" class="code-line">
+<td style="text-align:left"><strong>調査</strong></td>
+<td style="text-align:left">変更対象の設計書・指示書・コードを特定、マーキング</td>
+<td style="text-align:left">まだ何も書き換えない</td>
 </tr>
-<tr>
-<td style="text-align: left;"><strong>養生</strong></td>
-<td style="text-align: left;">worktree を切り、文書層を新設計に書き換え + 旧コードにマーク</td>
-<td style="text-align: left;">文書層 + コード層</td>
+<tr data-line="100" class="code-line">
+<td style="text-align:left"><strong>養生</strong></td>
+<td style="text-align:left">worktree を切り、文書層を新設計に書き換え + 旧コードにマーク</td>
+<td style="text-align:left">文書層 + コード層</td>
 </tr>
-<tr>
-<td style="text-align: left;"><strong>施工</strong></td>
-<td style="text-align: left;">クリーンなコンテキストで AI を走らせる</td>
-<td style="text-align: left;">AI がコードを変える</td>
+<tr data-line="101" class="code-line">
+<td style="text-align:left"><strong>施工</strong></td>
+<td style="text-align:left">クリーンなコンテキストで AI を走らせる</td>
+<td style="text-align:left">AI がコードを変える</td>
 </tr>
 </tbody>
 </table>
-<p>養生段階では<strong>2 種類の操作</strong>を行う:</p>
-<ul>
-<li><strong>文書層の書き換え（遮断）</strong>: 設計書・指示書・ステータスドキュメントを新設計のみに書き直す。旧設計の記述は消す。AI は旧設計の存在を知らない状態になる</li>
-<li><strong>コード層のマーキング</strong>: 書き換え対象の旧コードに「要改修？」と印をつける。AI がコードを読んだときに「これは変更対象かも」と判断できる状態にする</li>
+<p data-line="103" class="code-line">養生段階では<strong>2 種類の操作</strong>を行う:</p>
+<ul data-line="105" class="code-line">
+<li data-line="105" class="code-line">
+<strong>文書層の書き換え（遮断）</strong>: 設計書・指示書・ステータスドキュメントを新設計のみに書き直す。旧設計の記述は消す。AI は旧設計の存在を知らない状態になる</li>
+<li data-line="106" class="code-line">
+<strong>コード層のマーキング</strong>: 書き換え対象の旧コードに「要改修？」と印をつける。AI がコードを読んだときに「これは変更対象かも」と判断できる状態にする</li>
 </ul>
-<p>文書層で世界観を制御し、コード層で変更範囲を示す。</p>
-<h3>2.4 Before / After</h3>
-<p><strong>Before（養生なし）:</strong></p>
-<pre><code>開発者:「認証をセッション方式から JWT に変えて」
-        （旧コード・旧設計書が視野にある）
-
-AI:    「承知しました。既存のセッション認証との互換性を保ちながら、
-        JWTも使えるよう両対応の実装を行います。
-        旧セッション API は deprecated フラグを立てて残します」
-
-→ 二重実装・移行期間コードが大量生成
-→ 「違う、全部置き換えて」と指示
-→ リトライ（さらにトークン消費）
-→ それでも残骸が残る
-</code></pre>
-<p><strong>After（養生あり）:</strong></p>
-<pre><code>開発者: worktree を切り、設計書を新設計のみに書き換え済み
-        「認証を JWT で実装して」
-
-AI:    「承知しました。JWT 認証を実装します」
-
-→ 一発で完了
-</code></pre>
-<h3>2.5 なぜ「deprecated」では駄目なのか</h3>
-<pre><code class="language-markdown"># これは養生ではない
-
-&gt; 旧設計は廃止済みです。無視してください。
-</code></pre>
-<p>LLM は「無視すべき情報」を読んだ時点でコンテキストに取り込む。「無視して」と書いても、旧設計の存在を知った状態で推論する。</p>
-<pre><code class="language-markdown"># これが養生
-
-旧設計の記述がそもそも存在しない状態の文書。
-AI は旧設計を知らない。
-</code></pre>
-<hr />
-<h2>3. 実践: Claude Code での Yojo スキル</h2>
-<p>Yojo パターンを Claude Code のカスタムスキルとして実装した。<code>/yojo &lt;topic&gt;</code> で呼び出す。実戦で使って固まった知見を共有する。</p>
-<h3>3.1 設計判断</h3>
-<p><strong>「所見を書く、処方は書かない」</strong></p>
-<p>旧コードへのマークには「なぜ変わるか」と「設計検討リンク」だけ書く。「こう直せ」は書かない。変更方針は実装時に変わりうるし、養生の時点で実装方法を決めるのは越権だ。</p>
-<pre><code class="language-typescript">/**
- * TODO [要改修？] D1: 認証方式がセッションから JWT に転換
- * 現状: セッションベースの認証ミドルウェア
- * 設計検討: docs/planning/auth-jwt-migration.md
- */
-</code></pre>
-<p>「要改修？」と疑問符を付ける。改修が必要かどうかも含めて未確定。目星にすぎない。</p>
-<p><strong><code>@deprecated</code> を使わない理由</strong></p>
-<p><code>@deprecated</code> は「もう使えない」を意味する。養生対象のコードはまだ動作中で、新方式の実装が来るまで動き続ける。<code>TODO [要改修？]</code> は「方針が変わった、いずれ手を入れる、詳細は設計書を見ろ」という目星だ。意味が違う。</p>
-<p><strong>掲示ファイルで一時情報を分離する</strong></p>
-<p><code>.claude/yojo/&lt;topic&gt;.md</code> という一時ファイルを作り、判断の要約・マーク付きファイル一覧・設計検討リンク・改修完了条件を書く。設計書本体には恒久的な方針だけを書き、一時的な注意書きは埋め込まない。</p>
-<h3>3.2 施工後の片付け — 養生は撤去まで含む</h3>
-<p>養生は施工が終わったら撤去する。建築現場も同じだ。ブルーシートを貼りっぱなしにする現場はない。</p>
-<p>改修が全部終わったら:</p>
-<ol>
-<li><code>.claude/yojo/&lt;topic&gt;.md</code> を削除する</li>
-<li>設計書の改修中リンクを削除する</li>
-<li>コード中の <code>TODO [要改修？]</code> マークを削除する（改修済みだけでなく、残存分も確認）</li>
-<li>片付けコミットを打つ</li>
+<p data-line="108" class="code-line">文書層で世界観を制御し、コード層で変更範囲を示す。</p>
+<h3 id="2.4-before-%2F-after" data-line="110" class="code-line">
+<a class="header-anchor-link" href="#2.4-before-%2F-after" aria-hidden="true"></a> 2.4 Before / After</h3>
+<p data-line="112" class="code-line"><strong>Before（養生なし）:</strong></p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="114"><span class="line"><span>開発者:「認証をセッション方式から JWT に変えて」</span></span>
+<span class="line"><span>        （旧コード・旧設計書が視野にある）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>AI:    「承知しました。既存のセッション認証との互換性を保ちながら、</span></span>
+<span class="line"><span>        JWTも使えるよう両対応の実装を行います。</span></span>
+<span class="line"><span>        旧セッション API は deprecated フラグを立てて残します」</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>→ 二重実装・移行期間コードが大量生成</span></span>
+<span class="line"><span>→ 「違う、全部置き換えて」と指示</span></span>
+<span class="line"><span>→ リトライ（さらにトークン消費）</span></span>
+<span class="line"><span>→ それでも残骸が残る</span></span>
+<span class="line"><span></span></span></code></pre></div><p data-line="128" class="code-line"><strong>After（養生あり）:</strong></p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="130"><span class="line"><span>開発者: worktree を切り、設計書を新設計のみに書き換え済み</span></span>
+<span class="line"><span>        「認証を JWT で実装して」</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>AI:    「承知しました。JWT 認証を実装します」</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>→ 一発で完了</span></span>
+<span class="line"><span></span></span></code></pre></div><h3 id="2.5-%E3%81%AA%E3%81%9C%E3%80%8Cdeprecated%E3%80%8D%E3%81%A7%E3%81%AF%E9%A7%84%E7%9B%AE%E3%81%AA%E3%81%AE%E3%81%8B" data-line="139" class="code-line">
+<a class="header-anchor-link" href="#2.5-%E3%81%AA%E3%81%9C%E3%80%8Cdeprecated%E3%80%8D%E3%81%A7%E3%81%AF%E9%A7%84%E7%9B%AE%E3%81%AA%E3%81%AE%E3%81%8B" aria-hidden="true"></a> 2.5 なぜ「deprecated」では駄目なのか</h3>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="141"><span class="line"><span style="color:#79B8FF;font-weight:bold"># これは養生ではない</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#85E89D">&gt; 旧設計は廃止済みです。無視してください。</span></span>
+<span class="line"></span></code></pre></div><p data-line="147" class="code-line">LLM は「無視すべき情報」を読んだ時点でコンテキストに取り込む。「無視して」と書いても、旧設計の存在を知った状態で推論する。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="149"><span class="line"><span style="color:#79B8FF;font-weight:bold"># これが養生</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">旧設計の記述がそもそも存在しない状態の文書。</span></span>
+<span class="line"><span style="color:#E1E4E8">AI は旧設計を知らない。</span></span>
+<span class="line"></span></code></pre></div><hr data-line="156" class="code-line">
+<h2 id="3.-%E5%AE%9F%E8%B7%B5%3A-claude-code-%E3%81%A7%E3%81%AE-yojo-%E3%82%B9%E3%82%AD%E3%83%AB" data-line="158" class="code-line">
+<a class="header-anchor-link" href="#3.-%E5%AE%9F%E8%B7%B5%3A-claude-code-%E3%81%A7%E3%81%AE-yojo-%E3%82%B9%E3%82%AD%E3%83%AB" aria-hidden="true"></a> 3. 実践: Claude Code での Yojo スキル</h2>
+<p data-line="160" class="code-line">Yojo パターンを Claude Code のカスタムスキルとして実装した。<code>/yojo &lt;topic&gt;</code> で呼び出す。実戦で使って固まった知見を共有する。</p>
+<h3 id="3.1-%E8%A8%AD%E8%A8%88%E5%88%A4%E6%96%AD" data-line="162" class="code-line">
+<a class="header-anchor-link" href="#3.1-%E8%A8%AD%E8%A8%88%E5%88%A4%E6%96%AD" aria-hidden="true"></a> 3.1 設計判断</h3>
+<p data-line="164" class="code-line"><strong>「所見を書く、処方は書かない」</strong></p>
+<p data-line="166" class="code-line">旧コードへのマークには「なぜ変わるか」と「設計検討リンク」だけ書く。「こう直せ」は書かない。変更方針は実装時に変わりうるし、養生の時点で実装方法を決めるのは越権だ。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="168"><span class="line"><span style="color:#a0aab5">/**</span></span>
+<span class="line"><span style="color:#a0aab5"> * TODO [要改修？] D1: 認証方式がセッションから JWT に転換</span></span>
+<span class="line"><span style="color:#a0aab5"> * 現状: セッションベースの認証ミドルウェア</span></span>
+<span class="line"><span style="color:#a0aab5"> * 設計検討: docs/planning/auth-jwt-migration.md</span></span>
+<span class="line"><span style="color:#a0aab5"> */</span></span>
+<span class="line"></span></code></pre></div><p data-line="176" class="code-line">「要改修？」と疑問符を付ける。改修が必要かどうかも含めて未確定。目星にすぎない。</p>
+<p data-line="178" class="code-line"><strong><code>@deprecated</code> を使わない理由</strong></p>
+<p data-line="180" class="code-line"><code>@deprecated</code> は「もう使えない」を意味する。養生対象のコードはまだ動作中で、新方式の実装が来るまで動き続ける。<code>TODO [要改修？]</code> は「方針が変わった、いずれ手を入れる、詳細は設計書を見ろ」という目星だ。意味が違う。</p>
+<p data-line="182" class="code-line"><strong>掲示ファイルで一時情報を分離する</strong></p>
+<p data-line="184" class="code-line"><code>.claude/yojo/&lt;topic&gt;.md</code> という一時ファイルを作り、判断の要約・マーク付きファイル一覧・設計検討リンク・改修完了条件を書く。設計書本体には恒久的な方針だけを書き、一時的な注意書きは埋め込まない。</p>
+<h3 id="3.2-%E6%96%BD%E5%B7%A5%E5%BE%8C%E3%81%AE%E7%89%87%E4%BB%98%E3%81%91-%E2%80%94-%E9%A4%8A%E7%94%9F%E3%81%AF%E6%92%A4%E5%8E%BB%E3%81%BE%E3%81%A7%E5%90%AB%E3%82%80" data-line="186" class="code-line">
+<a class="header-anchor-link" href="#3.2-%E6%96%BD%E5%B7%A5%E5%BE%8C%E3%81%AE%E7%89%87%E4%BB%98%E3%81%91-%E2%80%94-%E9%A4%8A%E7%94%9F%E3%81%AF%E6%92%A4%E5%8E%BB%E3%81%BE%E3%81%A7%E5%90%AB%E3%82%80" aria-hidden="true"></a> 3.2 施工後の片付け — 養生は撤去まで含む</h3>
+<p data-line="188" class="code-line">養生は施工が終わったら撤去する。建築現場も同じだ。ブルーシートを貼りっぱなしにする現場はない。</p>
+<p data-line="190" class="code-line">改修が全部終わったら:</p>
+<ol data-line="192" class="code-line">
+<li data-line="192" class="code-line">
+<code>.claude/yojo/&lt;topic&gt;.md</code> を削除する</li>
+<li data-line="193" class="code-line">設計書の改修中リンクを削除する</li>
+<li data-line="194" class="code-line">コード中の <code>TODO [要改修？]</code> マークを削除する（改修済みだけでなく、残存分も確認）</li>
+<li data-line="195" class="code-line">片付けコミットを打つ</li>
 </ol>
-<p><strong>養生ファイルが残っている = 改修が未完了</strong>。これがシグナルになる。忘れ防止だ。片付けまで含めて養生。</p>
-<h3>3.3 チェックリスト</h3>
-<pre><code>【文書層（遮断）】
-□ 設計書から旧設計の記述を除去したか
-□ 設計書を新設計のみにしたか（または worktree から除外したか）
-□ ステータスドキュメントを更新したか
-□ README 等に旧設計への言及がないか
-
-【コード層（マーキング）】
-□ 書き換え対象の旧コードにマークしたか
-□ コード内コメントの旧設計言及を確認したか
-
-【総合】
-□ AI が見そうな場所を全部チェックしたか
-</code></pre>
-<h3>3.4 スキル定義（共有）</h3>
-<p>以下は実際に使っているスキルの骨格だ。Claude Code の <code>.claude/skills/</code> に置いて使う。プロジェクトに合わせて調整してほしい。</p>
-<pre><code class="language-markdown"># /yojo &lt;topic&gt;
-
-大規模な設計変更の実装に先立ち、旧設計を封印する。
-実装者が旧方式に従う「隙」をなくし、新設計の指示書を整備することが目的。
-
-&gt; Yojo != 実装。新機能のコードは書かない。
-&gt; 「旧を封じ、新の指示書を整備する」だけ。
-
-## 手順
-
-### Step 1: Worktree の作成
-設計書レベルの変更を含むため、本流と隔離する。
-
-### Step 2: 封印範囲の確認（HIL）
-調査ドキュメントを読み込み、封印対象リストをユーザーに提示。
-ユーザーの明示的な承認を得てから次に進む。
-
-### Step 3: 指示書・設計書の書き換え（シャドーマスク）
-新パラダイムの方針を指示書に先に記述する。
-旧設計の記述は削除する（「廃止済み」セクションも作らない）。
-掲示ファイル .claude/yojo/&lt;topic&gt;.md を作成する。
-
-### Step 4: コードへのマーク付与
-旧方式のコードに TODO [要改修？] マークを付ける。
-
-マークの書き方:
-- 判断ID + 変更理由の一行要約
-- 現状の説明
-- 設計検討ドキュメントへのリンク
-
-原則:
-- 所見を書く、処方は書かない（「こう直せ」は書かない）
-- ？を付ける（改修が必要かどうかも未確定）
-- コードは削除しない
-
-### Step 5: コミット・PR
-各ステップでユーザー確認を取る（HIL）。
-
-### Step 6: 改修完了時の片付け
-1. .claude/yojo/&lt;topic&gt;.md を削除
-2. 設計書の改修中リンクを削除
-3. コード中の TODO [要改修？] マークを削除
-4. 片付けコミット
-
-養生ファイルが残っている = 改修が未完了。
-</code></pre>
-<hr />
-<h2>4. トークン削減のポテンシャル</h2>
-<h3>4.1 Yojo が効くメカニズム</h3>
-<p>養生は以下の浪費を<strong>まとめて消す</strong>:</p>
-<ol>
-<li><strong>旧コード読み込み</strong> — 読ませないので input トークンが減る</li>
-<li><strong>後方互換コード生成</strong> — 生成されないので output トークンが減る</li>
-<li><strong>「違う、やり直し」ループ</strong> — 初回で正しい方向に行くのでリトライが減る</li>
-<li><strong>リトライ時のコンテキスト膨張</strong> — ループ自体が発生しない</li>
+<p data-line="197" class="code-line"><strong>養生ファイルが残っている = 改修が未完了</strong>。これがシグナルになる。忘れ防止だ。片付けまで含めて養生。</p>
+<h3 id="3.3-%E3%83%81%E3%82%A7%E3%83%83%E3%82%AF%E3%83%AA%E3%82%B9%E3%83%88" data-line="199" class="code-line">
+<a class="header-anchor-link" href="#3.3-%E3%83%81%E3%82%A7%E3%83%83%E3%82%AF%E3%83%AA%E3%82%B9%E3%83%88" aria-hidden="true"></a> 3.3 チェックリスト</h3>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="201"><span class="line"><span>【文書層（遮断）】</span></span>
+<span class="line"><span>□ 設計書から旧設計の記述を除去したか</span></span>
+<span class="line"><span>□ 設計書を新設計のみにしたか（または worktree から除外したか）</span></span>
+<span class="line"><span>□ ステータスドキュメントを更新したか</span></span>
+<span class="line"><span>□ README 等に旧設計への言及がないか</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>【コード層（マーキング）】</span></span>
+<span class="line"><span>□ 書き換え対象の旧コードにマークしたか</span></span>
+<span class="line"><span>□ コード内コメントの旧設計言及を確認したか</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>【総合】</span></span>
+<span class="line"><span>□ AI が見そうな場所を全部チェックしたか</span></span>
+<span class="line"><span></span></span></code></pre></div><h3 id="3.4-%E3%82%B9%E3%82%AD%E3%83%AB%E5%AE%9A%E7%BE%A9%EF%BC%88%E5%85%B1%E6%9C%89%EF%BC%89" data-line="216" class="code-line">
+<a class="header-anchor-link" href="#3.4-%E3%82%B9%E3%82%AD%E3%83%AB%E5%AE%9A%E7%BE%A9%EF%BC%88%E5%85%B1%E6%9C%89%EF%BC%89" aria-hidden="true"></a> 3.4 スキル定義（共有）</h3>
+<p data-line="218" class="code-line">以下は実際に使っているスキルの骨格だ。Claude Code の <code>.claude/skills/</code> に置いて使う。プロジェクトに合わせて調整してほしい。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="220"><span class="line"><span style="color:#79B8FF;font-weight:bold"># /yojo &lt;</span><span style="color:#85E89D;font-weight:bold">topic</span><span style="color:#79B8FF;font-weight:bold">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">大規模な設計変更の実装に先立ち、旧設計を封印する。</span></span>
+<span class="line"><span style="color:#E1E4E8">実装者が旧方式に従う「隙」をなくし、新設計の指示書を整備することが目的。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#85E89D">&gt; Yojo != 実装。新機能のコードは書かない。</span></span>
+<span class="line"><span style="color:#85E89D">&gt; 「旧を封じ、新の指示書を整備する」だけ。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">## 手順</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Step 1: Worktree の作成</span></span>
+<span class="line"><span style="color:#E1E4E8">設計書レベルの変更を含むため、本流と隔離する。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Step 2: 封印範囲の確認（HIL）</span></span>
+<span class="line"><span style="color:#E1E4E8">調査ドキュメントを読み込み、封印対象リストをユーザーに提示。</span></span>
+<span class="line"><span style="color:#E1E4E8">ユーザーの明示的な承認を得てから次に進む。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Step 3: 指示書・設計書の書き換え（シャドーマスク）</span></span>
+<span class="line"><span style="color:#E1E4E8">新パラダイムの方針を指示書に先に記述する。</span></span>
+<span class="line"><span style="color:#E1E4E8">旧設計の記述は削除する（「廃止済み」セクションも作らない）。</span></span>
+<span class="line"><span style="color:#E1E4E8">掲示ファイル .claude/yojo/&lt;</span><span style="color:#85E89D">topic</span><span style="color:#E1E4E8">&gt;.md を作成する。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Step 4: コードへのマーク付与</span></span>
+<span class="line"><span style="color:#E1E4E8">旧方式のコードに TODO [</span><span style="color:#DBEDFF;text-decoration:underline">要改修？</span><span style="color:#E1E4E8">] マークを付ける。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">マークの書き方:</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8"> 判断ID + 変更理由の一行要約</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8"> 現状の説明</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8"> 設計検討ドキュメントへのリンク</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">原則:</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8"> 所見を書く、処方は書かない（「こう直せ」は書かない）</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8"> ？を付ける（改修が必要かどうかも未確定）</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8"> コードは削除しない</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Step 5: コミット・PR</span></span>
+<span class="line"><span style="color:#E1E4E8">各ステップでユーザー確認を取る（HIL）。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Step 6: 改修完了時の片付け</span></span>
+<span class="line"><span style="color:#FFAB70">1.</span><span style="color:#E1E4E8"> .claude/yojo/&lt;</span><span style="color:#85E89D">topic</span><span style="color:#E1E4E8">&gt;.md を削除</span></span>
+<span class="line"><span style="color:#FFAB70">2.</span><span style="color:#E1E4E8"> 設計書の改修中リンクを削除</span></span>
+<span class="line"><span style="color:#FFAB70">3.</span><span style="color:#E1E4E8"> コード中の TODO [</span><span style="color:#DBEDFF;text-decoration:underline">要改修？</span><span style="color:#E1E4E8">] マークを削除</span></span>
+<span class="line"><span style="color:#FFAB70">4.</span><span style="color:#E1E4E8"> 片付けコミット</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">養生ファイルが残っている = 改修が未完了。</span></span>
+<span class="line"></span></code></pre></div><hr data-line="268" class="code-line">
+<h2 id="4.-%E3%83%88%E3%83%BC%E3%82%AF%E3%83%B3%E5%89%8A%E6%B8%9B%E3%81%AE%E3%83%9D%E3%83%86%E3%83%B3%E3%82%B7%E3%83%A3%E3%83%AB" data-line="270" class="code-line">
+<a class="header-anchor-link" href="#4.-%E3%83%88%E3%83%BC%E3%82%AF%E3%83%B3%E5%89%8A%E6%B8%9B%E3%81%AE%E3%83%9D%E3%83%86%E3%83%B3%E3%82%B7%E3%83%A3%E3%83%AB" aria-hidden="true"></a> 4. トークン削減のポテンシャル</h2>
+<h3 id="4.1-yojo-%E3%81%8C%E5%8A%B9%E3%81%8F%E3%83%A1%E3%82%AB%E3%83%8B%E3%82%BA%E3%83%A0" data-line="272" class="code-line">
+<a class="header-anchor-link" href="#4.1-yojo-%E3%81%8C%E5%8A%B9%E3%81%8F%E3%83%A1%E3%82%AB%E3%83%8B%E3%82%BA%E3%83%A0" aria-hidden="true"></a> 4.1 Yojo が効くメカニズム</h3>
+<p data-line="274" class="code-line">養生は以下の浪費を<strong>まとめて消す</strong>:</p>
+<ol data-line="276" class="code-line">
+<li data-line="276" class="code-line">
+<strong>旧コード読み込み</strong> — 読ませないので input トークンが減る</li>
+<li data-line="277" class="code-line">
+<strong>後方互換コード生成</strong> — 生成されないので output トークンが減る</li>
+<li data-line="278" class="code-line">
+<strong>「違う、やり直し」ループ</strong> — 初回で正しい方向に行くのでリトライが減る</li>
+<li data-line="279" class="code-line">
+<strong>リトライ時のコンテキスト膨張</strong> — ループ自体が発生しない</li>
 </ol>
-<p>設計変更タスクに限れば、これらが丸ごと消える。</p>
-<h3>4.2 市場規模</h3>
-<p>このアンチパターンが影響する範囲は小さくない。</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">指標</th>
-<th style="text-align: left;">数値</th>
-<th style="text-align: left;">出典</th>
+<p data-line="281" class="code-line">設計変更タスクに限れば、これらが丸ごと消える。</p>
+<h3 id="4.2-%E5%B8%82%E5%A0%B4%E8%A6%8F%E6%A8%A1" data-line="283" class="code-line">
+<a class="header-anchor-link" href="#4.2-%E5%B8%82%E5%A0%B4%E8%A6%8F%E6%A8%A1" aria-hidden="true"></a> 4.2 市場規模</h3>
+<p data-line="285" class="code-line">このアンチパターンが影響する範囲は小さくない。</p>
+<table data-line="287" class="code-line">
+<thead data-line="287" class="code-line">
+<tr data-line="287" class="code-line">
+<th style="text-align:left">指標</th>
+<th style="text-align:left">数値</th>
+<th style="text-align:left">出典</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td style="text-align: left;">AI コーディングツール市場（2025年）</td>
-<td style="text-align: left;"><strong>$5〜7B</strong></td>
-<td style="text-align: left;"><a href="https://www.mordorintelligence.com/industry-reports/artificial-intelligence-code-tools-market">Mordor Intelligence</a>, <a href="https://www.globenewswire.com/news-release/2026/01/05/3212882/0/en/AI-Code-Assistant-Market-Set-to-Hit-USD-14-62-Billion-by-2033-Driven-by-Rising-Demand-for-Automated-and-Efficient-Software-Development-Research-by-SNS-Insider.html">SNS Insider</a></td>
+<tbody data-line="289" class="code-line">
+<tr data-line="289" class="code-line">
+<td style="text-align:left">AI コーディングツール市場（2025年）</td>
+<td style="text-align:left"><strong>$5〜7B</strong></td>
+<td style="text-align:left">
+<a href="https://www.mordorintelligence.com/industry-reports/artificial-intelligence-code-tools-market" target="_blank" rel="nofollow noopener noreferrer">Mordor Intelligence</a>, <a href="https://www.globenewswire.com/news-release/2026/01/05/3212882/0/en/AI-Code-Assistant-Market-Set-to-Hit-USD-14-62-Billion-by-2033-Driven-by-Rising-Demand-for-Automated-and-Efficient-Software-Development-Research-by-SNS-Insider.html" target="_blank" rel="nofollow noopener noreferrer">SNS Insider</a>
+</td>
 </tr>
-<tr>
-<td style="text-align: left;">AI コード生成市場（2032年予測）</td>
-<td style="text-align: left;"><strong>$30B</strong></td>
-<td style="text-align: left;"><a href="https://www.secondtalent.com/resources/ai-coding-assistant-statistics/">Second Talent</a></td>
+<tr data-line="290" class="code-line">
+<td style="text-align:left">AI コード生成市場（2032年予測）</td>
+<td style="text-align:left"><strong>$30B</strong></td>
+<td style="text-align:left"><a href="https://www.secondtalent.com/resources/ai-coding-assistant-statistics/" target="_blank" rel="nofollow noopener noreferrer">Second Talent</a></td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2>5. 既存パターンとの位置づけ</h2>
-<h3>5.1 先行概念との比較</h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">概念</th>
-<th style="text-align: left;">Yojo との関係</th>
+<hr data-line="292" class="code-line">
+<h2 id="5.-%E6%97%A2%E5%AD%98%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3%E3%81%A8%E3%81%AE%E4%BD%8D%E7%BD%AE%E3%81%A5%E3%81%91" data-line="294" class="code-line">
+<a class="header-anchor-link" href="#5.-%E6%97%A2%E5%AD%98%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3%E3%81%A8%E3%81%AE%E4%BD%8D%E7%BD%AE%E3%81%A5%E3%81%91" aria-hidden="true"></a> 5. 既存パターンとの位置づけ</h2>
+<h3 id="5.1-%E5%85%88%E8%A1%8C%E6%A6%82%E5%BF%B5%E3%81%A8%E3%81%AE%E6%AF%94%E8%BC%83" data-line="296" class="code-line">
+<a class="header-anchor-link" href="#5.1-%E5%85%88%E8%A1%8C%E6%A6%82%E5%BF%B5%E3%81%A8%E3%81%AE%E6%AF%94%E8%BC%83" aria-hidden="true"></a> 5.1 先行概念との比較</h3>
+<table data-line="298" class="code-line">
+<thead data-line="298" class="code-line">
+<tr data-line="298" class="code-line">
+<th style="text-align:left">概念</th>
+<th style="text-align:left">Yojo との関係</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong>Context Engineering</strong>（Karpathy 2025, Anthropic 2026）</td>
-<td style="text-align: left;">「コンテキストに必要な情報だけを精密に詰め込む」思想。Yojo はこの実践パターンの一つ</td>
+<tbody data-line="300" class="code-line">
+<tr data-line="300" class="code-line">
+<td style="text-align:left">
+<strong>Context Engineering</strong>（Karpathy 2025, Anthropic 2026）</td>
+<td style="text-align:left">「コンテキストに必要な情報だけを精密に詰め込む」思想。Yojo はこの実践パターンの一つ</td>
 </tr>
-<tr>
-<td style="text-align: left;"><strong><code>@Deprecated</code></strong></td>
-<td style="text-align: left;">コンパイラと人間向け。AI の読解動線を考慮していない</td>
+<tr data-line="301" class="code-line">
+<td style="text-align:left"><strong><code>@Deprecated</code></strong></td>
+<td style="text-align:left">コンパイラと人間向け。AI の読解動線を考慮していない</td>
 </tr>
-<tr>
-<td style="text-align: left;"><strong><code>.cursorignore</code></strong></td>
-<td style="text-align: left;">ファイル単位でブロック。Yojo は文書層の書き換えで「世界観」を制御する</td>
+<tr data-line="302" class="code-line">
+<td style="text-align:left"><strong><code>.cursorignore</code></strong></td>
+<td style="text-align:left">ファイル単位でブロック。Yojo は文書層の書き換えで「世界観」を制御する</td>
 </tr>
-<tr>
-<td style="text-align: left;"><strong>Strangler Fig</strong></td>
-<td style="text-align: left;">アーキテクチャ移行のマクロ戦略。ファイル単位の操作ではない</td>
+<tr data-line="303" class="code-line">
+<td style="text-align:left"><strong>Strangler Fig</strong></td>
+<td style="text-align:left">アーキテクチャ移行のマクロ戦略。ファイル単位の操作ではない</td>
 </tr>
-<tr>
-<td style="text-align: left;"><strong>Sub-context Pattern</strong>（Pete Hodgson）</td>
-<td style="text-align: left;">サブエージェントへの委譲で汚染を防ぐ。文書層の操作は含まない</td>
+<tr data-line="304" class="code-line">
+<td style="text-align:left">
+<strong>Sub-context Pattern</strong>（Pete Hodgson）</td>
+<td style="text-align:left">サブエージェントへの委譲で汚染を防ぐ。文書層の操作は含まない</td>
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p>「設計書・指示書を事前に書き換えて AI の視野を制限する」という実践パターンは、2026 年 3 月時点で体系的な記述が見つからなかった。</p>
+<blockquote data-line="306" class="code-line">
+<p data-line="306" class="code-line">「設計書・指示書を事前に書き換えて AI の視野を制限する」という実践パターンは、2026 年 3 月時点で体系的な記述が見つからなかった。</p>
 </blockquote>
-<h3>5.2 Context Engineering の中での位置</h3>
-<p>Anthropic の Context Engineering は「どんな情報環境が最も信頼性の高い出力を生むか？」を問う。Yojo はその中でも<strong>「入力から何を除くか」</strong>に焦点を当てたパターン。</p>
-<pre><code>Context Engineering の問い: 何を見せるか？ + 何を見せないか？
-Yojo の問い:                                 何を見せないか？
-</code></pre>
-<hr />
-<h2>余談: 建築現場からもっと学べる</h2>
-<p>ソフトウェアの「アーキテクチャ」は建築から借りた言葉だが、借りてきたのは設計思想だけで、<strong>現場の施工知識</strong>はほとんど輸入されていない。</p>
-<p>養生は建築現場では当たり前の工程だ。工事前に周囲を保護し、作業範囲を明示し、関係者以外の立ち入りを防ぐ。これなしに工事を始める現場はない。</p>
-<p>AI コーディングは今、「養生なしで工事を始めている」状態にある。設計パターンやアーキテクチャの議論は盛んだが、施工前の準備工程という発想がまだない。建築が数千年かけて磨いてきた現場の知恵には、まだ輸入する価値のあるものが眠っていると思う。知らんけど。</p>
-<hr />
-<h3>参考文献</h3>
-<ul>
-<li><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic: Effective context engineering for AI agents</a></li>
-<li><a href="https://research.trychroma.com/context-rot">Chroma Research: Context Rot</a></li>
-<li><a href="https://www.augmentcode.com/tools/context-window-wars-200k-vs-1m-token-strategies">Augment Code: Context Window Wars</a></li>
-<li><a href="https://www.flowhunt.io/blog/context-engineering-ai-agents-token-optimization/">FlowHunt: Context Engineering for AI Agents</a></li>
-<li><a href="https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus">Manus: Context Engineering for AI Agents</a></li>
-<li><a href="https://tacnode.io/post/your-ai-agents-are-spinning-their-wheels">Tacnode: Context Drift in AI Agents</a></li>
-<li><a href="https://venturebeat.com/ai/why-ai-coding-agents-arent-production-ready-brittle-context-windows-broken">VentureBeat: Why AI coding agents aren't production-ready</a></li>
-<li><a href="https://altersquare.io/ai-coding-tools-2026-used-across-20-client-projects/">AlterSquare: AI Coding Tools in 2026</a></li>
-<li><a href="https://evalics.com/blog/how-token-limits-and-context-size-affect-ai-automation-costs">Evalics: Token Limits and Context Size</a></li>
+<h3 id="5.2-context-engineering-%E3%81%AE%E4%B8%AD%E3%81%A7%E3%81%AE%E4%BD%8D%E7%BD%AE" data-line="308" class="code-line">
+<a class="header-anchor-link" href="#5.2-context-engineering-%E3%81%AE%E4%B8%AD%E3%81%A7%E3%81%AE%E4%BD%8D%E7%BD%AE" aria-hidden="true"></a> 5.2 Context Engineering の中での位置</h3>
+<p data-line="310" class="code-line">Anthropic の Context Engineering は「どんな情報環境が最も信頼性の高い出力を生むか？」を問う。Yojo はその中でも**「入力から何を除くか」**に焦点を当てたパターン。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="312"><span class="line"><span>Context Engineering の問い: 何を見せるか？ + 何を見せないか？</span></span>
+<span class="line"><span>Yojo の問い:                                 何を見せないか？</span></span>
+<span class="line"><span></span></span></code></pre></div><hr data-line="317" class="code-line">
+<h2 id="%E4%BD%99%E8%AB%87%3A-%E5%BB%BA%E7%AF%89%E7%8F%BE%E5%A0%B4%E3%81%8B%E3%82%89%E3%82%82%E3%81%A3%E3%81%A8%E5%AD%A6%E3%81%B9%E3%82%8B" data-line="319" class="code-line">
+<a class="header-anchor-link" href="#%E4%BD%99%E8%AB%87%3A-%E5%BB%BA%E7%AF%89%E7%8F%BE%E5%A0%B4%E3%81%8B%E3%82%89%E3%82%82%E3%81%A3%E3%81%A8%E5%AD%A6%E3%81%B9%E3%82%8B" aria-hidden="true"></a> 余談: 建築現場からもっと学べる</h2>
+<p data-line="321" class="code-line">ソフトウェアの「アーキテクチャ」は建築から借りた言葉だが、借りてきたのは設計思想だけで、<strong>現場の施工知識</strong>はほとんど輸入されていない。</p>
+<p data-line="323" class="code-line">養生は建築現場では当たり前の工程だ。工事前に周囲を保護し、作業範囲を明示し、関係者以外の立ち入りを防ぐ。これなしに工事を始める現場はない。</p>
+<p data-line="325" class="code-line">AI コーディングは今、「養生なしで工事を始めている」状態にある。設計パターンやアーキテクチャの議論は盛んだが、施工前の準備工程という発想がまだない。建築が数千年かけて磨いてきた現場の知恵には、まだ輸入する価値のあるものが眠っていると思う。知らんけど。</p>
+<hr data-line="327" class="code-line">
+<h3 id="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE" data-line="329" class="code-line">
+<a class="header-anchor-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE" aria-hidden="true"></a> 参考文献</h3>
+<ul data-line="331" class="code-line">
+<li data-line="331" class="code-line"><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="nofollow noopener noreferrer">Anthropic: Effective context engineering for AI agents</a></li>
+<li data-line="332" class="code-line"><a href="https://research.trychroma.com/context-rot" target="_blank" rel="nofollow noopener noreferrer">Chroma Research: Context Rot</a></li>
+<li data-line="333" class="code-line"><a href="https://www.augmentcode.com/tools/context-window-wars-200k-vs-1m-token-strategies" target="_blank" rel="nofollow noopener noreferrer">Augment Code: Context Window Wars</a></li>
+<li data-line="334" class="code-line"><a href="https://www.flowhunt.io/blog/context-engineering-ai-agents-token-optimization/" target="_blank" rel="nofollow noopener noreferrer">FlowHunt: Context Engineering for AI Agents</a></li>
+<li data-line="335" class="code-line"><a href="https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus" target="_blank" rel="nofollow noopener noreferrer">Manus: Context Engineering for AI Agents</a></li>
+<li data-line="336" class="code-line"><a href="https://tacnode.io/post/your-ai-agents-are-spinning-their-wheels" target="_blank" rel="nofollow noopener noreferrer">Tacnode: Context Drift in AI Agents</a></li>
+<li data-line="337" class="code-line"><a href="https://venturebeat.com/ai/why-ai-coding-agents-arent-production-ready-brittle-context-windows-broken" target="_blank" rel="nofollow noopener noreferrer">VentureBeat: Why AI coding agents aren't production-ready</a></li>
+<li data-line="338" class="code-line"><a href="https://altersquare.io/ai-coding-tools-2026-used-across-20-client-projects/" target="_blank" rel="nofollow noopener noreferrer">AlterSquare: AI Coding Tools in 2026</a></li>
+<li data-line="339" class="code-line"><a href="https://evalics.com/blog/how-token-limits-and-context-size-affect-ai-automation-costs" target="_blank" rel="nofollow noopener noreferrer">Evalics: Token Limits and Context Size</a></li>
 </ul>
+
     <div class="source-link">初出: <a href="https://zenn.dev/orangewk/articles/yojo-pattern-shadow-mask-for-ai-coder" target="_blank" rel="noopener">Zenn</a></div>
   </div>
 </main>

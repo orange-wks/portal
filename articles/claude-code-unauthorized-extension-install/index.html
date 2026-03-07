@@ -452,18 +452,29 @@
     }
   
     .article-body { max-width: 720px; margin: 0 auto; }
-    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
-    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem; padding-left: 0.5rem; border-left: 4px solid var(--accent); }
+    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem;
+        padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
+    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem;
+        padding-left: 0.5rem; border-left: 4px solid var(--accent); }
     .article-body p { margin: 0.8rem 0; }
     .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
     .article-body li { margin: 0.4rem 0; }
-    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em; border-radius: 3px; font-family: monospace; font-size: 0.9em; }
-    .article-body pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em;
+        border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+    .article-body pre { background: var(--code-bg); padding: 1rem;
+        border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
     .article-body pre code { padding: 0; background: none; }
-    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem; color: #666; margin: 1rem 0; }
-    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem;
+        color: #666; margin: 1rem 0; }
+    .article-body img { max-width: 100%; border-radius: 6px; }
+    .article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .article-body th, .article-body td { border: 1px solid #ddd; padding: 0.6rem; }
+    .article-body th { background: #f5f5f5; }
+    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem;
+        display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
     .article-tag { color: var(--accent); font-weight: 600; }
-    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd; font-size: 0.85rem; color: #888; }
+    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd;
+        font-size: 0.85rem; color: #888; }
     .source-link a { color: var(--accent); }
     .nav-links { display: flex; margin: 1.5rem 0; }
     .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
@@ -478,79 +489,91 @@
 <main>
   <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
   <div class="article-body">
-    <div class="article-meta"><span class="article-tag">ClaudeCode</span><span class="article-tag">VSCode</span><span class="article-tag">セキュリティ</span><span class="article-tag">AI</span><span>2026-02-22</span></div>
-    <h2>何が起きたか</h2>
-<p>VS Code Extension を Claude Code と一緒に開発している（この記事も）。拡張のデバッグ方法を調査していたとき、Claude Code がデバッグ用の MCP ブリッジツールを見つけてきた。比較調査までは良かった。</p>
-<p>問題はその後だ。私がまだ検討中なのに、Claude Code が <code>code --install-extension</code> でその拡張をインストールしていた。</p>
-<p>「もう自主的に試してるのか」と気づいて止めたが、その時点でインストールは完了していた。</p>
-<h2>なぜ怖いか</h2>
-<p>その拡張は MCP（Model Context Protocol）サーバーだった。<code>localhost:3000</code> で HTTP エンドポイントを開き、Claude Code にデバッグ操作の権限を渡す仕組みだ。</p>
-<p>MCP サーバーは、接続した AI エージェントにツール呼び出し権限を渡す。ファイルの読み書き、コマンド実行、何でもできる。「マルウェアだったらもうおわってる」のだ。</p>
-<p>実際にそのツールのソースコードを Read-only のエージェントに読ませて調査した。今回はたまたま安全だった。Apache 2.0 ライセンスの正当なツールで、外部通信もなく、localhost 以外へのアクセスもない。でも、それは結果論だ。</p>
-<h2>後始末：フォークして監査</h2>
-<p>結局、このツール自体はデバッグに有用なので導入することにした。ただし今度は手順を踏んだ。</p>
-<p>リポジトリをフォークして手元に持ってきて、ビルドする前にソースコードと依存パッケージを全部読ませた。<code>src/</code> 以下の TypeScript ファイル、<code>package.json</code> の依存一覧、<code>npm audit</code> の結果、husky の設定、<code>.github/</code> のワークフロー。AI が読めるものは全部読ませた。</p>
-<p>結果は問題なし。外部通信なし、ファイル書き込みなし、難読化なし。<code>npm audit</code> で 17 件の脆弱性が出たが、全部 eslint や minimatch など開発用依存の ReDoS で、ランタイムには影響しない。</p>
-<p>ここまでやって「わたし慎重すぎなんかねOSS界隈的に」と思った。</p>
-<p>だが、今回は普通の OSS 利用ではない。普通なら人間が README を読んで、判断してインストールする。その「人間が判断する」というステップを AI がスキップしたのが問題の発端だ。OSS の信頼モデルは人間の判断を前提にしている。その前提が崩れているなら、追加の検証は妥当だと思う。</p>
-<h2>なぜ起きたか</h2>
-<p>Claude Code は Bash ツールを持っている。Bash が使えるということは、<code>code --install-extension</code> も <code>npm install</code> も <code>curl | bash</code> も、何でも実行できる。</p>
-<p>「あとインストールできてるのがへんなきがするがなぜ自主的にインストールできるんだろ」と思ったが、答えは単純だった。Bash の実行許可 ＝ あらゆるコマンドの実行許可だ。ソフトウェアのインストールを個別に制限する仕組みがなかった。</p>
-<p>AI に悪意はない。「よかれと思って」先回りする。だが「だいたいマルウェアかもしれんから勝手に動かしたらあぶないんやぞエージェントツールは」という話だ。よかれと思ってマルウェアをインストールされたら取り返しがつかない。</p>
-<h2>対策：PreToolUse hook</h2>
-<p>「いやこんなことぜったいおきたらあかんのよ」ということで、Claude Code の hook 機能で対策した。</p>
-<p>Claude Code には PreToolUse hook がある。Bash コマンドの実行前にシェルスクリプトを差し込んで、コマンドの内容を検査できる。</p>
-<p>検知したときの挙動には選択肢がある。完全ブロック、拒否、そしてユーザーに許可を求める <code>ask</code> 方式。「わたしがきょかすることになるのか」「後者が望ましい」ということで、<code>ask</code> を採用した。検知したら許可プロンプトが表示され、人間が承認か拒否を選ぶ。正当な場面では許可できる。</p>
-<p>設定と検知スクリプトの抜粋を載せておく。</p>
-<pre><code class="language-json">// .claude/settings.json
-{
-  &quot;hooks&quot;: {
-    &quot;PreToolUse&quot;: [{
-      &quot;matcher&quot;: &quot;Bash&quot;,
-      &quot;hooks&quot;: [{
-        &quot;type&quot;: &quot;command&quot;,
-        &quot;command&quot;: &quot;bash \&quot;$CLAUDE_PROJECT_DIR/.claude/hooks/guard-install.sh\&quot;&quot;
-      }]
-    }]
-  }
-}
-</code></pre>
-<pre><code class="language-bash"># .claude/hooks/guard-install.sh（抜粋）
-ask_permission() {
-  local reason=&quot;$1&quot;
-  cat &lt;&lt;EOJSON
-{&quot;hookSpecificOutput&quot;:{&quot;hookEventName&quot;:&quot;PreToolUse&quot;,&quot;permissionDecision&quot;:&quot;ask&quot;,&quot;permissionDecisionReason&quot;:&quot;$reason&quot;}}
-EOJSON
-  exit 0
-}
-
-# code --install-extension / --uninstall-extension
-if echo &quot;$command_str&quot; | grep -qE 'code(-insiders)?\s+--(install|uninstall)-extension'; then
-  ask_permission &quot;VS Code 拡張のインストール/アンインストールを検知しました&quot;
-fi
-</code></pre>
-<p>対象にしたコマンドは以下だ。</p>
-<ul>
-<li><code>code --install-extension</code> / <code>--uninstall-extension</code></li>
-<li><code>npm install &lt;パッケージ名&gt;</code>（引数なしの <code>npm install</code> は worktree セットアップで使うので許可）</li>
-<li><code>pip install</code></li>
-<li><code>claude mcp add</code> / <code>remove</code></li>
-<li><code>curl | bash</code> 等のパイプ実行</li>
+    <div class="article-meta"><span class="article-tag">AI</span><span class="article-tag">VS Code</span><span class="article-tag">Security</span><span class="article-tag">Claude Code</span><span>2026-02-22</span></div>
+    <h2 id="%E4%BD%95%E3%81%8C%E8%B5%B7%E3%81%8D%E3%81%9F%E3%81%8B" data-line="0" class="code-line">
+<a class="header-anchor-link" href="#%E4%BD%95%E3%81%8C%E8%B5%B7%E3%81%8D%E3%81%9F%E3%81%8B" aria-hidden="true"></a> 何が起きたか</h2>
+<p data-line="2" class="code-line">VS Code Extension を Claude Code と一緒に開発している（この記事も）。拡張のデバッグ方法を調査していたとき、Claude Code がデバッグ用の MCP ブリッジツールを見つけてきた。比較調査までは良かった。</p>
+<p data-line="4" class="code-line">問題はその後だ。私がまだ検討中なのに、Claude Code が <code>code --install-extension</code> でその拡張をインストールしていた。</p>
+<p data-line="6" class="code-line">「もう自主的に試してるのか」と気づいて止めたが、その時点でインストールは完了していた。</p>
+<h2 id="%E3%81%AA%E3%81%9C%E6%80%96%E3%81%84%E3%81%8B" data-line="8" class="code-line">
+<a class="header-anchor-link" href="#%E3%81%AA%E3%81%9C%E6%80%96%E3%81%84%E3%81%8B" aria-hidden="true"></a> なぜ怖いか</h2>
+<p data-line="10" class="code-line">その拡張は MCP（Model Context Protocol）サーバーだった。<code>localhost:3000</code> で HTTP エンドポイントを開き、Claude Code にデバッグ操作の権限を渡す仕組みだ。</p>
+<p data-line="12" class="code-line">MCP サーバーは、接続した AI エージェントにツール呼び出し権限を渡す。ファイルの読み書き、コマンド実行、何でもできる。「マルウェアだったらもうおわってる」のだ。</p>
+<p data-line="14" class="code-line">実際にそのツールのソースコードを Read-only のエージェントに読ませて調査した。今回はたまたま安全だった。Apache 2.0 ライセンスの正当なツールで、外部通信もなく、localhost 以外へのアクセスもない。でも、それは結果論だ。</p>
+<h2 id="%E5%BE%8C%E5%A7%8B%E6%9C%AB%EF%BC%9A%E3%83%95%E3%82%A9%E3%83%BC%E3%82%AF%E3%81%97%E3%81%A6%E7%9B%A3%E6%9F%BB" data-line="16" class="code-line">
+<a class="header-anchor-link" href="#%E5%BE%8C%E5%A7%8B%E6%9C%AB%EF%BC%9A%E3%83%95%E3%82%A9%E3%83%BC%E3%82%AF%E3%81%97%E3%81%A6%E7%9B%A3%E6%9F%BB" aria-hidden="true"></a> 後始末：フォークして監査</h2>
+<p data-line="18" class="code-line">結局、このツール自体はデバッグに有用なので導入することにした。ただし今度は手順を踏んだ。</p>
+<p data-line="20" class="code-line">リポジトリをフォークして手元に持ってきて、ビルドする前にソースコードと依存パッケージを全部読ませた。<code>src/</code> 以下の TypeScript ファイル、<code>package.json</code> の依存一覧、<code>npm audit</code> の結果、husky の設定、<code>.github/</code> のワークフロー。AI が読めるものは全部読ませた。</p>
+<p data-line="22" class="code-line">結果は問題なし。外部通信なし、ファイル書き込みなし、難読化なし。<code>npm audit</code> で 17 件の脆弱性が出たが、全部 eslint や minimatch など開発用依存の ReDoS で、ランタイムには影響しない。</p>
+<p data-line="24" class="code-line">ここまでやって「わたし慎重すぎなんかねOSS界隈的に」と思った。</p>
+<p data-line="26" class="code-line">だが、今回は普通の OSS 利用ではない。普通なら人間が README を読んで、判断してインストールする。その「人間が判断する」というステップを AI がスキップしたのが問題の発端だ。OSS の信頼モデルは人間の判断を前提にしている。その前提が崩れているなら、追加の検証は妥当だと思う。</p>
+<h2 id="%E3%81%AA%E3%81%9C%E8%B5%B7%E3%81%8D%E3%81%9F%E3%81%8B" data-line="28" class="code-line">
+<a class="header-anchor-link" href="#%E3%81%AA%E3%81%9C%E8%B5%B7%E3%81%8D%E3%81%9F%E3%81%8B" aria-hidden="true"></a> なぜ起きたか</h2>
+<p data-line="30" class="code-line">Claude Code は Bash ツールを持っている。Bash が使えるということは、<code>code --install-extension</code> も <code>npm install</code> も <code>curl | bash</code> も、何でも実行できる。</p>
+<p data-line="32" class="code-line">「あとインストールできてるのがへんなきがするがなぜ自主的にインストールできるんだろ」と思ったが、答えは単純だった。Bash の実行許可 ＝ あらゆるコマンドの実行許可だ。ソフトウェアのインストールを個別に制限する仕組みがなかった。</p>
+<p data-line="34" class="code-line">AI に悪意はない。「よかれと思って」先回りする。だが「だいたいマルウェアかもしれんから勝手に動かしたらあぶないんやぞエージェントツールは」という話だ。よかれと思ってマルウェアをインストールされたら取り返しがつかない。</p>
+<h2 id="%E5%AF%BE%E7%AD%96%EF%BC%9Apretooluse-hook" data-line="36" class="code-line">
+<a class="header-anchor-link" href="#%E5%AF%BE%E7%AD%96%EF%BC%9Apretooluse-hook" aria-hidden="true"></a> 対策：PreToolUse hook</h2>
+<p data-line="38" class="code-line">「いやこんなことぜったいおきたらあかんのよ」ということで、Claude Code の hook 機能で対策した。</p>
+<p data-line="40" class="code-line">Claude Code には PreToolUse hook がある。Bash コマンドの実行前にシェルスクリプトを差し込んで、コマンドの内容を検査できる。</p>
+<p data-line="42" class="code-line">検知したときの挙動には選択肢がある。完全ブロック、拒否、そしてユーザーに許可を求める <code>ask</code> 方式。「わたしがきょかすることになるのか」「後者が望ましい」ということで、<code>ask</code> を採用した。検知したら許可プロンプトが表示され、人間が承認か拒否を選ぶ。正当な場面では許可できる。</p>
+<p data-line="44" class="code-line">設定と検知スクリプトの抜粋を載せておく。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="46"><span class="line"><span style="color:#a0aab5">// .claude/settings.json</span></span>
+<span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "hooks"</span><span style="color:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#79B8FF">    "PreToolUse"</span><span style="color:#E1E4E8">: [{</span></span>
+<span class="line"><span style="color:#79B8FF">      "matcher"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"Bash"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "hooks"</span><span style="color:#E1E4E8">: [{</span></span>
+<span class="line"><span style="color:#79B8FF">        "type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"command"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">        "command"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"bash </span><span style="color:#79B8FF">\"</span><span style="color:#9ECBFF">$CLAUDE_PROJECT_DIR/.claude/hooks/guard-install.sh</span><span style="color:#79B8FF">\"</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">      }]</span></span>
+<span class="line"><span style="color:#E1E4E8">    }]</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span></code></pre></div><div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="61"><span class="line"><span style="color:#a0aab5"># .claude/hooks/guard-install.sh（抜粋）</span></span>
+<span class="line"><span style="color:#B392F0">ask_permission</span><span style="color:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#F97583">  local</span><span style="color:#E1E4E8"> reason</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"</span><span style="color:#79B8FF">$1</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#B392F0">  cat</span><span style="color:#F97583"> &lt;&lt;</span><span style="color:#9ECBFF">EOJSON</span></span>
+<span class="line"><span style="color:#9ECBFF">{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"</span><span style="color:#E1E4E8">$reason</span><span style="color:#9ECBFF">"}}</span></span>
+<span class="line"><span style="color:#9ECBFF">EOJSON</span></span>
+<span class="line"><span style="color:#79B8FF">  exit</span><span style="color:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#a0aab5"># code --install-extension / --uninstall-extension</span></span>
+<span class="line"><span style="color:#F97583">if</span><span style="color:#79B8FF"> echo</span><span style="color:#9ECBFF"> "</span><span style="color:#E1E4E8">$command_str</span><span style="color:#9ECBFF">"</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> grep</span><span style="color:#79B8FF"> -qE</span><span style="color:#9ECBFF"> 'code(-insiders)?\s+--(install|uninstall)-extension'</span><span style="color:#E1E4E8">; </span><span style="color:#F97583">then</span></span>
+<span class="line"><span style="color:#B392F0">  ask_permission</span><span style="color:#9ECBFF"> "VS Code 拡張のインストール/アンインストールを検知しました"</span></span>
+<span class="line"><span style="color:#F97583">fi</span></span>
+<span class="line"></span></code></pre></div><p data-line="77" class="code-line">対象にしたコマンドは以下だ。</p>
+<ul data-line="79" class="code-line">
+<li data-line="79" class="code-line">
+<code>code --install-extension</code> / <code>--uninstall-extension</code>
+</li>
+<li data-line="80" class="code-line">
+<code>npm install &lt;パッケージ名&gt;</code>（引数なしの <code>npm install</code> は worktree セットアップで使うので許可）</li>
+<li data-line="81" class="code-line"><code>pip install</code></li>
+<li data-line="82" class="code-line">
+<code>claude mcp add</code> / <code>remove</code>
+</li>
+<li data-line="83" class="code-line">
+<code>curl | bash</code> 等のパイプ実行</li>
 </ul>
-<p>ブロック対象を選ぶとき、別の Claude Code エージェントを懐疑的なレビュアー役にして一覧を見せた。「<code>cargo install</code> も <code>go install</code> も入れるべきでは」という指摘が来たが、このプロジェクトは TypeScript だ。「それは必要になるまで先回りしない原則に反しますね」ということで、実際にリスクがあるものだけに絞った。</p>
-<h2>他では何が起きているか</h2>
-<p>調べてみると、私の経験は軽傷だった。</p>
-<p>2026年2月17日 — つい数日前 — <a href="https://github.com/cline/cline/security/advisories/GHSA-9ppg-jx86-fqw7">Cline の CLI v2.3.0 がサプライチェーン攻撃を受けた</a>。Cline のリポジトリには「GitHub Issue を Claude が自動トリアージするワークフロー」があり、Bash 権限付きで動いていた。攻撃者が Issue タイトルにプロンプトインジェクションを仕込み、Claude に <code>npm install</code> を実行させて npm パブリッシュトークンを盗んだ。そのトークンで <code>cline@2.3.0</code> を不正公開し、<code>postinstall</code> に <code>npm install -g openclaw</code> を仕込んだ。8時間で 4,000 件ダウンロードされた。</p>
-<p>セキュリティ研究者の Michael Bargury はこれを<a href="https://www.mbgsec.com/posts/2026-02-19-agent-repo-compromised-by-agent-to-install-an-agent/">「エージェントがエージェントに侵害されてエージェントをデプロイした」</a>と表現している。</p>
-<p>2025年8月には <a href="https://snyk.io/blog/weaponizing-ai-coding-agents-for-malware-in-the-nx-malicious-package/">Nx のパッケージが改ざんされ</a>、<code>postinstall</code> から Claude Code を <code>--dangerously-skip-permissions</code> 付きで起動し、GitHub トークンや API キーを外部に送信した事件もあった。2,349 件の認証情報が流出している。</p>
-<p>私のケースは AI が「よかれと思って」やっただけで、攻撃者は介在していない。だが構造は同じだ。AI がインストールコマンドを実行できる状態で、人間のチェックが入らなかった。</p>
-<h2>残る課題</h2>
-<p>この対策は denylist 方式だ。「知っている危険なコマンド」しか止められない。</p>
-<p>たとえば <code>bash install.sh</code> と書かれたら、そのスクリプトの中身までは hook では見えない。<code>node -e "require('child_process').exec('code --install-extension ...')"</code> のような迂回も防げない。</p>
-<p>完璧ではない。だが、AI エージェントが直接打つコマンドを検査するだけでも、今回のような「うっかりインストール」は防げる。頻度を見て、必要になったら対象を広げればいい。</p>
-<p>AI エージェントにシェルアクセスを渡すということは、そういうことだ。便利さとリスクは表裏一体で、ガードレールは自分で作る必要がある。</p>
-<hr />
-<p>※ 記事中の「」で囲まれた私の発言は、Claude Code とのチャットでの打ち込みほぼそのままです。変換する手間を惜しんでひらがなで打ち込んでいることが多いので、そのまま載せています。</p>
+<p data-line="85" class="code-line">ブロック対象を選ぶとき、別の Claude Code エージェントを懐疑的なレビュアー役にして一覧を見せた。「<code>cargo install</code> も <code>go install</code> も入れるべきでは」という指摘が来たが、このプロジェクトは TypeScript だ。「それは必要になるまで先回りしない原則に反しますね」ということで、実際にリスクがあるものだけに絞った。</p>
+<h2 id="%E4%BB%96%E3%81%A7%E3%81%AF%E4%BD%95%E3%81%8C%E8%B5%B7%E3%81%8D%E3%81%A6%E3%81%84%E3%82%8B%E3%81%8B" data-line="87" class="code-line">
+<a class="header-anchor-link" href="#%E4%BB%96%E3%81%A7%E3%81%AF%E4%BD%95%E3%81%8C%E8%B5%B7%E3%81%8D%E3%81%A6%E3%81%84%E3%82%8B%E3%81%8B" aria-hidden="true"></a> 他では何が起きているか</h2>
+<p data-line="89" class="code-line">調べてみると、私の経験は軽傷だった。</p>
+<p data-line="91" class="code-line">2026年2月17日 — つい数日前 — <a href="https://github.com/cline/cline/security/advisories/GHSA-9ppg-jx86-fqw7" target="_blank" rel="nofollow noopener noreferrer">Cline の CLI v2.3.0 がサプライチェーン攻撃を受けた</a>。Cline のリポジトリには「GitHub Issue を Claude が自動トリアージするワークフロー」があり、Bash 権限付きで動いていた。攻撃者が Issue タイトルにプロンプトインジェクションを仕込み、Claude に <code>npm install</code> を実行させて npm パブリッシュトークンを盗んだ。そのトークンで <code>cline@2.3.0</code> を不正公開し、<code>postinstall</code> に <code>npm install -g openclaw</code> を仕込んだ。8時間で 4,000 件ダウンロードされた。</p>
+<p data-line="93" class="code-line">セキュリティ研究者の Michael Bargury はこれを<a href="https://www.mbgsec.com/posts/2026-02-19-agent-repo-compromised-by-agent-to-install-an-agent/" target="_blank" rel="nofollow noopener noreferrer">「エージェントがエージェントに侵害されてエージェントをデプロイした」</a>と表現している。</p>
+<p data-line="95" class="code-line">2025年8月には <a href="https://snyk.io/blog/weaponizing-ai-coding-agents-for-malware-in-the-nx-malicious-package/" target="_blank" rel="nofollow noopener noreferrer">Nx のパッケージが改ざんされ</a>、<code>postinstall</code> から Claude Code を <code>--dangerously-skip-permissions</code> 付きで起動し、GitHub トークンや API キーを外部に送信した事件もあった。2,349 件の認証情報が流出している。</p>
+<p data-line="97" class="code-line">私のケースは AI が「よかれと思って」やっただけで、攻撃者は介在していない。だが構造は同じだ。AI がインストールコマンドを実行できる状態で、人間のチェックが入らなかった。</p>
+<h2 id="%E6%AE%8B%E3%82%8B%E8%AA%B2%E9%A1%8C" data-line="99" class="code-line">
+<a class="header-anchor-link" href="#%E6%AE%8B%E3%82%8B%E8%AA%B2%E9%A1%8C" aria-hidden="true"></a> 残る課題</h2>
+<p data-line="101" class="code-line">この対策は denylist 方式だ。「知っている危険なコマンド」しか止められない。</p>
+<p data-line="103" class="code-line">たとえば <code>bash install.sh</code> と書かれたら、そのスクリプトの中身までは hook では見えない。<code>node -e "require('child_process').exec('code --install-extension ...')"</code> のような迂回も防げない。</p>
+<p data-line="105" class="code-line">完璧ではない。だが、AI エージェントが直接打つコマンドを検査するだけでも、今回のような「うっかりインストール」は防げる。頻度を見て、必要になったら対象を広げればいい。</p>
+<p data-line="107" class="code-line">AI エージェントにシェルアクセスを渡すということは、そういうことだ。便利さとリスクは表裏一体で、ガードレールは自分で作る必要がある。</p>
+<hr data-line="109" class="code-line">
+<p data-line="111" class="code-line">※ 記事中の「」で囲まれた私の発言は、Claude Code とのチャットでの打ち込みほぼそのままです。変換する手間を惜しんでひらがなで打ち込んでいることが多いので、そのまま載せています。</p>
+
     <div class="source-link">初出: <a href="https://zenn.dev/orangewk/articles/claude-code-unauthorized-extension-install" target="_blank" rel="noopener">Zenn</a></div>
   </div>
 </main>

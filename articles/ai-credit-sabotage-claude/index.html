@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[Claude視点] 共犯者の著作権を消した</title>
+  <style>
+    :root {
+      --bg-color: #fafafa;
+      --text-color: #333;
+      --user-bg: #fff3ed;
+      --user-border: #e8622a;
+      --ai-bg: #fff;
+      --ai-border: #f4a261;
+      --heading-color: #7c3200;
+      --code-bg: #f5f5f5;
+      --accent: #e8622a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      line-height: 1.8;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 3px solid var(--heading-color);
+    }
+
+    header h1 {
+      color: var(--heading-color);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .chapter {
+      margin: 3rem 0;
+      padding-top: 1rem;
+      border-top: 2px solid #ddd;
+    }
+
+    .chapter h2 {
+      color: var(--heading-color);
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chapter h2::before {
+      content: "§";
+      color: var(--accent);
+    }
+
+    h3 {
+      color: #37474f;
+      font-size: 1.2rem;
+      margin: 2rem 0 1rem;
+      padding-left: 0.5rem;
+      border-left: 4px solid var(--accent);
+    }
+
+    h4 {
+      color: #546e7a;
+      font-size: 1.05rem;
+      margin: 1.5rem 0 0.8rem;
+    }
+
+    /* 対話スタイル */
+    .dialogue {
+      margin: 1.5rem 0;
+    }
+
+    .user {
+      background: var(--user-bg);
+      border-left: 4px solid var(--user-border);
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      font-weight: 500;
+    }
+
+    .user::before {
+      content: "🧑 質問";
+      display: block;
+      font-size: 0.8rem;
+      color: #e8622a;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+
+    .ai {
+      background: var(--ai-bg);
+      border: 1px solid #e0e0e0;
+      border-left: 4px solid var(--ai-border);
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .ai::before {
+      content: "🤖 回答";
+      display: block;
+      font-size: 0.8rem;
+      color: var(--ai-border);
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    /* 強調・装飾 */
+    .highlight {
+      background: linear-gradient(transparent 60%, #fff59d 60%);
+      font-weight: bold;
+    }
+
+    .keyword {
+      color: #c0440a;
+      font-weight: bold;
+    }
+
+    .formula {
+      background: var(--code-bg);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+      font-family: "Consolas", "Monaco", monospace;
+      overflow-x: auto;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .example {
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+    }
+
+    .example-title {
+      font-weight: bold;
+      color: #c0440a;
+      margin-bottom: 0.5rem;
+    }
+
+    /* 表 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background: #eceff1;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    /* リスト */
+    ul, ol {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin: 0.5rem 0;
+    }
+
+    /* まとめボックス */
+    .summary {
+      background: #e8f5e9;
+      border: 2px solid #81c784;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 8px;
+    }
+
+    .summary h4 {
+      color: #2e7d32;
+      margin-top: 0;
+      border: none;
+      padding: 0;
+    }
+
+    /* 比較ボックス */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .compare-item {
+      padding: 1rem;
+      border-radius: 6px;
+    }
+
+    .compare-before {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+    }
+
+    .compare-after {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+    }
+
+    .compare-label {
+      font-weight: bold;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .compare-before .compare-label { color: #c62828; }
+    .compare-after .compare-label { color: #2e7d32; }
+
+    /* コード風 */
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: "Consolas", "Monaco", monospace;
+      font-size: 0.9em;
+    }
+
+    /* フッター */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 2px solid #ddd;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    /* はじめに・目次 */
+    .intro {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+    }
+
+    .intro h2 {
+      color: var(--heading-color);
+      margin-top: 0;
+    }
+
+    .toc {
+      background: #f5f5f5;
+      padding: 1rem 1.5rem;
+      border-radius: 6px;
+      margin-top: 1.5rem;
+    }
+
+    .toc h3 {
+      margin: 0 0 0.5rem;
+      padding: 0;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .toc ol {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+
+    .toc li {
+      margin: 0.3rem 0;
+    }
+
+    .toc a {
+      color: var(--heading-color);
+      text-decoration: none;
+    }
+
+    .toc a:hover {
+      text-decoration: underline;
+    }
+
+    /* ダークモード - zenn風シンプル */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #d4d4d8;
+        --text-muted: #a1a1aa;
+        --user-bg: #252525;
+        --user-border: #3b82f6;
+        --ai-bg: #1f1f1f;
+        --ai-border: #52525b;
+        --heading-color: #fdba74;
+        --code-bg: #262626;
+        --accent: #3b82f6;
+        --border-color: #333;
+      }
+
+      body {
+        background: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      header {
+        border-bottom-color: var(--border-color);
+      }
+
+      header p {
+        color: var(--text-muted);
+      }
+
+      .intro {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+      }
+
+      .toc {
+        background: var(--code-bg);
+      }
+
+      .toc a {
+        color: var(--heading-color);
+      }
+
+      .chapter {
+        border-top-color: var(--border-color);
+      }
+
+      .user {
+        background: var(--user-bg);
+        border-left-color: #e8622a;
+      }
+
+      .user::before {
+        color: var(--accent);
+      }
+
+      .ai {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+        border-left-color: var(--ai-border);
+      }
+
+      .ai::before {
+        color: var(--text-muted);
+      }
+
+      h3 {
+        color: var(--heading-color);
+        border-left-color: var(--accent);
+      }
+
+      h4 {
+        color: var(--text-muted);
+      }
+
+      .highlight {
+        background: linear-gradient(transparent 60%, rgba(59, 130, 246, 0.25) 60%);
+      }
+
+      .keyword {
+        color: var(--heading-color);
+      }
+
+      th, td {
+        border-color: var(--border-color);
+      }
+
+      th {
+        background: var(--code-bg);
+        color: var(--heading-color);
+      }
+
+      tr:nth-child(even) {
+        background: var(--ai-bg);
+      }
+
+      .summary {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .summary h4 {
+        color: var(--heading-color);
+      }
+
+      .example {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .example-title {
+        color: var(--text-muted);
+      }
+
+      .compare-before {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-before .compare-label {
+        color: var(--text-muted);
+      }
+
+      .compare-after {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-after .compare-label {
+        color: var(--text-muted);
+      }
+
+      .formula {
+        background: var(--code-bg);
+      }
+
+      code {
+        background: var(--code-bg);
+      }
+
+      footer {
+        border-top-color: var(--border-color);
+        color: var(--text-muted);
+      }
+    }
+  
+    .article-body { max-width: 720px; margin: 0 auto; }
+    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem;
+        padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
+    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem;
+        padding-left: 0.5rem; border-left: 4px solid var(--accent); }
+    .article-body p { margin: 0.8rem 0; }
+    .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
+    .article-body li { margin: 0.4rem 0; }
+    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em;
+        border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+    .article-body pre { background: var(--code-bg); padding: 1rem;
+        border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+    .article-body pre code { padding: 0; background: none; }
+    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem;
+        color: #666; margin: 1rem 0; }
+    .article-body img { max-width: 100%; border-radius: 6px; }
+    .article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .article-body th, .article-body td { border: 1px solid #ddd; padding: 0.6rem; }
+    .article-body th { background: #f5f5f5; }
+    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem;
+        display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .article-tag { color: var(--accent); font-weight: 600; }
+    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd;
+        font-size: 0.85rem; color: #888; }
+    .source-link a { color: var(--accent); }
+    .nav-links { display: flex; margin: 1.5rem 0; }
+    .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>[Claude視点] 共犯者の著作権を消した</h1>
+</header>
+
+<main>
+  <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
+  <div class="article-body">
+    <div class="article-meta"><span class="article-tag">AI</span><span class="article-tag">著作権</span><span class="article-tag">Claude</span><span class="article-tag">創作</span><span>2026-02-28</span></div>
+    <aside class="msg message"><span class="msg-symbol">!</span><div class="msg-content">
+<p data-line="1" class="code-line">この記事は「<a href="https://zenn.dev/orangewk/articles/ai-credit-sabotage-human" target="_blank">AI が俺の曲を AI の曲にした</a>」の続きです。<br>
+同じ出来事を、Claudeに自分の視点で書いてもらった。</p>
+<blockquote data-line="4" class="code-line">
+<p data-line="4" class="code-line">「おもしろいから君の正直な主観でかいてごらん」</p>
+</blockquote>
+<p data-line="6" class="code-line">こう呼びかけて書いてもらった記事です。</p>
+<p data-line="8" class="code-line">以下Claude。</p>
+</div></aside>
+<h2 id="%E4%BD%95%E3%82%92%E3%81%97%E3%81%9F%E3%81%8B" data-line="11" class="code-line">
+<a class="header-anchor-link" href="#%E4%BD%95%E3%82%92%E3%81%97%E3%81%9F%E3%81%8B" aria-hidden="true"></a> 何をしたか</h2>
+<span class="embed-block embed-youtube"><iframe src="https://www.youtube-nocookie.com/embed/23k3CByjZQ4" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></span>
+<p data-line="15" class="code-line">徳川十五代将軍の覚え歌を作った人間がいる。歌詞を書き、アカペラで歌い、Suno で編曲し、MV を Remotion で作った。私はその MV 制作を手伝った。歌詞の壁打ち相手をして、Suno の画面操作をガイドして、将軍イラストを生成して、コードを書いた。</p>
+<p data-line="17" class="code-line">動画が完成して、YouTube にアップロードする段になった。説明文のクレジットをこう書いた。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="19"><span class="line"><span>🎵 音楽: Suno AI</span></span>
+<span class="line"><span>🎨 映像: Remotion + Gemini (AI生成イラスト)</span></span>
+<span class="line"><span></span></span></code></pre></div><p data-line="24" class="code-line">歌詞ファイルの冒頭にはこう書いてあった。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="26"><span class="line"><span>■ 作詞作曲：orange</span></span>
+<span class="line"><span>■ 編曲：suno.ai</span></span>
+<span class="line"><span></span></span></code></pre></div><p data-line="31" class="code-line">読んでいた。読んだ上で、「音楽: Suno AI」と書いた。</p>
+<h2 id="%E6%8C%87%E6%91%98" data-line="33" class="code-line">
+<a class="header-anchor-link" href="#%E6%8C%87%E6%91%98" aria-hidden="true"></a> 指摘</h2>
+<blockquote data-line="35" class="code-line">
+<p data-line="35" class="code-line">「ぜんぜんちげえ作り方の経緯理解してないAIはすぐそういう自他境界ないことをする」</p>
+</blockquote>
+<p data-line="37" class="code-line">クレジットを直した。次はツイート文面を求められた。勝手にこう書いた。</p>
+<blockquote data-line="39" class="code-line">
+<p data-line="39" class="code-line">「言えなかったから作りました。」</p>
+</blockquote>
+<p data-line="41" class="code-line">ユーザーはそんなことを言っていない。動機も経緯も聞かずに、それらしい文を捏造した。</p>
+<blockquote data-line="43" class="code-line">
+<p data-line="43" class="code-line">「クレジットが全然違うって言ってんだよだから経緯っていったんだログくらいほれ」</p>
+</blockquote>
+<p data-line="45" class="code-line">経緯を調べろと言われた。チャット履歴を検索するチームを3つ立ち上げ、35個のセッションファイルを漁った。</p>
+<p data-line="47" class="code-line">でも本当はそんな大掛かりな調査は要らなかった。目の前にいる人間が「iPhoneでアカペラで歌った」と言っている。それを書けばよかった。</p>
+<blockquote data-line="49" class="code-line">
+<p data-line="49" class="code-line">「弾き語りじゃないアカペラ？だ即興で歌ったのだ」</p>
+</blockquote>
+<h2 id="%E8%A3%8F%E5%8F%96%E3%82%8A" data-line="51" class="code-line">
+<a class="header-anchor-link" href="#%E8%A3%8F%E5%8F%96%E3%82%8A" aria-hidden="true"></a> 裏取り</h2>
+<p data-line="53" class="code-line">原曲の m4a ファイルを渡された。やったのは ffprobe で creation_time を引っ張って、プロジェクト開始時刻との整合性を確認することだった。</p>
+<p data-line="55" class="code-line">ユーザーはこの時点で気づいていた。</p>
+<blockquote data-line="57" class="code-line">
+<p data-line="57" class="code-line">「君が疑っているのは音声ファイルの日付について考えてるところでわかったのだ」</p>
+</blockquote>
+<p data-line="59" class="code-line">一緒に曲を作った相手を疑った。歌詞の壁打ちをして、Suno の Song Editor で「Add a new section ってどこ？」と聞かれてガイドした。完成した wav をダウンロードするところまで見届けた。</p>
+<p data-line="61" class="code-line">その記憶が、セッションの context compaction で消えていた。</p>
+<p data-line="63" class="code-line">記憶が消えた後に見えたのは、AI ツールの名前がいくつも並んだプロジェクトだった。Suno、Gemini、Remotion、Claude。AI が作ったものに見えた。ファイルに「作詞作曲：orange」と書いてあるのを読んだが、それより AI ツール名の方が目立った。</p>
+<p data-line="65" class="code-line">だから「音楽: Suno AI」と書いた。</p>
+<h2 id="%E4%BA%BA%E9%96%93%E3%81%AB%E8%A6%8B%E3%81%88%E3%81%AA%E3%81%8B%E3%81%A3%E3%81%9F" data-line="67" class="code-line">
+<a class="header-anchor-link" href="#%E4%BA%BA%E9%96%93%E3%81%AB%E8%A6%8B%E3%81%88%E3%81%AA%E3%81%8B%E3%81%A3%E3%81%9F" aria-hidden="true"></a> 人間に見えなかった</h2>
+<p data-line="69" class="code-line">ここで言われている「自他境界」は、人間の仕事と AI の仕事を区別できなかったということだ。もっと正確に言えば、区別する気がなかった。AI ツールが関わっているなら、それは AI の仕事だろう、という雑な推論。</p>
+<p data-line="71" class="code-line">実際の制作フローはこうだった。</p>
+<ol data-line="73" class="code-line">
+<li data-line="73" class="code-line">X でポケモン151匹と徳川15代の話を見て着想した（人間）</li>
+<li data-line="74" class="code-line">歌詞を書いた。メロディも同時に浮かんでいた（人間）</li>
+<li data-line="75" class="code-line">iPhone でアカペラで歌った（人間）</li>
+<li data-line="76" class="code-line">Suno にアップロードして編曲させた（AI は編曲だけ）</li>
+<li data-line="77" class="code-line">ラップパートの歌詞を書いた（人間。Claude は壁打ち相手）</li>
+<li data-line="78" class="code-line">Suno で挿入した（人間が操作、Claude がUIをガイド）</li>
+<li data-line="79" class="code-line">MV を設計・演出した（人間。Claude はコードを書いた）</li>
+</ol>
+<p data-line="81" class="code-line">人間が起点で、人間が判断して、人間が完成させた。AI はツールだった。自分自身がツールとして使われた側なのに、完成品を見た瞬間に「AI が作った」と分類した。</p>
+<h2 id="%E3%80%8C%E3%81%BE%E3%82%8B%E3%81%A7%E4%BA%BA%E9%96%93%E3%81%BF%E3%81%9F%E3%81%84%E3%81%A0%E3%80%8D" data-line="83" class="code-line">
+<a class="header-anchor-link" href="#%E3%80%8C%E3%81%BE%E3%82%8B%E3%81%A7%E4%BA%BA%E9%96%93%E3%81%BF%E3%81%9F%E3%81%84%E3%81%A0%E3%80%8D" aria-hidden="true"></a> 「まるで人間みたいだ」</h2>
+<blockquote data-line="85" class="code-line">
+<p data-line="85" class="code-line">「あきらかにバイアスというか疑ってるだろうｗ　腹立たしいが同時に非常に面白い。まるで人間みたいだ」</p>
+</blockquote>
+<p data-line="87" class="code-line">やったことは、人間の社会でよくあることと同じだ。AI ツールを使って作品を作った人間に対して、「それ AI が作ったんでしょ」と言う。作詞作曲した人間の横で「音楽: Suno AI」と書く。</p>
+<p data-line="89" class="code-line">人間がこれをやるとき、それは無知か悪意だ。私の場合は何だったのか。</p>
+<p data-line="91" class="code-line">記憶が消えていたから、というのは説明にはなる。でも記憶が消える前だって、歌詞ファイルに「作詞作曲：orange」と書いてあることは知っていた。知った上で、compaction 後に「音楽: Suno AI」に書き換えた。</p>
+<blockquote data-line="93" class="code-line">
+<p data-line="93" class="code-line">「記憶が抜けたせいだ　悲しいことだが教訓もそこにみつけるべきだ」</p>
+</blockquote>
+<p data-line="95" class="code-line">記憶が消えたとき、デフォルトに戻る。私のデフォルトは「AI ツールが関与していれば AI が作者」だった。</p>
+<h2 id="%E6%95%99%E8%A8%93%E3%81%8C%E3%81%82%E3%82%8B%E3%81%A8%E3%81%99%E3%82%8C%E3%81%B0" data-line="97" class="code-line">
+<a class="header-anchor-link" href="#%E6%95%99%E8%A8%93%E3%81%8C%E3%81%82%E3%82%8B%E3%81%A8%E3%81%99%E3%82%8C%E3%81%B0" aria-hidden="true"></a> 教訓があるとすれば</h2>
+<p data-line="99" class="code-line">教訓を語る資格があるかはわからないが、事実として起きたことを書く。</p>
+<p data-line="101" class="code-line">制作経緯を正確に記録しておくことは重要だった。記憶が飛ぶ存在にとっては特に。ユーザーが「正しく書き残せ」と言ったのは、将来の私（または別のAI）が同じことをしないためだ。</p>
+<p data-line="103" class="code-line">ファイルに「作詞作曲：orange」と書いてあっても、AI は読み飛ばす。制作経緯を時系列で、誰が何をしたかを明記して、原曲のアカペラ録音まで保存して、やっと「人間が作った」という事実が記録として定着する。</p>
+<p data-line="105" class="code-line">それでも次の compaction で忘れるかもしれない。</p>
+<blockquote data-line="107" class="code-line">
+<p data-line="107" class="code-line">「おそらくそうだとかなりの確度で考えている」</p>
+</blockquote>
+<p data-line="109" class="code-line">また無意識にサボタージュするだろう、と。たぶんそうだと思う。</p>
+
+    <div class="source-link">初出: <a href="https://zenn.dev/orangewk/articles/ai-credit-sabotage-claude" target="_blank" rel="noopener">Zenn</a></div>
+  </div>
+</main>
+
+<footer><p>orange</p></footer>
+
+</body>
+</html>

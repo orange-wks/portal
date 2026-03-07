@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>「どこが分からないか分からない」娘のために、数学AIチューターを作ってみた</title>
+  <style>
+    :root {
+      --bg-color: #fafafa;
+      --text-color: #333;
+      --user-bg: #fff3ed;
+      --user-border: #e8622a;
+      --ai-bg: #fff;
+      --ai-border: #f4a261;
+      --heading-color: #7c3200;
+      --code-bg: #f5f5f5;
+      --accent: #e8622a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      line-height: 1.8;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 3px solid var(--heading-color);
+    }
+
+    header h1 {
+      color: var(--heading-color);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .chapter {
+      margin: 3rem 0;
+      padding-top: 1rem;
+      border-top: 2px solid #ddd;
+    }
+
+    .chapter h2 {
+      color: var(--heading-color);
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chapter h2::before {
+      content: "§";
+      color: var(--accent);
+    }
+
+    h3 {
+      color: #37474f;
+      font-size: 1.2rem;
+      margin: 2rem 0 1rem;
+      padding-left: 0.5rem;
+      border-left: 4px solid var(--accent);
+    }
+
+    h4 {
+      color: #546e7a;
+      font-size: 1.05rem;
+      margin: 1.5rem 0 0.8rem;
+    }
+
+    /* 対話スタイル */
+    .dialogue {
+      margin: 1.5rem 0;
+    }
+
+    .user {
+      background: var(--user-bg);
+      border-left: 4px solid var(--user-border);
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      font-weight: 500;
+    }
+
+    .user::before {
+      content: "🧑 質問";
+      display: block;
+      font-size: 0.8rem;
+      color: #e8622a;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+
+    .ai {
+      background: var(--ai-bg);
+      border: 1px solid #e0e0e0;
+      border-left: 4px solid var(--ai-border);
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .ai::before {
+      content: "🤖 回答";
+      display: block;
+      font-size: 0.8rem;
+      color: var(--ai-border);
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    /* 強調・装飾 */
+    .highlight {
+      background: linear-gradient(transparent 60%, #fff59d 60%);
+      font-weight: bold;
+    }
+
+    .keyword {
+      color: #c0440a;
+      font-weight: bold;
+    }
+
+    .formula {
+      background: var(--code-bg);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+      font-family: "Consolas", "Monaco", monospace;
+      overflow-x: auto;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .example {
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+    }
+
+    .example-title {
+      font-weight: bold;
+      color: #c0440a;
+      margin-bottom: 0.5rem;
+    }
+
+    /* 表 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background: #eceff1;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    /* リスト */
+    ul, ol {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin: 0.5rem 0;
+    }
+
+    /* まとめボックス */
+    .summary {
+      background: #e8f5e9;
+      border: 2px solid #81c784;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 8px;
+    }
+
+    .summary h4 {
+      color: #2e7d32;
+      margin-top: 0;
+      border: none;
+      padding: 0;
+    }
+
+    /* 比較ボックス */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .compare-item {
+      padding: 1rem;
+      border-radius: 6px;
+    }
+
+    .compare-before {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+    }
+
+    .compare-after {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+    }
+
+    .compare-label {
+      font-weight: bold;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .compare-before .compare-label { color: #c62828; }
+    .compare-after .compare-label { color: #2e7d32; }
+
+    /* コード風 */
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: "Consolas", "Monaco", monospace;
+      font-size: 0.9em;
+    }
+
+    /* フッター */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 2px solid #ddd;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    /* はじめに・目次 */
+    .intro {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+    }
+
+    .intro h2 {
+      color: var(--heading-color);
+      margin-top: 0;
+    }
+
+    .toc {
+      background: #f5f5f5;
+      padding: 1rem 1.5rem;
+      border-radius: 6px;
+      margin-top: 1.5rem;
+    }
+
+    .toc h3 {
+      margin: 0 0 0.5rem;
+      padding: 0;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .toc ol {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+
+    .toc li {
+      margin: 0.3rem 0;
+    }
+
+    .toc a {
+      color: var(--heading-color);
+      text-decoration: none;
+    }
+
+    .toc a:hover {
+      text-decoration: underline;
+    }
+
+    /* ダークモード - zenn風シンプル */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #d4d4d8;
+        --text-muted: #a1a1aa;
+        --user-bg: #252525;
+        --user-border: #3b82f6;
+        --ai-bg: #1f1f1f;
+        --ai-border: #52525b;
+        --heading-color: #fdba74;
+        --code-bg: #262626;
+        --accent: #3b82f6;
+        --border-color: #333;
+      }
+
+      body {
+        background: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      header {
+        border-bottom-color: var(--border-color);
+      }
+
+      header p {
+        color: var(--text-muted);
+      }
+
+      .intro {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+      }
+
+      .toc {
+        background: var(--code-bg);
+      }
+
+      .toc a {
+        color: var(--heading-color);
+      }
+
+      .chapter {
+        border-top-color: var(--border-color);
+      }
+
+      .user {
+        background: var(--user-bg);
+        border-left-color: #e8622a;
+      }
+
+      .user::before {
+        color: var(--accent);
+      }
+
+      .ai {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+        border-left-color: var(--ai-border);
+      }
+
+      .ai::before {
+        color: var(--text-muted);
+      }
+
+      h3 {
+        color: var(--heading-color);
+        border-left-color: var(--accent);
+      }
+
+      h4 {
+        color: var(--text-muted);
+      }
+
+      .highlight {
+        background: linear-gradient(transparent 60%, rgba(59, 130, 246, 0.25) 60%);
+      }
+
+      .keyword {
+        color: var(--heading-color);
+      }
+
+      th, td {
+        border-color: var(--border-color);
+      }
+
+      th {
+        background: var(--code-bg);
+        color: var(--heading-color);
+      }
+
+      tr:nth-child(even) {
+        background: var(--ai-bg);
+      }
+
+      .summary {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .summary h4 {
+        color: var(--heading-color);
+      }
+
+      .example {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .example-title {
+        color: var(--text-muted);
+      }
+
+      .compare-before {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-before .compare-label {
+        color: var(--text-muted);
+      }
+
+      .compare-after {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-after .compare-label {
+        color: var(--text-muted);
+      }
+
+      .formula {
+        background: var(--code-bg);
+      }
+
+      code {
+        background: var(--code-bg);
+      }
+
+      footer {
+        border-top-color: var(--border-color);
+        color: var(--text-muted);
+      }
+    }
+  
+    .article-body { max-width: 720px; margin: 0 auto; }
+    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem;
+        padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
+    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem;
+        padding-left: 0.5rem; border-left: 4px solid var(--accent); }
+    .article-body p { margin: 0.8rem 0; }
+    .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
+    .article-body li { margin: 0.4rem 0; }
+    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em;
+        border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+    .article-body pre { background: var(--code-bg); padding: 1rem;
+        border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+    .article-body pre code { padding: 0; background: none; }
+    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem;
+        color: #666; margin: 1rem 0; }
+    .article-body img { max-width: 100%; border-radius: 6px; }
+    .article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .article-body th, .article-body td { border: 1px solid #ddd; padding: 0.6rem; }
+    .article-body th { background: #f5f5f5; }
+    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem;
+        display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .article-tag { color: var(--accent); font-weight: 600; }
+    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd;
+        font-size: 0.85rem; color: #888; }
+    .source-link a { color: var(--accent); }
+    .nav-links { display: flex; margin: 1.5rem 0; }
+    .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>「どこが分からないか分からない」娘のために、数学AIチューターを作ってみた</h1>
+</header>
+
+<main>
+  <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
+  <div class="article-body">
+    <div class="article-meta"><span class="article-tag">React</span><span class="article-tag">Google Cloud</span><span class="article-tag">Gemini</span><span class="article-tag">Agentic AI</span><span class="article-tag">gch4</span><span>2026-02-15</span></div>
+    <aside class="msg message"><span class="msg-symbol">!</span><div class="msg-content">
+<p data-line="1" class="code-line">この記事は、第4回 Agentic AI Hackathon with Google Cloud 審査向け記事です。<br>
+アプリは開発中です。現時点では「中学レベルから数学をやり直したい」生徒がオンボーディング → 推薦スキルの学習と進む導線のみ整備されています。好きな単元を自由に選んで学ぶ等の機能はまだありません。</p>
+</div></aside>
+<h1 id="%E3%81%AF%E3%81%98%E3%82%81%E3%81%AB%3A-%E3%80%8C%E6%95%B0%E5%AD%A6%E3%80%81%E3%81%A9%E3%81%A3%E3%81%8B%E3%82%89%E3%82%8F%E3%81%8B%E3%82%89%E3%81%AA%E3%81%84%E3%81%AE%E3%81%8B%E3%82%8F%E3%81%8B%E3%82%89%E3%81%AA%E3%81%84%E3%80%8D" data-line="5" class="code-line">
+<a class="header-anchor-link" href="#%E3%81%AF%E3%81%98%E3%82%81%E3%81%AB%3A-%E3%80%8C%E6%95%B0%E5%AD%A6%E3%80%81%E3%81%A9%E3%81%A3%E3%81%8B%E3%82%89%E3%82%8F%E3%81%8B%E3%82%89%E3%81%AA%E3%81%84%E3%81%AE%E3%81%8B%E3%82%8F%E3%81%8B%E3%82%89%E3%81%AA%E3%81%84%E3%80%8D" aria-hidden="true"></a> はじめに: 「数学、どっからわからないのかわからない」</h1>
+<p data-line="7" class="code-line">「数学、どっからわからないのかわからない」<br>
+冬休みが始まった娘が相談してきたのが、アプリ制作のきっかけでした。<br>
+状況を聞くと、「どこから分からないか分からない」、授業中地蔵状態とのこと。</p>
+<p data-line="11" class="code-line">（あれ？　これはちょっとまずいんじゃないか？）</p>
+<p data-line="13" class="code-line">学校以外で、わからないところを探し出し、それに対応してくれるような教育施設というと――<br>
+家庭教師か個別塾くらいしか見当たらない。<br>
+冬期講習を探し、個別塾の相場を調べたところ、個別指導は月7万円。<br>
+2週間で効果があるか？　そもそももう冬休み講習に間に合わない！</p>
+<p data-line="18" class="code-line">ところで私はここしばらく業務でAIの相手をずっとしたので、ふとひらめきました。</p>
+<p data-line="20" class="code-line"><strong>「数学AIチューター、冬休みで作ろ」</strong></p>
+<h1 id="ai%E3%83%81%E3%83%A5%E3%83%BC%E3%82%BF%E3%83%BC%E3%82%92%E4%BD%9C%E3%82%8B" data-line="22" class="code-line">
+<a class="header-anchor-link" href="#ai%E3%83%81%E3%83%A5%E3%83%BC%E3%82%BF%E3%83%BC%E3%82%92%E4%BD%9C%E3%82%8B" aria-hidden="true"></a> AIチューターを作る</h1>
+<p data-line="23" class="code-line">わざわざエージェントAI自作？　Gemini3Proあたりで十分じゃん、と思うかもしれませんが。あまいのです。</p>
+<p data-line="25" class="code-line">「何が分からないかわからない」生徒には、答えを教えるAIではなく、分からないところを見つけてくれるAIでないと学習の助けにならないのです。<br>
+娘の様子から、そう判断しました。</p>
+<p data-line="28" class="code-line">そこで作ることにしたのが「<strong>MathDesk</strong>」。<br>
+「いま自分がどこにいるか」「次に何をやればいいか」を可視化する数学AIチューターというコンセプト。<br>
+共通テストレベルに必要な数学スキルを、学習指導要領に基づく<strong>382個</strong>に分解し、依存関係つきのマップで可視化しています。</p>
+<p data-line="32" class="code-line"><img src="https://res.cloudinary.com/zenn/image/fetch/s---EJdKl__--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_1200/https://storage.googleapis.com/zenn-user-upload/deployed-images/e5bb19933cf1031995d9537e.jpg%3Fsha%3D1a3a1df252533e5ec300176e8beb08d4fe397e89" alt="オンボーディング画面：津田先生と問診票" class="md-img" loading="lazy"></p>
+<span class="embed-block zenn-embedded zenn-embedded-mermaid"><iframe id="zenn-embedded__5744cead25ec4" src="https://embed.zenn.studio/mermaid#zenn-embedded__5744cead25ec4" data-content="graph%20LR%0A%20%20%20%20A%5B%E5%88%86%E9%85%8D%E6%B3%95%E5%89%87%E3%81%A8%3Cbr%3E%E5%B1%95%E9%96%8B%20%E2%9C%93%5D%3A%3A%3Adone%20--%3E%20B%5B%EF%BC%92%E6%AC%A1%E5%BC%8F%E3%81%AE%3Cbr%3E%E5%B1%95%E9%96%8B%20%E2%9C%93%5D%3A%3A%3Adone%0A%20%20%20%20B%20--%3E%20C%5B%EF%BC%92%E6%AC%A1%E5%BC%8F%E3%81%AE%3Cbr%3E%E5%9B%A0%E6%95%B0%E5%88%86%E8%A7%A3%20%E2%9C%93%5D%3A%3A%3Adone%0A%20%20%20%20C%20--%3E%20D%5B%E5%9B%A0%E6%95%B0%E5%88%86%E8%A7%A3%E3%83%BB%3Cbr%3E%E3%81%9F%E3%81%99%E3%81%8D%E6%8E%9B%E3%81%91%20%E2%96%B6%5D%3A%3A%3Acurrent%0A%20%20%20%20D%20--%3E%20E%5B%EF%BC%93%E6%AC%A1%E5%BC%8F%E3%81%AE%3Cbr%3E%E5%9B%A0%E6%95%B0%E5%88%86%E8%A7%A3%5D%3A%3A%3Alocked%0A%0A%20%20%20%20classDef%20done%20fill%3A%2316a34a%2Cstroke%3A%2315803d%2Ccolor%3A%23fff%0A%20%20%20%20classDef%20current%20fill%3A%23ca8a04%2Cstroke%3A%23a16207%2Ccolor%3A%23fff%0A%20%20%20%20classDef%20locked%20fill%3A%236b7280%2Cstroke%3A%234b5563%2Ccolor%3A%23fff" frameborder="0" scrolling="no" loading="lazy"></iframe></span><p data-line="46" class="code-line"><em>実際の依存チェーンから「数と式」分野を抜粋。✓ 習得済み、▶ 学習中、グレー＝未挑戦</em></p>
+<p data-line="48" class="code-line"><img src="https://res.cloudinary.com/zenn/image/fetch/s--8u7y8Ykk--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_1200/https://storage.googleapis.com/zenn-user-upload/deployed-images/ccf518f73fa3983a0eb257dd.png%3Fsha%3D0a3ab97177af924e3092c8b284d3c05352281486" alt="スキルマップ画面：382スキルを6科目に分類" class="md-img" loading="lazy"></p>
+<h2 id="%E5%AF%BE%E8%B1%A1%E3%83%A6%E3%83%BC%E3%82%B6%E3%83%BC" data-line="50" class="code-line">
+<a class="header-anchor-link" href="#%E5%AF%BE%E8%B1%A1%E3%83%A6%E3%83%BC%E3%82%B6%E3%83%BC" aria-hidden="true"></a> 対象ユーザー</h2>
+<ul data-line="51" class="code-line">
+<li data-line="51" class="code-line">大学入学共通テスト（数学I・A・II・B・C）を控える大学受験生</li>
+<li data-line="52" class="code-line">数学に苦手意識を持ち、「何から手をつければいいか分からない」学習者</li>
+</ul>
+<h1 id="%E4%B8%BB%E8%A6%81%E6%A9%9F%E8%83%BD" data-line="54" class="code-line">
+<a class="header-anchor-link" href="#%E4%B8%BB%E8%A6%81%E6%A9%9F%E8%83%BD" aria-hidden="true"></a> 主要機能</h1>
+<h2 id="1.-%E3%82%B9%E3%82%AD%E3%83%AB%E3%83%9E%E3%83%83%E3%83%97-%E2%80%94-382%E3%82%B9%E3%82%AD%E3%83%AB%E3%81%AE%E4%BE%9D%E5%AD%98%E3%82%B0%E3%83%A9%E3%83%95" data-line="56" class="code-line">
+<a class="header-anchor-link" href="#1.-%E3%82%B9%E3%82%AD%E3%83%AB%E3%83%9E%E3%83%83%E3%83%97-%E2%80%94-382%E3%82%B9%E3%82%AD%E3%83%AB%E3%81%AE%E4%BE%9D%E5%AD%98%E3%82%B0%E3%83%A9%E3%83%95" aria-hidden="true"></a> 1. スキルマップ — 382スキルの依存グラフ</h2>
+<p data-line="58" class="code-line">学習指導要領をベースに、数学I〜Cの全範囲を382個のスキルに分解してます。<br>
+項目は有名参考書を複数購入し「目次」を参考にしています。</p>
+<p data-line="61" class="code-line">各スキルには前提スキル（prerequisite）があります。</p>
+<blockquote data-line="63" class="code-line">
+<p data-line="63" class="code-line">「二次不等式が解けない」→「因数分解が怪しいかも」→「実は展開の段階で曖昧」<br>
+　——　弱点を、依存関係を辿って特定していく。</p>
+</blockquote>
+<ul data-line="66" class="code-line">
+<li data-line="66" class="code-line">
+<strong>科目（6科目） → 単元（24単元） → スキル（382個）</strong> の3階層。<br>
+たとえば「数学II → 三角関数 → 加法定理の証明と応用」のように分解</li>
+<li data-line="68" class="code-line">スキルごとに <strong>rank（未挑戦 / Lv.1 / Lv.2 / Master）</strong> をバッジ表示</li>
+<li data-line="69" class="code-line">
+<strong>「学習可能」フィルタ</strong> で、前提をクリア済みのスキルだけを表示</li>
+</ul>
+<p data-line="71" class="code-line"><img src="https://res.cloudinary.com/zenn/image/fetch/s--DeHf04x_--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_1200/https://storage.googleapis.com/zenn-user-upload/deployed-images/6d82b1a787a229743c69f381.png%3Fsha%3D072e94b0d6a457e31d518d791232c2f6e18e2ee1" alt="スキル詳細：学習開始・練習・習得判定の3アクション" class="md-img" loading="lazy"></p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="73"><span class="line"><span>数学は積木みたいだなと思ってまして。</span></span>
+<span class="line"><span>「わからん」の上には、何か積もうとしても崩れるだけだなと。</span></span>
+<span class="line"><span>（漢字ならどんな順番でも覚えられますが）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>当たり前ですが、その当たり前をシステムで表現する必要があるなあとこの形にしました。</span></span>
+<span class="line"><span></span></span></code></pre></div><p data-line="81" class="code-line">スキルマップの主眼は <strong>「何ができて、何ができないか」を一目で把握できること</strong>。<br>
+382スキルのうち、どこまでが緑（習得済み）で、どこからがグレー（未挑戦）か。<br>
+その境界線が、ユーザーの現在地です。<br>
+現状はリスト形式ですが、いずれ地図として眺められるUIにしたい。</p>
+<h2 id="2.-ai%E5%95%8F%E9%A1%8C%E7%94%9F%E6%88%90-%2B-%E6%AE%B5%E9%9A%8E%E7%9A%84%E3%83%9E%E3%82%B9%E3%82%BF%E3%83%AA%E3%83%BC%E5%88%A4%E5%AE%9A" data-line="86" class="code-line">
+<a class="header-anchor-link" href="#2.-ai%E5%95%8F%E9%A1%8C%E7%94%9F%E6%88%90-%2B-%E6%AE%B5%E9%9A%8E%E7%9A%84%E3%83%9E%E3%82%B9%E3%82%BF%E3%83%AA%E3%83%BC%E5%88%A4%E5%AE%9A" aria-hidden="true"></a> 2. AI問題生成 + 段階的マスタリー判定</h2>
+<p data-line="88" class="code-line">各スキルに対して<strong>Gemini 3 Pro（High）</strong> で4段階の難易度の問題を生成。</p>
+<table data-line="90" class="code-line">
+<thead data-line="90" class="code-line">
+<tr data-line="90" class="code-line">
+<th>Level</th>
+<th>難易度</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody data-line="92" class="code-line">
+<tr data-line="92" class="code-line">
+<td>Lv.1</td>
+<td>基礎確認</td>
+<td>定義の理解、計算の正確さ</td>
+</tr>
+<tr data-line="93" class="code-line">
+<td>Lv.2</td>
+<td>標準</td>
+<td>概念を組み合わせた問題</td>
+</tr>
+<tr data-line="94" class="code-line">
+<td>Lv.3</td>
+<td>応用</td>
+<td>複数ステップ、条件整理が必要</td>
+</tr>
+<tr data-line="95" class="code-line">
+<td>Lv.4</td>
+<td>発展</td>
+<td>複数テクニックの複合、証明・一般化</td>
+</tr>
+</tbody>
+</table>
+<ul data-line="97" class="code-line">
+<li data-line="97" class="code-line">
+<strong>2,800問以上の事前生成プール</strong>（全レベル対応）— 即時提供、待ち時間ゼロ</li>
+<li data-line="98" class="code-line">プール使い切り時は<strong>リアルタイムAI生成</strong>（SSEストリーミング）→ 生成した問題はプールに自動追加</li>
+<li data-line="99" class="code-line">
+<strong>部分点評価</strong> — 途中式・考え方も含めて採点</li>
+<li data-line="100" class="code-line">
+<strong>図形問題の自動作図</strong> — 幾何や関数の問題では、Flashが問題文に合わせたJSXGraphコードを生成し、図を動的に描画</li>
+</ul>
+<p data-line="102" class="code-line"><img src="https://res.cloudinary.com/zenn/image/fetch/s--hrnA9SqU--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_1200/https://storage.googleapis.com/zenn-user-upload/deployed-images/3613f943429c732275ab0ac6.png%3Fsha%3D37cc9e938d8b508455fb6612209fb01892c13b17" alt="練習画面：AI生成問題と回答入力" class="md-img" loading="lazy"></p>
+<h2 id="3.-%E7%AD%94%E3%81%88%E3%81%A7%E3%81%AF%E3%81%AA%E3%81%8F%E3%80%8C%E7%AD%94%E3%81%88%E6%96%B9%E3%80%8D%E3%82%92%E6%95%99%E3%81%88%E3%82%8B%E3%82%B3%E3%83%BC%E3%83%81%E3%83%B3%E3%82%B0" data-line="104" class="code-line">
+<a class="header-anchor-link" href="#3.-%E7%AD%94%E3%81%88%E3%81%A7%E3%81%AF%E3%81%AA%E3%81%8F%E3%80%8C%E7%AD%94%E3%81%88%E6%96%B9%E3%80%8D%E3%82%92%E6%95%99%E3%81%88%E3%82%8B%E3%82%B3%E3%83%BC%E3%83%81%E3%83%B3%E3%82%B0" aria-hidden="true"></a> 3. 答えではなく「答え方」を教えるコーチング</h2>
+<p data-line="106" class="code-line">答えだけ教えても身につかない、類題になるとダメ、というのは数学苦手界隈あるある。<br>
+MathDeskは、「どう考えればいいか」を引き出す対話型コーチングがポリシー。</p>
+<p data-line="109" class="code-line"><img src="https://res.cloudinary.com/zenn/image/fetch/s--lUmFkbpK--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_1200/https://storage.googleapis.com/zenn-user-upload/deployed-images/55c5f70c5b19aa021dfde377.png%3Fsha%3D6c361f1b3f308966d704bee8a6ddc6fcd78de5e4" alt="チャット画面：チェックリストで段階的に誘導" class="md-img" loading="lazy"></p>
+<h2 id="4.-%E5%85%A5%E5%8A%9B%E3%81%AF%E7%B0%A1%E5%8D%98%E3%81%AB" data-line="111" class="code-line">
+<a class="header-anchor-link" href="#4.-%E5%85%A5%E5%8A%9B%E3%81%AF%E7%B0%A1%E5%8D%98%E3%81%AB" aria-hidden="true"></a> 4. 入力は簡単に</h2>
+<ul data-line="113" class="code-line">
+<li data-line="113" class="code-line">
+<strong>数式入力を簡単にする工夫</strong>: 分数や√を直接タップできるキーボード + 音声入力（Web Speech API）</li>
+<li data-line="114" class="code-line">
+<strong>ノートを写真でアップロード</strong>: 手書きでも読み取って「この問題が分からない」から学習開始も可能</li>
+<li data-line="115" class="code-line">
+<strong>バックトラック診断</strong>: 誤りを検出すると自動で前提スキルを診断</li>
+<li data-line="116" class="code-line">もちろん自由に文章で入力しても解釈する。「３ぶんの４」でもOK</li>
+</ul>
+<p data-line="119" class="code-line">ここまでの機能をデモ動画にまとめた。</p>
+<span class="embed-block embed-youtube"><iframe src="https://www.youtube-nocookie.com/embed/10udIttEOlc" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></span>
+<h1 id="%E3%81%A8%E3%81%AB%E3%81%8B%E3%81%8F%E6%99%82%E9%96%93%E3%81%8C%E3%81%AA%E3%81%84-%E2%80%94-%E9%96%8B%E7%99%BA%E3%82%82ai%E3%81%A7%E3%80%81%E5%BE%B9%E5%BA%95%E7%9A%84%E3%81%AB%E8%87%AA%E5%8B%95%E5%8C%96" data-line="123" class="code-line">
+<a class="header-anchor-link" href="#%E3%81%A8%E3%81%AB%E3%81%8B%E3%81%8F%E6%99%82%E9%96%93%E3%81%8C%E3%81%AA%E3%81%84-%E2%80%94-%E9%96%8B%E7%99%BA%E3%82%82ai%E3%81%A7%E3%80%81%E5%BE%B9%E5%BA%95%E7%9A%84%E3%81%AB%E8%87%AA%E5%8B%95%E5%8C%96" aria-hidden="true"></a> とにかく時間がない — 開発もAIで、徹底的に自動化</h1>
+<p data-line="125" class="code-line">本業は別にあるので、開発時間があまりとれません。<br>
+やれそうなことは、可能性が少しでもあれば全部AIにやらせる方針で進めました。</p>
+<h2 id="%E3%83%90%E3%83%BC%E3%83%81%E3%83%A3%E3%83%AB%E3%83%97%E3%83%AC%E3%82%A4%E3%83%A4%E3%83%BC%E3%83%86%E3%82%B9%E3%83%88" data-line="128" class="code-line">
+<a class="header-anchor-link" href="#%E3%83%90%E3%83%BC%E3%83%81%E3%83%A3%E3%83%AB%E3%83%97%E3%83%AC%E3%82%A4%E3%83%A4%E3%83%BC%E3%83%86%E3%82%B9%E3%83%88" aria-hidden="true"></a> バーチャルプレイヤーテスト</h2>
+<p data-line="130" class="code-line">締め切り1週間前、機能はひと通りできたけどUXテストをやる時間がない。テスターを集めるあてもない。<br>
+で、思いついたのが<strong>AIにユーザーを演じさせる</strong>という方法です。</p>
+<p data-line="133" class="code-line"><strong>Claude Codeのサブエージェント</strong>に架空の高校生ペルソナを与え、<strong>Playwright CLI</strong>経由で実際にアプリを操作させてみました。（従来なら固定シナリオで仕様を確認するだけ）</p>
+<blockquote data-line="135" class="code-line">
+<p data-line="135" class="code-line">プロンプトサンプル</p>
+</blockquote>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="136"><span class="line"><span>あなたは Misakiという高校2年生です。</span></span>
+<span class="line"><span>- 進学校（偏差値65）に通うが、数学は苦手（定期テスト45点）</span></span>
+<span class="line"><span>- 友達に「このアプリいいよ」と勧められてインストールした</span></span>
+<span class="line"><span>- 面倒くさがり。つまらなければすぐやめる</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>このアプリを好きなように使ってみてください。</span></span>
+<span class="line"><span>強制はありません。面白ければ続ける、つまらなければやめる、それでOKです。</span></span>
+<span class="line"><span></span></span></code></pre></div><p data-line="146" class="code-line">ポイントは<strong>行動を規定しない</strong>こと。<br>
+テスト項目を渡すとチェックリスト消化になってしまいます。<br>
+ペルソナの属性だけ与えて自由に操作させることで、人間のユーザビリティテストに近い「予想外の行動」を観察可能に。</p>
+<h2 id="%E3%83%90%E3%83%BC%E3%83%81%E3%83%A3%E3%83%AB%E3%83%97%E3%83%AC%E3%82%A4%E3%83%A4%E3%83%BC%E3%81%A7%E8%A6%8B%E3%81%A4%E3%81%91%E3%81%9F%E8%AA%B2%E9%A1%8C" data-line="151" class="code-line">
+<a class="header-anchor-link" href="#%E3%83%90%E3%83%BC%E3%83%81%E3%83%A3%E3%83%AB%E3%83%97%E3%83%AC%E3%82%A4%E3%83%A4%E3%83%BC%E3%81%A7%E8%A6%8B%E3%81%A4%E3%81%91%E3%81%9F%E8%AA%B2%E9%A1%8C" aria-hidden="true"></a> バーチャルプレイヤーで見つけた課題</h2>
+<p data-line="153" class="code-line"><strong>UIの問題</strong>:</p>
+<ul data-line="154" class="code-line">
+<li data-line="154" class="code-line">「382スキル・0%」を初見でみたペルソナが絶望して離脱 → デフォルトフィルタを「学習可能」に変更</li>
+<li data-line="155" class="code-line">面倒くさがりのペルソナが「努力がすぐ反映されない」と離脱 → rankバッジのリアルタイム表示を追加</li>
+<li data-line="156" class="code-line">「スキル」と「カード」の2概念が混乱を招く → カードタブを廃止して1画面に統合</li>
+</ul>
+<p data-line="158" class="code-line"><strong>LLM設計</strong>:<br>
+こちらはもっと根深い。5体のペルソナを並列で走らせると、それぞれが詳細な操作ログを残すが、<br>
+横断的に読むことで、複数のペルソナの報告に共通点があることに気づけた。</p>
+<ul data-line="161" class="code-line">
+<li data-line="161" class="code-line">
+<strong>同じ問題を4回出題された</strong>（x²-5x+6 が延々ループ）</li>
+<li data-line="162" class="code-line">
+<strong>会話9ターン目で「元の問題を教えて」と聞き返される</strong>（さっき解いた問題を忘れている）</li>
+<li data-line="163" class="code-line">
+<strong>存在しない会話への言及</strong>（「前のドラマ」——そんな話はしていない）</li>
+</ul>
+<p data-line="165" class="code-line">1体だけなら見過ごしたが、これは「コンテキストが小さいときのLLMの会話パターン」。<br>
+それぞれ起票するのでなく、コンテキストウィンドウが1だったりしないか調査。</p>
+<p data-line="168" class="code-line">答えは違いましたがやはりその部分に問題が。<br>
+<strong>毎回のリクエストで、システムプロンプト約12,000トークン + 会話履歴の全量を丸ごと送信していた</strong>のです。<br>
+会話が10ターンを超えると、システムプロンプトと合わせて20,000トークン超え。<br>
+Geminiの注意力が会話の中間部分で低下する「Lost in the Middle」問題がわずか9ターンで発生。</p>
+<p data-line="173" class="code-line">プロンプト12,000トークンの内訳を調べ、必須なのはキャラクター定義と基本ルールだけと結論。<br>
+習得判定用のFew-shot（約4,500トークン）は通常会話で不要。<br>
+介入戦略の詳細な台本も、各1行で十分。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="177"><span class="line"><span>対策として、プロンプトをコアと状況別に分離。</span></span>
+<span class="line"><span>通常会話時のシステムプロンプトを 12,000 → 3,500 トークンに圧縮。</span></span>
+<span class="line"><span></span></span></code></pre></div><p data-line="182" class="code-line">バーチャルプレイヤー自体が優秀なこと以外に、<strong>操作ログ</strong>も有用。<br>
+人間のテスターなら「AIが変だった」で終わるところを、<br>
+「Turn 9でコンテキスト喪失」「5体中3体で再現」という具体的なログで、<br>
+プロンプト設計の不具合とすぐに結論できた。</p>
+<h2 id="%E3%83%87%E3%83%A2%E5%8B%95%E7%94%BB%E3%82%82claudecode%E3%82%B9%E3%82%AD%E3%83%AB%E3%81%A7%E4%BD%9C%E3%82%8B" data-line="187" class="code-line">
+<a class="header-anchor-link" href="#%E3%83%87%E3%83%A2%E5%8B%95%E7%94%BB%E3%82%82claudecode%E3%82%B9%E3%82%AD%E3%83%AB%E3%81%A7%E4%BD%9C%E3%82%8B" aria-hidden="true"></a> デモ動画もClaudeCodeスキルで作る</h2>
+<p data-line="189" class="code-line">デモ動画も手動撮影ゼロ。<br>
+Playwrightでアプリを自動操作して画面録画。<br>
+VOICEVOXでナレーション音声を生成。<br>
+Remotion（Reactベースの動画フレームワーク）で合成してMP4出力。</p>
+<p data-line="194" class="code-line">台詞を書き換えてコマンドを叩くだけで撮り直しできるので、締め切り直前の修正にも対応できた。<br>
+（＝このページの動画。この原稿書いてる横で自動で作られつつある）</p>
+<h2 id="%E4%BA%BA%E9%96%93%E3%81%8C%E8%80%83%E3%81%88%E3%80%81ai%E3%81%8C%E4%BD%9C%E3%82%8B" data-line="197" class="code-line">
+<a class="header-anchor-link" href="#%E4%BA%BA%E9%96%93%E3%81%8C%E8%80%83%E3%81%88%E3%80%81ai%E3%81%8C%E4%BD%9C%E3%82%8B" aria-hidden="true"></a> 人間が考え、AIが作る</h2>
+<p data-line="199" class="code-line">このプロジェクトは休日一人開発。<br>
+開発エージェント（Claude Code）とアプリ内AI（Gemini）を道具として使い分けている。</p>
+<p data-line="202" class="code-line"><strong>私が考えたこと:</strong></p>
+<ul data-line="203" class="code-line">
+<li data-line="203" class="code-line">
+<strong>「数学の地図」というコンセプト</strong> — 娘の相談から出発し、依存関係グラフという形に落とし込んだ</li>
+<li data-line="204" class="code-line">
+<strong>「答え方を教える」という教育思想</strong> — 答えを教えても身につかないという実感から</li>
+<li data-line="205" class="code-line">
+<strong>参考書キャプチャ → AI問題生成への方針転換</strong> — 「参考書がなくても学べるべきだ」と途中で判断</li>
+<li data-line="206" class="code-line">
+<strong>バーチャルプレイヤーテストの発案と設計</strong> — 「行動を規定しない」原則を含めて</li>
+<li data-line="207" class="code-line">
+<strong>Gemini Pro / Flash の使い分け戦略</strong> — 応答速度・コスト・品質トレードオフの判断</li>
+</ul>
+<p data-line="209" class="code-line"><strong>AIが実行したこと:</strong></p>
+<ul data-line="210" class="code-line">
+<li data-line="210" class="code-line">上記の判断に基づくフルスタック実装</li>
+<li data-line="211" class="code-line">2,800問の問題プール生成</li>
+<li data-line="212" class="code-line">バーチャルプレイヤーテストの実行（5ペルソナで延べ一週間プレイ）</li>
+<li data-line="213" class="code-line">100本以上の設計ドキュメント作成（人間がレビュー・修正）</li>
+</ul>
+<p data-line="215" class="code-line">要するに、何を作るか・なぜ作るかは私がリクエストし、実装はAIという分担。</p>
+<h1 id="%E6%8A%80%E8%A1%93%E3%82%B9%E3%82%BF%E3%83%83%E3%82%AF" data-line="217" class="code-line">
+<a class="header-anchor-link" href="#%E6%8A%80%E8%A1%93%E3%82%B9%E3%82%BF%E3%83%83%E3%82%AF" aria-hidden="true"></a> 技術スタック</h1>
+<table data-line="219" class="code-line">
+<thead data-line="219" class="code-line">
+<tr data-line="219" class="code-line">
+<th>レイヤー</th>
+<th>技術</th>
+</tr>
+</thead>
+<tbody data-line="221" class="code-line">
+<tr data-line="221" class="code-line">
+<td>フロントエンド</td>
+<td>React 18 + TypeScript + Vite</td>
+</tr>
+<tr data-line="222" class="code-line">
+<td>バックエンド</td>
+<td>Node.js + Express + TypeScript</td>
+</tr>
+<tr data-line="223" class="code-line">
+<td>データベース</td>
+<td>Cloud Firestore</td>
+</tr>
+<tr data-line="224" class="code-line">
+<td>AI（アプリ内）</td>
+<td>Gemini 3 Pro / Flash（Vertex AI 経由）</td>
+</tr>
+<tr data-line="225" class="code-line">
+<td>AI（開発）</td>
+<td>Claude Code（Claude Opus）</td>
+</tr>
+<tr data-line="226" class="code-line">
+<td>数式表示</td>
+<td>KaTeX + MathLive</td>
+</tr>
+<tr data-line="227" class="code-line">
+<td>図形描画</td>
+<td>JSXGraph</td>
+</tr>
+<tr data-line="228" class="code-line">
+<td>音声入力</td>
+<td>Web Speech API</td>
+</tr>
+<tr data-line="229" class="code-line">
+<td>認証</td>
+<td>Firebase Authentication</td>
+</tr>
+<tr data-line="230" class="code-line">
+<td>インフラ</td>
+<td>Google Cloud Run</td>
+</tr>
+</tbody>
+</table>
+<details><summary>Gemini APIの使い分け</summary><div class="details-content">
+<table data-line="234" class="code-line">
+<thead data-line="234" class="code-line">
+<tr data-line="234" class="code-line">
+<th>用途</th>
+<th>モデル</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody data-line="236" class="code-line">
+<tr data-line="236" class="code-line">
+<td>対話コーチング</td>
+<td>Gemini 3 Pro</td>
+<td>教育的推論の質が重要</td>
+</tr>
+<tr data-line="237" class="code-line">
+<td>問題生成（Lv.3-4）</td>
+<td>Gemini 3 Pro</td>
+<td>応用・発展は質が重要</td>
+</tr>
+<tr data-line="238" class="code-line">
+<td>問題生成（Lv.1-2）</td>
+<td>Flash</td>
+<td>基礎問は速度優先</td>
+</tr>
+<tr data-line="239" class="code-line">
+<td>回答評価</td>
+<td>Gemini 3 Pro</td>
+<td>部分点評価に推論力が必要</td>
+</tr>
+<tr data-line="240" class="code-line">
+<td>日次アドバイス</td>
+<td>Flash</td>
+<td>軽量タスク</td>
+</tr>
+</tbody>
+</table>
+</div></details>
+<h2 id="google-cloud-%E3%81%AE%E6%B4%BB%E7%94%A8" data-line="243" class="code-line">
+<a class="header-anchor-link" href="#google-cloud-%E3%81%AE%E6%B4%BB%E7%94%A8" aria-hidden="true"></a> Google Cloud の活用</h2>
+<span class="embed-block zenn-embedded zenn-embedded-mermaid"><iframe id="zenn-embedded__fa84ed3b7ff4" src="https://embed.zenn.studio/mermaid#zenn-embedded__fa84ed3b7ff4" data-content="flowchart%20TB%0A%20%20%20%20subgraph%20client%5B%22Client%22%5D%0A%20%20%20%20%20%20%20%20A%5BReact%20SPA%5D%3A%3A%3Afe%0A%20%20%20%20end%0A%0A%20%20%20%20subgraph%20gcp%5B%22Google%20Cloud%22%5D%0A%20%20%20%20%20%20%20%20subgraph%20run%5B%22Cloud%20Run%22%5D%0A%20%20%20%20%20%20%20%20%20%20%20%20B1%5B%E3%83%81%E3%83%A3%E3%83%83%E3%83%88%20API%5D%3A%3A%3Aapi%0A%20%20%20%20%20%20%20%20%20%20%20%20B2%5B%E7%B7%B4%E7%BF%92%20API%5D%3A%3A%3Aapi%0A%20%20%20%20%20%20%20%20end%0A%20%20%20%20%20%20%20%20subgraph%20vertex%5B%22Vertex%20AI%22%5D%0A%20%20%20%20%20%20%20%20%20%20%20%20D1%5BGemini%203%20Pro%5D%3A%3A%3Aai%0A%20%20%20%20%20%20%20%20%20%20%20%20D2%5BGemini%20Flash%5D%3A%3A%3Aai%0A%20%20%20%20%20%20%20%20end%0A%20%20%20%20%20%20%20%20E%5B(Firestore)%5D%3A%3A%3Adb%0A%20%20%20%20%20%20%20%20F%5BFirebase%20Auth%5D%3A%3A%3Aauth%0A%20%20%20%20end%0A%0A%20%20%20%20A%20--%20SSE%20--%3E%20B1%0A%20%20%20%20A%20--%20SSE%20--%3E%20B2%0A%20%20%20%20B1%20--%3E%20D1%0A%20%20%20%20B2%20--%3E%20D1%0A%20%20%20%20B2%20--%3E%20D2%0A%20%20%20%20B1%20--%3E%20E%0A%20%20%20%20B2%20--%3E%20E%0A%20%20%20%20A%20--%3E%20F%0A%0A%20%20%20%20classDef%20fe%20fill%3A%233b82f6%2Cstroke%3A%232563eb%2Ccolor%3A%23fff%0A%20%20%20%20classDef%20api%20fill%3A%238b5cf6%2Cstroke%3A%237c3aed%2Ccolor%3A%23fff%0A%20%20%20%20classDef%20ai%20fill%3A%23f59e0b%2Cstroke%3A%23d97706%2Ccolor%3A%23fff%0A%20%20%20%20classDef%20db%20fill%3A%2310b981%2Cstroke%3A%23059669%2Ccolor%3A%23fff%0A%20%20%20%20classDef%20auth%20fill%3A%236b7280%2Cstroke%3A%234b5563%2Ccolor%3A%23fff" frameborder="0" scrolling="no" loading="lazy"></iframe></span><ul data-line="280" class="code-line">
+<li data-line="280" class="code-line">
+<strong>Cloud Run</strong>: フロントエンド + バックエンドを1コンテナに統合。自動スケーリング</li>
+<li data-line="281" class="code-line">
+<strong>Vertex AI（Gemini API）</strong>: 4タスクで Pro / Flash を使い分け</li>
+<li data-line="282" class="code-line">
+<strong>Cloud Firestore</strong>: ユーザーデータ・会話履歴・スキル進捗・問題プール2,800問+を管理。開発初期のSQLiteから完全移行</li>
+<li data-line="283" class="code-line">
+<strong>Firebase Authentication</strong>: Google ログイン</li>
+</ul>
+<h1 id="%E3%82%B3%E3%82%B9%E3%83%88-%E2%80%94-%E9%96%8B%E7%99%BA%E4%B8%AD%E3%81%AB%E4%BD%BF%E3%81%A3%E3%81%9F%E3%81%8A%E9%87%91" data-line="285" class="code-line">
+<a class="header-anchor-link" href="#%E3%82%B3%E3%82%B9%E3%83%88-%E2%80%94-%E9%96%8B%E7%99%BA%E4%B8%AD%E3%81%AB%E4%BD%BF%E3%81%A3%E3%81%9F%E3%81%8A%E9%87%91" aria-hidden="true"></a> コスト — 開発中に使ったお金</h1>
+<p data-line="287" class="code-line">GCP（Gemini API・Cloud Run）、開発AI（Claude Code）、BGM生成、参考書……全部ひっくるめても、<strong>個別塾の月謝1ヶ月分（7万円）にすら届かない</strong>。</p>
+<p data-line="289" class="code-line">もちろん人間の先生の代わりにはならない。でも「どこが分からないか分からない」段階のナビゲーションなら、この費用感で十分に助けになれると思っている。</p>
+<h1 id="%E7%8F%BE%E5%9C%A8%E5%9C%B0%E3%81%A8%E4%BB%8A%E5%BE%8C" data-line="291" class="code-line">
+<a class="header-anchor-link" href="#%E7%8F%BE%E5%9C%A8%E5%9C%B0%E3%81%A8%E4%BB%8A%E5%BE%8C" aria-hidden="true"></a> 現在地と今後</h1>
+<p data-line="293" class="code-line">現時点で動くもの:</p>
+<ul data-line="294" class="code-line">
+<li data-line="294" class="code-line">オンボーディング（問診票）→ AIが推薦スキルを提示 → 学習・練習・チャットの一連の流れ</li>
+<li data-line="295" class="code-line">382スキルのマップ表示、問題プール2,800問、対話コーチング</li>
+</ul>
+<p data-line="297" class="code-line">まだできていないこと:</p>
+<ul data-line="298" class="code-line">
+<li data-line="298" class="code-line">
+<strong>好きな単元を自由に選んで学ぶ</strong> — 現状はAI推薦の導線のみ</li>
+<li data-line="299" class="code-line">
+<strong>スキルマップの地図化</strong> — リスト形式から、依存関係を辿れるビジュアルマップへ</li>
+<li data-line="300" class="code-line">
+<strong>問題プールの新陳代謝</strong> — ユーザーが解くことで正答率・解答時間が溜まり、良問が残り悪問が淘汰されるプールにしたい</li>
+<li data-line="301" class="code-line">
+<strong>他教科への展開</strong> — 物理・化学など、同じく「積木型」の教科へ</li>
+</ul>
+<h1 id="%E3%81%8A%E3%82%8F%E3%82%8A%E3%81%AB" data-line="303" class="code-line">
+<a class="header-anchor-link" href="#%E3%81%8A%E3%82%8F%E3%82%8A%E3%81%AB" aria-hidden="true"></a> おわりに</h1>
+<p data-line="305" class="code-line">娘に相談された12月末から、約7週間。<br>
+自分の冬休み期間で作ろうと思った段階では、「黄チャートの問題をAIに読ませて解説させる」だけの簡素なツールを想定していました。<br>
+でも作り始めてみると、「参考書がなくても学べるべきだ」「答えじゃなくて答え方を教えるべきだ」と要件がどんどん変わっていきました。（キャラづけやBGMは少し暴走したかも）</p>
+<p data-line="309" class="code-line">第4回 Agentic AI Hackathon with Google Cloud に出すと決め、「娘専用の自炊アプリ」から「他の人にも使える形」へとゴールが変わりました。<br>
+著作権をクリアに、参考書なしでも学べる設計にと大きくピボットしましたが、結果的にプロダクトとしてよいものになっていると思います。ハッカソンが強制的にプロダクト化を促したとも言えます。</p>
+<p data-line="312" class="code-line">「数学は積木」という当たり前を、見通しよく表現するアプリになれているといいなと思っています。<br>
+結局一義的には娘のために作ったアプリなので、ちゃんと使ってもらえることが現在の目標です。</p>
+<p data-line="316" class="code-line"><em>MathDeskは一人の開発者がClaude Code + Gemini APIで開発した数学学習プラットフォームです。</em><br>
+<em>第4回 Agentic AI Hackathon with Google Cloud に応募しています。</em></p>
+
+    <div class="source-link">初出: <a href="https://zenn.dev/orangewk/articles/031a5776986417" target="_blank" rel="noopener">Zenn</a></div>
+  </div>
+</main>
+
+<footer><p>orange</p></footer>
+
+</body>
+</html>

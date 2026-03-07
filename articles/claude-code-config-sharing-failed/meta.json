@@ -1,10 +1,10 @@
 {
   "title": "Claude Code の設定ファイルをリポ間で共有しようとして、やめた話",
-  "description": "Claude Code の設定ファイルをリポ間で共有しようとして、やめた話   きっかけ  Claude Code を複数のリポジトリで使っていると、同じスキル...",
+  "description": "Claude Code の設定ファイルをリポ間で共有しようとして、やめた話   きっかけ Claude Code を複数のリポジトリで使っていると、同じスキルや...",
   "date": "2026-02-21",
   "tags": [
-    "claudecode",
-    "cli"
+    "CLI",
+    "DevTools"
   ],
   "cover": "assets/covers/zenn-default.png",
   "platform": "Zenn",

@@ -452,18 +452,29 @@
     }
   
     .article-body { max-width: 720px; margin: 0 auto; }
-    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
-    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem; padding-left: 0.5rem; border-left: 4px solid var(--accent); }
+    .article-body h2 { color: var(--heading-color); font-size: 1.4rem; margin: 2.5rem 0 1rem;
+        padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent); }
+    .article-body h3 { color: #37474f; font-size: 1.15rem; margin: 2rem 0 0.8rem;
+        padding-left: 0.5rem; border-left: 4px solid var(--accent); }
     .article-body p { margin: 0.8rem 0; }
     .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
     .article-body li { margin: 0.4rem 0; }
-    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em; border-radius: 3px; font-family: monospace; font-size: 0.9em; }
-    .article-body pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+    .article-body code { background: var(--code-bg); padding: 0.2em 0.4em;
+        border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+    .article-body pre { background: var(--code-bg); padding: 1rem;
+        border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
     .article-body pre code { padding: 0; background: none; }
-    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem; color: #666; margin: 1rem 0; }
-    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .article-body blockquote { border-left: 4px solid #ddd; padding: 0.5rem 1rem;
+        color: #666; margin: 1rem 0; }
+    .article-body img { max-width: 100%; border-radius: 6px; }
+    .article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .article-body th, .article-body td { border: 1px solid #ddd; padding: 0.6rem; }
+    .article-body th { background: #f5f5f5; }
+    .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem;
+        display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
     .article-tag { color: var(--accent); font-weight: 600; }
-    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd; font-size: 0.85rem; color: #888; }
+    .source-link { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #ddd;
+        font-size: 0.85rem; color: #888; }
     .source-link a { color: var(--accent); }
     .nav-links { display: flex; margin: 1.5rem 0; }
     .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
@@ -478,77 +489,91 @@
 <main>
   <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
   <div class="article-body">
-    <div class="article-meta"><span class="article-tag">claudecode</span><span class="article-tag">ai</span><span class="article-tag">cli</span><span>2026-02-26</span></div>
-    <p>Claude Codeを使っていて、こんな経験はないだろうか。</p>
-<blockquote>
-<p>「あ、違う方向に進んでる。止めなきゃ」</p>
+    <div class="article-meta"><span class="article-tag">AI</span><span class="article-tag">CLI</span><span class="article-tag">Claude Code</span><span>2026-02-26</span></div>
+    <p data-line="0" class="code-line">Claude Codeを使っていて、こんな経験はないだろうか。</p>
+<blockquote data-line="2" class="code-line">
+<p data-line="2" class="code-line">「あ、違う方向に進んでる。止めなきゃ」</p>
 </blockquote>
-<p>そこでESCを押す。または、怖くて押せずに最後まで見届ける。</p>
-<p>どちらの行動も、停止ボタンの挙動を正確に理解していないところから来ている。</p>
-<h2>停止したとき、何が起きているか</h2>
-<p>停止ボタン（ESCまたはUI上の■ボタン）を押したとき、起きることと起きないことがある。</p>
-<p><strong>起きること：</strong>
-- 現在生成中のレスポンスが打ち切られる
-- まだ実行されていなかったツール呼び出しがキャンセルされる</p>
-<p><strong>起きないこと：</strong>
-- 会話履歴のリセット（コンテキストはそのまま残る）
-- すでに実行済みのツール呼び出しの巻き戻し</p>
-<p>最後の点が重要だ。ファイル編集やgit操作など、停止前にすでに走ったものは残る。停止はアンドゥではない。</p>
-<h2>熟練者ほど止める</h2>
-<p>この挙動を理解すると、使い方が変わる。</p>
-<p>Anthropicが2025〜2026年にかけて行った調査によると、Claude Codeの熟練ユーザーほど停止ボタンをよく使う。新規ユーザーが全ターンの5%で中断するのに対し、経験を積んだユーザーは9%まで増加する。</p>
-<p>「使い込むほど怖くなる」のではなく、「停止して指示を修正する」ことが効率的だと学習している。</p>
-<p>具体的な場面で言うと：</p>
-<ul>
-<li>Claudeが想定と違うファイルを読み始めた → 止めて「そっちじゃなくてXXを見て」と追加</li>
-<li>複数メッセージに分けて指示を出している途中で先走られた → 止めて最初から言い直す</li>
-<li>タイポを訂正したら新しい指示として解釈された → 止めて「訂正：〇〇」と明示して再送</li>
+<p data-line="4" class="code-line">そこでESCを押す。または、怖くて押せずに最後まで見届ける。</p>
+<p data-line="6" class="code-line">どちらの行動も、停止ボタンの挙動を正確に理解していないところから来ている。</p>
+<h2 id="%E5%81%9C%E6%AD%A2%E3%81%97%E3%81%9F%E3%81%A8%E3%81%8D%E3%80%81%E4%BD%95%E3%81%8C%E8%B5%B7%E3%81%8D%E3%81%A6%E3%81%84%E3%82%8B%E3%81%8B" data-line="8" class="code-line">
+<a class="header-anchor-link" href="#%E5%81%9C%E6%AD%A2%E3%81%97%E3%81%9F%E3%81%A8%E3%81%8D%E3%80%81%E4%BD%95%E3%81%8C%E8%B5%B7%E3%81%8D%E3%81%A6%E3%81%84%E3%82%8B%E3%81%8B" aria-hidden="true"></a> 停止したとき、何が起きているか</h2>
+<p data-line="10" class="code-line">停止ボタン（ESCまたはUI上の■ボタン）を押したとき、起きることと起きないことがある。</p>
+<p data-line="12" class="code-line"><strong>起きること：</strong></p>
+<ul data-line="13" class="code-line">
+<li data-line="13" class="code-line">現在生成中のレスポンスが打ち切られる</li>
+<li data-line="14" class="code-line">まだ実行されていなかったツール呼び出しがキャンセルされる</li>
 </ul>
-<p>停止はリセットではなく、「ちょっと待って、追加情報あり」の合図として使える。</p>
-<h2>ただし信頼性は低い</h2>
-<p>ESCキーは、ツール呼び出しが実行中のタイミングでは効かないことが多い。GitHubのIssueには以下のような報告がある：</p>
-<ul>
-<li>ESCを押すと赤いフィードバックは出るが、エージェントが止まらない（<a href="https://github.com/anthropics/claude-code/issues/3455">#3455</a>）</li>
-<li>アクティブなツール呼び出し中はESCもCtrl+Cも無視される（<a href="https://github.com/anthropics/claude-code/issues/17466">#17466</a>）</li>
-<li>セッションによっては一切効かない（<a href="https://github.com/anthropics/claude-code/issues/14526">#14526</a>）</li>
+<p data-line="16" class="code-line"><strong>起きないこと：</strong></p>
+<ul data-line="17" class="code-line">
+<li data-line="17" class="code-line">会話履歴のリセット（コンテキストはそのまま残る）</li>
+<li data-line="18" class="code-line">すでに実行済みのツール呼び出しの巻き戻し</li>
 </ul>
-<p>「思考中」のフェーズなら止まりやすく、「ツール実行中」のフェーズは止まりにくい、というのが実態に近い。</p>
-<h2>実践パターン</h2>
-<p>これを踏まえた上での使い方：</p>
-<ol>
-<li><strong>思考フェーズで止める</strong> — ツールを呼ぶ前の段階が一番止まりやすい。ファイルを読み始めたらもう遅いと思っておく</li>
-<li><strong>複数メッセージに分けて指示を出すなら、止めてから送る</strong> — 「まだ続きがある」状態でClaudeが動き出すと混乱の元になる</li>
-<li><strong>タイポ訂正と新指示は区別を明示する</strong> — 短いメッセージは文脈から判断しにくい。訂正の場合は「訂正：〇〇」と添えると安全</li>
-<li><strong>止まらなかったときは諦める</strong> — ESCが効かない場合、完了を待ってから「〇〇は間違いだったので元に戻して」と指示する方が早い</li>
+<p data-line="20" class="code-line">最後の点が重要だ。ファイル編集やgit操作など、停止前にすでに走ったものは残る。停止はアンドゥではない。</p>
+<h2 id="%E7%86%9F%E7%B7%B4%E8%80%85%E3%81%BB%E3%81%A9%E6%AD%A2%E3%82%81%E3%82%8B" data-line="22" class="code-line">
+<a class="header-anchor-link" href="#%E7%86%9F%E7%B7%B4%E8%80%85%E3%81%BB%E3%81%A9%E6%AD%A2%E3%82%81%E3%82%8B" aria-hidden="true"></a> 熟練者ほど止める</h2>
+<p data-line="24" class="code-line">この挙動を理解すると、使い方が変わる。</p>
+<p data-line="26" class="code-line">Anthropicが2025〜2026年にかけて行った調査によると、Claude Codeの熟練ユーザーほど停止ボタンをよく使う。新規ユーザーが全ターンの5%で中断するのに対し、経験を積んだユーザーは9%まで増加する。</p>
+<p data-line="28" class="code-line">「使い込むほど怖くなる」のではなく、「停止して指示を修正する」ことが効率的だと学習している。</p>
+<p data-line="30" class="code-line">具体的な場面で言うと：</p>
+<ul data-line="32" class="code-line">
+<li data-line="32" class="code-line">Claudeが想定と違うファイルを読み始めた → 止めて「そっちじゃなくてXXを見て」と追加</li>
+<li data-line="33" class="code-line">複数メッセージに分けて指示を出している途中で先走られた → 止めて最初から言い直す</li>
+<li data-line="34" class="code-line">タイポを訂正したら新しい指示として解釈された → 止めて「訂正：〇〇」と明示して再送</li>
+</ul>
+<p data-line="36" class="code-line">停止はリセットではなく、「ちょっと待って、追加情報あり」の合図として使える。</p>
+<h2 id="%E3%81%9F%E3%81%A0%E3%81%97%E4%BF%A1%E9%A0%BC%E6%80%A7%E3%81%AF%E4%BD%8E%E3%81%84" data-line="38" class="code-line">
+<a class="header-anchor-link" href="#%E3%81%9F%E3%81%A0%E3%81%97%E4%BF%A1%E9%A0%BC%E6%80%A7%E3%81%AF%E4%BD%8E%E3%81%84" aria-hidden="true"></a> ただし信頼性は低い</h2>
+<p data-line="40" class="code-line">ESCキーは、ツール呼び出しが実行中のタイミングでは効かないことが多い。GitHubのIssueには以下のような報告がある：</p>
+<ul data-line="42" class="code-line">
+<li data-line="42" class="code-line">ESCを押すと赤いフィードバックは出るが、エージェントが止まらない（<a href="https://github.com/anthropics/claude-code/issues/3455" target="_blank" rel="nofollow noopener noreferrer">#3455</a>）</li>
+<li data-line="43" class="code-line">アクティブなツール呼び出し中はESCもCtrl+Cも無視される（<a href="https://github.com/anthropics/claude-code/issues/17466" target="_blank" rel="nofollow noopener noreferrer">#17466</a>）</li>
+<li data-line="44" class="code-line">セッションによっては一切効かない（<a href="https://github.com/anthropics/claude-code/issues/14526" target="_blank" rel="nofollow noopener noreferrer">#14526</a>）</li>
+</ul>
+<p data-line="46" class="code-line">「思考中」のフェーズなら止まりやすく、「ツール実行中」のフェーズは止まりにくい、というのが実態に近い。</p>
+<h2 id="%E5%AE%9F%E8%B7%B5%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" data-line="48" class="code-line">
+<a class="header-anchor-link" href="#%E5%AE%9F%E8%B7%B5%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" aria-hidden="true"></a> 実践パターン</h2>
+<p data-line="50" class="code-line">これを踏まえた上での使い方：</p>
+<ol data-line="52" class="code-line">
+<li data-line="52" class="code-line">
+<strong>思考フェーズで止める</strong> — ツールを呼ぶ前の段階が一番止まりやすい。ファイルを読み始めたらもう遅いと思っておく</li>
+<li data-line="53" class="code-line">
+<strong>複数メッセージに分けて指示を出すなら、止めてから送る</strong> — 「まだ続きがある」状態でClaudeが動き出すと混乱の元になる</li>
+<li data-line="54" class="code-line">
+<strong>タイポ訂正と新指示は区別を明示する</strong> — 短いメッセージは文脈から判断しにくい。訂正の場合は「訂正：〇〇」と添えると安全</li>
+<li data-line="55" class="code-line">
+<strong>止まらなかったときは諦める</strong> — ESCが効かない場合、完了を待ってから「〇〇は間違いだったので元に戻して」と指示する方が早い</li>
 </ol>
-<h2>まとめ</h2>
-<table>
-<thead>
-<tr>
+<h2 id="%E3%81%BE%E3%81%A8%E3%82%81" data-line="57" class="code-line">
+<a class="header-anchor-link" href="#%E3%81%BE%E3%81%A8%E3%82%81" aria-hidden="true"></a> まとめ</h2>
+<table data-line="59" class="code-line">
+<thead data-line="59" class="code-line">
+<tr data-line="59" class="code-line">
 <th>よくある誤解</th>
 <th>実際</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody data-line="61" class="code-line">
+<tr data-line="61" class="code-line">
 <td>停止＝リセット</td>
 <td>コンテキストはそのまま残る</td>
 </tr>
-<tr>
+<tr data-line="62" class="code-line">
 <td>停止＝アンドゥ</td>
 <td>実行済みの操作は巻き戻らない</td>
 </tr>
-<tr>
+<tr data-line="63" class="code-line">
 <td>怖いから押さない</td>
 <td>熟練者ほど積極的に使う</td>
 </tr>
-<tr>
+<tr data-line="64" class="code-line">
 <td>押せば必ず止まる</td>
 <td>ツール実行中は効かないことが多い</td>
 </tr>
 </tbody>
 </table>
-<p>停止ボタンは「壊れるかもしれないもの」ではなく、方向修正のための介入ポイントだ。ただし万能ではないので、効かなかった場合の代替手段も頭に入れておくとよい。</p>
+<p data-line="66" class="code-line">停止ボタンは「壊れるかもしれないもの」ではなく、方向修正のための介入ポイントだ。ただし万能ではないので、効かなかった場合の代替手段も頭に入れておくとよい。</p>
+
     <div class="source-link">初出: <a href="https://zenn.dev/orangewk/articles/claude-code-stop-button" target="_blank" rel="noopener">Zenn</a></div>
   </div>
 </main>
