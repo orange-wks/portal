@@ -46,6 +46,74 @@ def render_card(article):
       </div>
     </a>'''
 
+PORTAL_CSS = """
+    :root {
+      --bg: #f9f9f7;
+      --surface: #fff;
+      --text: #1a1a1a;
+      --muted: #888;
+      --border: #e5e5e5;
+      --accent: #e8622a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 3rem 2rem 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+    header p { margin-top: 0.4rem; color: var(--muted); font-size: 0.9rem; }
+    main { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 3rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-title:first-child { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .card-image { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: #f0ede8; }
+    .card-body { padding: 1.2rem 1.3rem 1.4rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+    .card-meta { font-size: 0.78rem; color: var(--muted); display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+    .card-tag { color: var(--accent); font-weight: 600; }
+    .card-badge { font-size: 0.7rem; font-weight: 700; padding: 0.1em 0.5em; border-radius: 3px; }
+    .card-badge--zenn { background: #3ea8ff22; color: #1a7fd4; }
+    .card-badge--qiita { background: #55c50022; color: #2d6a00; }
+    .card-title { font-size: 1rem; font-weight: 700; line-height: 1.5; }
+    .card-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-top: auto; padding-top: 0.4rem; }
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #1a1a1a; --surface: #222; --text: #d4d4d8; --muted: #666; --border: #333; }
+    }
+"""
+
 def render_section(title, articles):
     if not articles:
         return ''
@@ -84,10 +152,7 @@ BASE_CSS_PATH = os.path.join(BLOG_DIR, 'articles', 'llm-mechanism', 'index.html'
 
 def build():
     import re
-    with open(BASE_CSS_PATH, encoding='utf-8') as f:
-        base = f.read()
-    css_match = re.search(r'<style>(.*?)</style>', base, re.DOTALL)
-    base_css = css_match.group(1) if css_match else ''
+    base_css = PORTAL_CSS
 
     articles = load_articles()
     recent = [a for a in articles if a.get('section', 'recent') == 'recent']
