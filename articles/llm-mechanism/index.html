@@ -1,0 +1,1532 @@
+
+<!-- saved from url=(0259)https://296513045-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.ja.OSmOiv7CE2U.O%2Fd%3D1%2Frs%3DAHpOoo-f4WB8btJWkp_Egf9VekHj3Lxt0w%2Fm%3D__features__ -->
+<html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><!--<base target="_blank">--><base href="." target="_blank">
+
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLMの仕組み解説 - 対話形式で学ぶ</title>
+  <style>
+    :root {
+      --bg-color: #fafafa;
+      --text-color: #333;
+      --user-bg: #e3f2fd;
+      --user-border: #2196f3;
+      --ai-bg: #fff;
+      --ai-border: #4caf50;
+      --heading-color: #1a237e;
+      --code-bg: #f5f5f5;
+      --accent: #ff7043;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      line-height: 1.8;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 3px solid var(--heading-color);
+    }
+
+    header h1 {
+      color: var(--heading-color);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .chapter {
+      margin: 3rem 0;
+      padding-top: 1rem;
+      border-top: 2px solid #ddd;
+    }
+
+    .chapter h2 {
+      color: var(--heading-color);
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chapter h2::before {
+      content: "§";
+      color: var(--accent);
+    }
+
+    h3 {
+      color: #37474f;
+      font-size: 1.2rem;
+      margin: 2rem 0 1rem;
+      padding-left: 0.5rem;
+      border-left: 4px solid var(--accent);
+    }
+
+    h4 {
+      color: #546e7a;
+      font-size: 1.05rem;
+      margin: 1.5rem 0 0.8rem;
+    }
+
+    /* 対話スタイル */
+    .dialogue {
+      margin: 1.5rem 0;
+    }
+
+    .user {
+      background: var(--user-bg);
+      border-left: 4px solid var(--user-border);
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      font-weight: 500;
+    }
+
+    .user::before {
+      content: "🧑 質問";
+      display: block;
+      font-size: 0.8rem;
+      color: var(--user-border);
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+
+    .ai {
+      background: var(--ai-bg);
+      border: 1px solid #e0e0e0;
+      border-left: 4px solid var(--ai-border);
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .ai::before {
+      content: "🤖 回答";
+      display: block;
+      font-size: 0.8rem;
+      color: var(--ai-border);
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    /* 強調・装飾 */
+    .highlight {
+      background: linear-gradient(transparent 60%, #fff59d 60%);
+      font-weight: bold;
+    }
+
+    .keyword {
+      color: #d32f2f;
+      font-weight: bold;
+    }
+
+    .formula {
+      background: var(--code-bg);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+      font-family: "Consolas", "Monaco", monospace;
+      overflow-x: auto;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .example {
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+    }
+
+    .example-title {
+      font-weight: bold;
+      color: #e65100;
+      margin-bottom: 0.5rem;
+    }
+
+    /* 表 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background: #eceff1;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    /* リスト */
+    ul, ol {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin: 0.5rem 0;
+    }
+
+    /* まとめボックス */
+    .summary {
+      background: #e8f5e9;
+      border: 2px solid #81c784;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 8px;
+    }
+
+    .summary h4 {
+      color: #2e7d32;
+      margin-top: 0;
+      border: none;
+      padding: 0;
+    }
+
+    /* 比較ボックス */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .compare-item {
+      padding: 1rem;
+      border-radius: 6px;
+    }
+
+    .compare-before {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+    }
+
+    .compare-after {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+    }
+
+    .compare-label {
+      font-weight: bold;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .compare-before .compare-label { color: #c62828; }
+    .compare-after .compare-label { color: #2e7d32; }
+
+    /* コード風 */
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: "Consolas", "Monaco", monospace;
+      font-size: 0.9em;
+    }
+
+    /* フッター */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 2px solid #ddd;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    /* はじめに・目次 */
+    .intro {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+    }
+
+    .intro h2 {
+      color: var(--heading-color);
+      margin-top: 0;
+    }
+
+    .toc {
+      background: #f5f5f5;
+      padding: 1rem 1.5rem;
+      border-radius: 6px;
+      margin-top: 1.5rem;
+    }
+
+    .toc h3 {
+      margin: 0 0 0.5rem;
+      padding: 0;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .toc ol {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+
+    .toc li {
+      margin: 0.3rem 0;
+    }
+
+    .toc a {
+      color: var(--heading-color);
+      text-decoration: none;
+    }
+
+    .toc a:hover {
+      text-decoration: underline;
+    }
+
+    /* ダークモード - zenn風シンプル */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #d4d4d8;
+        --text-muted: #a1a1aa;
+        --user-bg: #252525;
+        --user-border: #3b82f6;
+        --ai-bg: #1f1f1f;
+        --ai-border: #52525b;
+        --heading-color: #7dd3fc;
+        --code-bg: #262626;
+        --accent: #3b82f6;
+        --border-color: #333;
+      }
+
+      body {
+        background: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      header {
+        border-bottom-color: var(--border-color);
+      }
+
+      header p {
+        color: var(--text-muted);
+      }
+
+      .intro {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+      }
+
+      .toc {
+        background: var(--code-bg);
+      }
+
+      .toc a {
+        color: var(--heading-color);
+      }
+
+      .chapter {
+        border-top-color: var(--border-color);
+      }
+
+      .user {
+        background: var(--user-bg);
+        border-left-color: var(--user-border);
+      }
+
+      .user::before {
+        color: var(--accent);
+      }
+
+      .ai {
+        background: var(--ai-bg);
+        border-color: var(--border-color);
+        border-left-color: var(--ai-border);
+      }
+
+      .ai::before {
+        color: var(--text-muted);
+      }
+
+      h3 {
+        color: var(--heading-color);
+        border-left-color: var(--accent);
+      }
+
+      h4 {
+        color: var(--text-muted);
+      }
+
+      .highlight {
+        background: linear-gradient(transparent 60%, rgba(59, 130, 246, 0.25) 60%);
+      }
+
+      .keyword {
+        color: var(--heading-color);
+      }
+
+      th, td {
+        border-color: var(--border-color);
+      }
+
+      th {
+        background: var(--code-bg);
+        color: var(--heading-color);
+      }
+
+      tr:nth-child(even) {
+        background: var(--ai-bg);
+      }
+
+      .summary {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .summary h4 {
+        color: var(--heading-color);
+      }
+
+      .example {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .example-title {
+        color: var(--text-muted);
+      }
+
+      .compare-before {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-before .compare-label {
+        color: var(--text-muted);
+      }
+
+      .compare-after {
+        background: var(--code-bg);
+        border-color: var(--border-color);
+      }
+
+      .compare-after .compare-label {
+        color: var(--text-muted);
+      }
+
+      .formula {
+        background: var(--code-bg);
+      }
+
+      code {
+        background: var(--code-bg);
+      }
+
+      footer {
+        border-top-color: var(--border-color);
+        color: var(--text-muted);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>LLMの仕組み解説</h1>
+  <p>対話形式で学ぶ大規模言語モデルの基礎</p>
+</header>
+
+<section class="intro">
+  <h2>はじめに</h2>
+  <p>この記事は、<strong>orangeさん</strong>が<strong>Gemini（Google AI）</strong>に「LLMって結局どう動いてるの？」と質問していった対話をまとめたものです。</p>
+  <p>専門用語を噛み砕きながら、ワードベクトルからRLHFまで一気に駆け抜けます。エンジニアでなくても読める内容を目指しつつ、詳しく知りたい人向けの補足も随所に入れています。</p>
+
+  <div class="toc">
+    <h3>目次</h3>
+    <ol>
+      <li>ワードベクトル — 言葉を数字に変える</li>
+      <li>ワードベクトルの具体的なデータ構造</li>
+      <li>未知の単語への対処 — サブワード分割</li>
+      <li>Attention機構 — 文脈を理解する仕組み</li>
+      <li>Transformer — AIの全体構造</li>
+      <li>事前学習 — AIに知識を叩き込む</li>
+      <li>確率の計算方法 — 記憶ではなく計算</li>
+      <li>パラメータと行列演算</li>
+      <li>誤差逆伝播 — 「罰」の仕組み</li>
+      <li>総まとめとファインチューニング</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<section class="chapter" id="ch1">
+  <h2>ワードベクトル — 言葉を数字に変える</h2>
+
+  <div class="dialogue">
+    <div class="user">
+      LLMの出発点っていうかワードベクトルという概念とデータの作り方を解説して
+    </div>
+
+    <div class="ai">
+      <p>LLM（大規模言語モデル）の「出発点」としてワードベクトルに着目するのは、非常に鋭い視点です！</p>
+
+      <p><span class="keyword">ワードベクトル（単語埋め込み）</span>は、<span class="highlight">「コンピュータに『言葉の意味』を数学的に理解させるための翻訳技術」</span>と言えます。これがないと、現在のAIは成立しません。</p>
+
+      <h3>そもそも「ワードベクトル」とは？</h3>
+      <p>コンピュータは計算機なので、「リンゴ」や「愛」といった文字そのものを理解することはできません。コンピュータが理解できるのは「数字」だけです。</p>
+      <p>そこで、言葉を「数字の列（ベクトル）」に変換します。</p>
+
+      <div class="compare">
+        <div class="compare-item compare-before">
+          <div class="compare-label">人間にとっての「王様」</div>
+          偉い人、男性、冠をかぶっている...
+        </div>
+        <div class="compare-item compare-after">
+          <div class="compare-label">コンピュータにとっての「王様」</div>
+          <code>[0.52, −1.23, 0.88, ...]</code>
+        </div>
+      </div>
+
+      <p>このように、ひとつの単語を数十〜数千個の数字の並びで表現したものが「ワードベクトル」です。</p>
+
+      <h4>なぜ「ベクトル（矢印/座標）」にするのか？</h4>
+      <p>ただの数字のID（例：リンゴ=1, ミカン=2）ではなく、<strong>ベクトル（座標）</strong>にすることで、「言葉の意味の近さ」を「距離」として計算できるようになるからです。</p>
+
+      <div class="example">
+        <div class="example-title">有名な例：王様の計算</div>
+        <p>ワードベクトルが画期的なのは、言葉で足し算・引き算ができる点です。</p>
+        <div class="formula">王様 − 男性 + 女性 = 女王</div>
+        <p>ベクトル空間（言葉の地図）の中で、「王様」という地点から「男性」成分を引き、「女性」成分を足すと、不思議なことに座標が「女王」の地点にピタリと重なるのです。</p>
+      </div>
+
+      <h3>どうやってデータを作るのか？（学習の仕組み）</h3>
+      <p>では、どうやって「王様」を <code>[0.52,...]</code> という具体的な数字にするのでしょうか？ 人間が一つ一つ数値を決めているわけではありません。<span class="highlight">AIが大量の文章を読んで自動的に決定します。</span></p>
+
+      <p>その基本的な考え方は、<span class="keyword">「分布仮説」</span>という言語学のルールに基づいています。</p>
+
+      <div class="example">
+        <div class="example-title">分布仮説</div>
+        「単語の意味は、その単語の『周囲にある単語』によって決まる」
+      </div>
+
+      <h4>データの作り方：穴埋め問題トレーニング</h4>
+      <p>AIに大量のテキスト（Wikipedia、ニュース、小説など）を読ませ、ひたすら<strong>「穴埋め問題」</strong>を解かせます。</p>
+
+      <div class="example">
+        <div class="example-title">例文</div>
+        「かわいい 猫 が こたつ で 丸くなる」
+      </div>
+
+      <p><strong>AIへの学習プロセス：</strong></p>
+      <ol>
+        <li><strong>ターゲット:</strong> 「猫」という単語に注目します。</li>
+        <li><strong>周囲を見る:</strong> 周りには「かわいい」「こたつ」「丸くなる」という単語があります。</li>
+        <li><strong>推測と調整:</strong> AIは、「かわいい」や「こたつ」の近くに来る単語は、どうやら「猫（のようなもの）」らしい、と学習します。</li>
+      </ol>
+
+      <p>もし、AIが適当な数字を持っていて「車」と予測したら、「違うよ、正解は猫だよ」と叱られます。するとAIは、「猫」のベクトル（数値）を、少しだけ「かわいい」や「こたつ」のベクトルに近づけます。</p>
+
+      <p>これを何億回、何兆回と繰り返すと、最終的に以下のような「意味の地図」が出来上がります。</p>
+      <ul>
+        <li><strong>「猫」と「犬」:</strong> どちらも「かわいい」「走る」「ペット」などの近くに現れるので、ベクトル（座標）が近くなる。</li>
+        <li><strong>「猫」と「冷蔵庫」:</strong> 一緒に使われることが少ないので、座標は遠くなる。</li>
+      </ul>
+
+      <h3>LLMへの進化</h3>
+      <p>ワードベクトルは「単語の意味」を捉えることに成功しましたが、これだけでは今のChatGPTのような対話はできません。</p>
+
+      <div class="compare">
+        <div class="compare-item compare-before">
+          <div class="compare-label">ワードベクトルの限界</div>
+          「銀行（Bank）」と「土手（Bank）」のように、同じ単語でも文脈によって意味が変わる場合、昔のワードベクトル（Word2Vecなど）では区別できませんでした。
+        </div>
+        <div class="compare-item compare-after">
+          <div class="compare-label">LLM（Transformer）の登場</div>
+          最新のLLMは、単語を固定されたベクトルとして見るだけでなく、「その文の中で、どの単語と強く結びついているか（Attention機構）」を計算します。
+        </div>
+      </div>
+
+      <div class="summary">
+        <h4>まとめ</h4>
+        <ul>
+          <li><strong>ワードベクトルとは：</strong> 言葉を「数字の座標」に変換し、意味の近さを計算できるようにしたもの。</li>
+          <li><strong>データの作り方：</strong> 大量の文章を読み、「その単語の周りにどんな単語があるか」という統計データから、自動的に座標（数値）を調整していく。</li>
+        </ul>
+        <p>ここが出発点となり、「単語」の理解から「文脈」の理解へとAIは進化していきました。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<section class="chapter" id="ch2">
+  <h2>ワードベクトルの具体的なデータ構造</h2>
+
+  <div class="dialogue">
+    <div class="user">
+      ワードベクトルってどんなデータ？ 辞書サイズとか 次元数とか
+    </div>
+
+    <div class="ai">
+      <p>ワードベクトルの中身は、ざっくり言うと<span class="highlight">「巨大な乱数表（エクセルのような表）」</span>です。</p>
+      <p>専門用語では<span class="keyword">「埋め込み行列（Embedding Matrix）」</span>と呼びます。</p>
+
+      <h3>データの見た目（イメージ）</h3>
+      <p>頭の中で巨大なエクセル表を思い浮かべてください。</p>
+      <ul>
+        <li><strong>行（タテ）：</strong> 辞書にある単語（トークン）のリスト</li>
+        <li><strong>列（ヨコ）：</strong> その単語の意味を表す数値の列（次元数）</li>
+      </ul>
+
+      <table>
+        <tbody><tr>
+          <th>ID</th>
+          <th>単語 (Token)</th>
+          <th>次元1</th>
+          <th>次元2</th>
+          <th>次元3</th>
+          <th>...</th>
+          <th>次元4096</th>
+        </tr>
+        <tr>
+          <td>0</td>
+          <td>&lt;unk&gt;</td>
+          <td>0.012</td>
+          <td>-0.982</td>
+          <td>0.332</td>
+          <td>...</td>
+          <td>0.115</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>の</td>
+          <td>0.552</td>
+          <td>0.123</td>
+          <td>-0.005</td>
+          <td>...</td>
+          <td>-1.221</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>猫</td>
+          <td>0.882</td>
+          <td>-0.551</td>
+          <td>0.993</td>
+          <td>...</td>
+          <td>0.441</td>
+        </tr>
+        <tr>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <td>128000</td>
+          <td>宇宙</td>
+          <td>0.119</td>
+          <td>-0.332</td>
+          <td>1.552</td>
+          <td>...</td>
+          <td>-0.991</td>
+        </tr>
+      </tbody></table>
+
+      <p>コンピュータに「猫」と入力されると、AIはこの表の「2番」の行を見に行き、そこに書かれている横一列の数字（ベクトル）を引っ張り出してきます。これが「ワードベクトル」の正体です。</p>
+
+      <h3>辞書サイズ（行数）：単語はいくつある？</h3>
+      <p>ここが面白いところで、昔と今で考え方が逆転しています。</p>
+
+      <table>
+        <tbody><tr>
+          <th>時代</th>
+          <th>辞書サイズ</th>
+          <th>備考</th>
+        </tr>
+        <tr>
+          <td>昔（Word2Vecなど）</td>
+          <td>約300万語</td>
+          <td>「走る」「走ります」「走れば」を全部別の単語として登録</td>
+        </tr>
+        <tr>
+          <td>今（Llama 3）</td>
+          <td>128,256 トークン</td>
+          <td>Subword技術で効率化</td>
+        </tr>
+        <tr>
+          <td>今（GPT-4）</td>
+          <td>約 100,256 トークン</td>
+          <td>Subword技術で効率化</td>
+        </tr>
+      </tbody></table>
+
+      <p><strong>なぜ減った？:</strong> 「Subword（サブワード）」という技術を使うようになったからです。「Unhappiness」を「Un」+「happi」+「ness」のように部品に分解して覚えるため、少ない辞書サイズで無限の言葉に対応できるようになりました。</p>
+
+      <h3>次元数（列数）：数字の列はどれくらい長い？</h3>
+      <p>次元数は<span class="highlight">「意味の解像度」</span>だと思ってください。数字が多ければ多いほど、微妙なニュアンスを区別できます。</p>
+
+      <table>
+        <tbody><tr>
+          <th>モデル</th>
+          <th>次元数</th>
+          <th>特徴</th>
+        </tr>
+        <tr>
+          <td>Word2Vec（昔）</td>
+          <td>300次元</td>
+          <td>画期的だが、同音異義語の区別は困難</td>
+        </tr>
+        <tr>
+          <td>Llama 3 (8B)</td>
+          <td>4,096次元</td>
+          <td>高度な意味表現が可能</td>
+        </tr>
+        <tr>
+          <td>GPT-3 (175B)</td>
+          <td>12,288次元</td>
+          <td>皮肉や文脈依存の意味も表現</td>
+        </tr>
+      </tbody></table>
+
+      <h3>データ容量はどれくらい？</h3>
+      <p>実際にこの「表」がどれくらいのデータサイズになるか計算してみましょう（Llama 3 8Bの場合）。</p>
+
+      <div class="formula">
+        辞書サイズ (128,256) × 次元数 (4,096) × データサイズ (2バイト/数値) ≒ <strong>約 1GB</strong>
+      </div>
+
+      <p>80億パラメータ（8B）あるモデル全体の中で、最初の「言葉を数字に変換する辞書」だけで1GBも容量を使っているわけです。ここがLLMの知識の土台となります。</p>
+
+      <div class="summary">
+        <h4>まとめ</h4>
+        <ul>
+          <li><strong>データ構造:</strong> 巨大な数値の表（行列）</li>
+          <li><strong>辞書サイズ:</strong> 最近は10万前後（部品で覚えるから効率的）</li>
+          <li><strong>次元数:</strong> 最近は4,000〜12,000（超高解像度）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<section class="chapter" id="ch3">
+  <h2>未知の単語への対処 — サブワード分割</h2>
+
+  <div class="dialogue">
+    <div class="user">
+      知らない単語ってどう扱ってるの？　なんでも辞書に詰めておけないよね？
+    </div>
+
+    <div class="ai">
+      <p>昔のAIにとって、辞書にない言葉は<strong>「未知の単語（Unknown）」</strong>としてエラー扱い（または &lt;unk&gt; という記号に変換）され、そこで思考停止していました。</p>
+
+      <p>しかし、<span class="highlight">今のLLMには「未知の単語」は実質的に存在しません。</span>そのカラクリは、<span class="keyword">「言葉のレゴブロック化（サブワード）」</span>という手法にあります。</p>
+
+      <h3>レゴブロック戦略（Subword Tokenization）</h3>
+      <p>LLMは、辞書にない難しい単語に出会ったとき、諦めるのではなく<strong>「知っている単位まで分解」</strong>します。</p>
+
+      <div class="example">
+        <div class="example-title">例：「スマホ中毒」が辞書にない場合</div>
+        <ol>
+          <li><strong>検索:</strong> 「スマホ中毒」はあるか？ → ❌ ない</li>
+          <li><strong>分解:</strong>
+            <ul>
+              <li>「スマホ」はあるか？ → ⭕️ ある！（ID: 3422）</li>
+              <li>「中毒」はあるか？ → ⭕️ ある！（ID: 5911）</li>
+            </ul>
+          </li>
+          <li><strong>解決:</strong> 「スマホ」＋「中毒」という2つのベクトルの組み合わせとして処理</li>
+        </ol>
+      </div>
+
+      <p>これが、辞書サイズが小さくても（約10万語）、世の中のあらゆる言葉に対応できる理由です。</p>
+
+      <h3>具体的な分割の例</h3>
+
+      <h4>例1：複合語や活用形</h4>
+      <div class="example">
+        <p>「食べ歩き」が辞書にない場合：</p>
+        <div class="formula">「食べ」 + 「歩き」</div>
+        <p>それぞれの意味（ベクトル）は持っているので、「食べて、歩くことだな」と意味を合成できます。</p>
+      </div>
+
+      <h4>例2：英語の長い単語</h4>
+      <div class="example">
+        <p>「Unfriendliness（不愛想）」が辞書にない場合：</p>
+        <div class="formula">"Un" (否定) + "friend" (友) + "li" (接尾辞) + "ness" (名詞化)</div>
+        <p>接頭辞や接尾辞レベルまで分解すれば、初めて見る単語でも「友好的じゃないことだな」と推測できます。</p>
+      </div>
+
+      <h4>例3：完全な造語や謎の文字列</h4>
+      <div class="example">
+        <p>「XyZ123」のような無意味な文字列の場合：</p>
+        <div class="formula">"X" + "y" + "Z" + "1" + "2" + "3"</div>
+        <p>最悪の場合、<strong>アルファベット1文字（バイト単位）</strong>まで分解します。文字単位のベクトルは必ず持っているので、エラーにならずに処理できます。</p>
+      </div>
+
+      <h3>この仕組みの凄さ</h3>
+      <p>この「分解アプローチ」のおかげで、LLMは以下のことができるようになりました。</p>
+      <ul>
+        <li><strong>新語・造語への対応:</strong> 「ググる」「インスタ映え」などが辞書になくても、「ググ（Googleっぽさ）」＋「る（動詞）」のように分解してなんとなく理解します。</li>
+        <li><strong>プログラミングコードの理解:</strong> <code>print_hello_world</code> のような変数名も <code>print</code> <code>hello</code> <code>world</code> に分解して意味を理解します。</li>
+        <li><strong>多言語対応:</strong> 日本語も英語も中国語も、同じ「レゴブロック（トークン）」の組み合わせとして処理できるため、言語の壁を越えやすくなりました。</li>
+      </ul>
+
+      <div class="summary">
+        <h4>まとめ</h4>
+        <ul>
+          <li><strong>昔:</strong> 辞書にない言葉 → エラー（未知語）</li>
+          <li><strong>今:</strong> 辞書にない言葉 → 「知っている部品（サブワード）」にバラして理解する</li>
+        </ul>
+        <p>こうして、どんなテキストが来ても、とりあえずすべて「ベクトル（数字）」に変換して取り込む準備が整いました。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<section class="chapter" id="ch4">
+  <h2>Attention機構 — 文脈を理解する仕組み</h2>
+
+  <div class="dialogue">
+    <div class="user">
+      （単語が解っても文章の理解にはなってないよね？　どうやって「理解」してるの？＞Attention機構です＞それを実現しているというAttention機構について教えて（お願いします）
+    </div>
+
+    <div class="ai">
+      <p>ここがLLM（大規模言語モデル）の一番の山場であり、最重要ポイントです。</p>
+
+      <p><span class="keyword">Attention（アテンション）機構</span>。一言でいうと、これは<span class="highlight">単語同士の「会議」</span>です。</p>
+
+      <p>これまで作った「ワードベクトル」は、まだ「辞書に載っている固定の意味」しか持っていません。Attentionは、これらを<strong>「文脈に合わせた意味」</strong>に変化させる魔法です。</p>
+
+      <h3>なぜAttentionが必要なのか？（Before / After）</h3>
+
+      <div class="compare">
+        <div class="compare-item compare-before">
+          <div class="compare-label">Before (Word2Vec)</div>
+          <p>「Bank（銀行）」という単語は、どんな文の中でも常に同じベクトル（数値）でした。</p>
+          <ul>
+            <li>例文A：「Bankにお金を預ける」</li>
+            <li>例文B：「川のBank（土手）を歩く」</li>
+          </ul>
+          <p>AIの悩み：「どっちのBankかわからない…数値が一緒だから区別できない！」</p>
+        </div>
+        <div class="compare-item compare-after">
+          <div class="compare-label">After (Transformer / LLM)</div>
+          <p>Attentionを使うと、文脈によってベクトルの中身が書き換わります。</p>
+          <ul>
+            <li>例文AのBank → 「金融機関」成分が強化されたベクトルに変身</li>
+            <li>例文BのBank → 「地形」成分が強化されたベクトルに変身</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Attentionの仕組み：単語同士の「スポットライト」</h3>
+      <p>イメージしてください。真っ暗な部屋に、単語たちが一列に並んでいます。</p>
+
+      <div class="example">
+        <div class="example-title">例文</div>
+        「彼は　猫が　好きだ」
+      </div>
+
+      <p><strong>「彼」のターン：</strong></p>
+      <ol>
+        <li>「彼」という単語がスポットライト（Attention）を持って、周りの単語を照らします。</li>
+        <li>「自分（彼）の意味をハッキリさせるために、重要な単語はどれだ？」と探します。</li>
+        <li>この文では、「好きだ」という単語に強い光（注目）を当てます。「誰が」と「どうした」は関係が深いからです。</li>
+      </ol>
+
+      <p><strong>情報の吸収（ミキシング）：</strong></p>
+      <p>「彼」は、「好きだ」という単語から<strong>「感情」や「動作」という意味（ベクトル成分）を少し吸い取ります</strong>。</p>
+      <p>すると、「彼」というベクトルは、ただの「男性」という意味から、「猫が好きな男性」という文脈を含んだベクトルに進化します。</p>
+      <p><strong>これを、すべての単語が同時に、お互いに対して行います。</strong></p>
+
+      <h3>ちょっと専門的な話（Q, K, V）</h3>
+      <p>この「スポットライト」の計算を、数学（行列計算）では<span class="keyword">「Q, K, V（クエリ・キー・バリュー）」</span>という3つの役割で行います。</p>
+
+      <table>
+        <tbody><tr>
+          <th>役割</th>
+          <th>英語</th>
+          <th>説明</th>
+        </tr>
+        <tr>
+          <td>探す人</td>
+          <td>Query (Q)</td>
+          <td>「私の意味を補完してくれる情報はどこ？」と問い合わせる係</td>
+        </tr>
+        <tr>
+          <td>目印</td>
+          <td>Key (K)</td>
+          <td>「私はこういう単語ですよ」と看板を掲げている係</td>
+        </tr>
+        <tr>
+          <td>中身</td>
+          <td>Value (V)</td>
+          <td>その単語が持っている実際の意味内容</td>
+        </tr>
+      </tbody></table>
+
+      <p><strong>処理の流れ：</strong></p>
+      <ol>
+        <li>ある単語の Q が、全員の K と照合（内積）します。</li>
+        <li>相性が良い（関連性が高い）ほど、スコアが高くなります。</li>
+        <li>スコアが高い単語の V（中身）を、たくさん取り込みます。</li>
+      </ol>
+
+      <div class="formula">
+        Attention(Q, K, V) = softmax( QK<sup>T</sup> / √d<sub>k</sub> ) V
+      </div>
+
+      <p>この数式は、「関連度（QK）を計算して、その重み分だけ中身（V）を混ぜ合わせる」という意味です。</p>
+
+      <h3>具体例：代名詞の謎を解く</h3>
+      <p>Attentionが最も威力を発揮するのは、代名詞（それ、彼、これ）の解釈です。</p>
+
+      <div class="example">
+        <div class="example-title">例文</div>
+        「その動物は道路を渡らなかった。なぜなら<strong>それ</strong>は疲れすぎていたからだ。」
+      </div>
+
+      <p>人間なら、「それ＝動物」だとわかりますよね？ でも、文の構造だけだと「それ＝道路」の可能性もあります。</p>
+
+      <p><strong>LLM（Attention）の頭の中：</strong></p>
+      <ol>
+        <li>「それ（it）」という単語が周りを見渡します。</li>
+        <li>候補は「動物」と「道路」。</li>
+        <li>文脈の手がかりは「疲れすぎていた（tired）」。</li>
+        <li>LLMの知識：「道路は疲れない。動物は疲れる。」</li>
+        <li>結果：「それ」から「動物」へのAttention（注目度）が強くなり、「それ」のベクトルは「動物」の意味を強く帯びるようになります。</li>
+      </ol>
+
+      <div class="summary">
+        <h4>まとめ</h4>
+        <ul>
+          <li><strong>ワードベクトル（出発点）：</strong> 辞書にある「固定の意味」</li>
+          <li><strong>Attention（加工プロセス）：</strong> 周りの単語を見て、「文脈に応じた意味」にベクトルを書き換える機能</li>
+        </ul>
+        <p>このAttentionを何層も（例えば96層とか）積み重ねることで、AIは「単語の意味」だけでなく、「文章全体の意図」や「行間」まで理解できるようになったのです。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<section class="chapter" id="ch5">
+  <h2>Transformer — AIの全体構造</h2>
+
+  <div class="dialogue">
+    <div class="user">
+      Transformer全体はどういう構造になっているの？　積み重ねて、どうするの？
+    </div>
+
+    <div class="ai">
+      <p>では、最強のAIアーキテクチャである<span class="keyword">「Transformer（トランスフォーマー）」</span>の全体構造について解説します。</p>
+
+      <p>これまで解説した「ワードベクトル」や「Attention」は、あくまで部品です。これらをどう組み立てれば、ChatGPTのような巨大な知能になるのか？</p>
+
+      <p>その姿は、<span class="highlight">「超高層ビル」</span>に例えると非常に分かりやすくなります。</p>
+
+      <h3>Transformerの全体像：96階建てのオフィスビル</h3>
+      <p>最新のLLM（例えばGPT-4クラス）は、同じ構造の「ブロック（層）」を何十回も積み重ねた構造をしています。</p>
+
+      <p>イメージしてください。ここには、言葉を処理する専門家たちが働く<strong>「96階建てのビル」</strong>があります。</p>
+
+      <table>
+        <tbody><tr>
+          <th>階層</th>
+          <th>役割</th>
+        </tr>
+        <tr>
+          <td>1階（入力）</td>
+          <td>「猫」などの単語が入ってきます</td>
+        </tr>
+        <tr>
+          <td>低層階</td>
+          <td>文法や、単語同士の単純な関係（「猫」は主語だな、など）を処理</td>
+        </tr>
+        <tr>
+          <td>中層階</td>
+          <td>もう少し深い意味（「猫」と「かわいい」の関係など）を理解</td>
+        </tr>
+        <tr>
+          <td>高層階</td>
+          <td>文脈、論理、皮肉、意図といった高度な概念を処理</td>
+        </tr>
+        <tr>
+          <td>屋上（出力）</td>
+          <td>最終的に「次にくる単語は『丸くなる』だ！」と確率を出します</td>
+        </tr>
+      </tbody></table>
+
+      <p>昔のAIは数階建てでしたが、今のLLMは<strong>層を深く（Deepに）</strong>することで、人間のような深い思考を可能にしています。これが「ディープラーニング」と呼ばれる所以です。</p>
+
+      <h3>ひとつの「階（ブロック）」の中身</h3>
+      <p>では、このビルの<strong>「1つのフロア」</strong>の中では何が行われているのでしょうか？ どの階も基本的には同じ間取りで、大きく<strong>2つの部屋（機能）</strong>があります。</p>
+
+      <h4>部屋A：Attention（会議室）</h4>
+      <ul>
+        <li><strong>役割：</strong> 「周りの情報を集める」</li>
+        <li>さっき解説した機能です。単語同士が話し合い、「彼は」が「好きだ」と関係している、といった文脈情報を整理します。</li>
+        <li>ここでは、あくまで「今、入力された文章の中での関係」を処理します。</li>
+      </ul>
+
+      <h4>部屋B：Feed-Forward Network（個人の作業デスク）</h4>
+      <ul>
+        <li><strong>役割：</strong> 「知識を思い出す・加工する」</li>
+        <li>Attentionで周りの状況を把握した後、その情報を個別に持ち帰り、自分の頭の中にある<strong>「知識」</strong>と照らし合わせます。</li>
+        <li>実は、AIが学習した<strong>「事実や知識（フランスの首都はパリ、など）」の多くは、この部屋（のパラメータ）に保存されている</strong>と言われています。</li>
+      </ul>
+
+      <div class="formula">
+        入力 → 【会議室で文脈理解(Attention)】 → 【デスクで知識適用(FFN)】 → 次の階へ
+      </div>
+
+      <p>これを96回（96層）繰り返すことで、情報はどんどん洗練されていきます。</p>
+
+      <h3>GPTは「Decoder」という片割れ</h3>
+      <p>実は、2017年に発表されたオリジナルのTransformerには、2つの塔がありました。</p>
+
+      <table>
+        <tbody><tr>
+          <th>構成要素</th>
+          <th>役割</th>
+          <th>使用例</th>
+        </tr>
+        <tr>
+          <td>Encoder（エンコーダー）</td>
+          <td>文章を「読む・理解する」専門の塔</td>
+          <td>BERT</td>
+        </tr>
+        <tr>
+          <td>Decoder（デコーダー）</td>
+          <td>文章を「書く・生成する」専門の塔</td>
+          <td>GPT</td>
+        </tr>
+      </tbody></table>
+
+      <p>ChatGPTなどのGPTシリーズは、このうち<strong>「Decoder（書く塔）」だけ</strong>を巨大化させたモデルです。「ひたすら次の単語を予測して書き続ける」ことに特化させた結果、逆に「書くためには深く理解しないといけない」という進化を遂げ、理解力も手に入れました。</p>
+
+      <h3>忘れてはいけない「位置エンコーディング」</h3>
+      <p>Transformerには一つだけ弱点があります。それは、<strong>「一度に文章全体を見るため、順番がわからない」</strong>ことです。</p>
+
+      <div class="example">
+        <p>以下の2つの文は、含まれる単語のセットは同じですが意味が全く違います：</p>
+        <ul>
+          <li>「犬 が 猫 を 噛んだ」</li>
+          <li>「猫 が 犬 を 噛んだ」</li>
+        </ul>
+      </div>
+
+      <p>Attention機能だけだと、この2つの区別がつきにくくなります。そこで、データの入り口（1階）で、各単語に<span class="keyword">「番号札（Positional Encoding）」</span>を貼り付けます。</p>
+
+      <div class="formula">
+        犬（1番目） → が（2番目） → 猫（3番目） → を（4番目） → 噛んだ（5番目）
+      </div>
+
+      <p>この番号札があるおかげで、LLMは語順を理解できるのです。</p>
+
+      <div class="summary">
+        <h4>構造のまとめ</h4>
+        <p>LLM（Transformer）の構造を一言で言うなら：</p>
+        <p><strong>「単語の位置情報をつけたベクトルを、『文脈理解（Attention）』と『知識処理（FFN）』のセットに何十回も通して、徐々に意味を深くしていく巨大な多層ビル」</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<section class="chapter" id="ch6">
+  <h2>事前学習 — AIに知識を叩き込む</h2>
+
+  <div class="dialogue">
+    <div class="user">
+      ここまでの話って、単語をどう理解するか文章をどう理解するか、だけど、どうやって「知識」をAIに教え込むの？　単語の意味がいくらわかっても、ハリー・ポッターの出だし渡しだけで続き書けないよね？
+    </div>
+
+    <div class="ai">
+      <p>いよいよ、<span class="keyword">「事前学習（Pre-training）」</span>の解説です。</p>
+
+      <p>ビル（Transformer）を建てただけでは、中のAIはまだ「あー」とか「うー」しか言えない赤ちゃんの状態です。ここに、インターネット上のあらゆる知識を詰め込むプロセスが事前学習です。</p>
+
+      <p>これは、<span class="highlight">人間が何年もかけて学校に通うプロセスを、数ヶ月で一気に終わらせる</span>ような壮絶な工程です。</p>
+
+      <h3>学習の方法：ひたすら「次単語予測」</h3>
+      <p>AIは、人間のように教科書を読んで「ふむふむ、1192年に鎌倉幕府ができたのか」と覚えるわけではありません。</p>
+      <p>AIがやることはたった一つ、<span class="keyword">「次の単語当てゲーム」</span>です。</p>
+
+      <div class="example">
+        <div class="example-title">学習のルール</div>
+        「昔々、あるところに、おじいさんと【？】がいました」
+      </div>
+
+      <ol>
+        <li><strong>隠す:</strong> AIに文章の続き（【？】の部分）を隠して見せます。</li>
+        <li><strong>予測:</strong> AIは今の知識（最初は適当な乱数）で予測します。
+          <div class="example">AIの回答：「...戦車？」</div>
+        </li>
+        <li><strong>答え合わせ:</strong> 正解を見せます。
+          <div class="example">正解：「おばあさん」</div>
+        </li>
+        <li><strong>叱る（誤差逆伝播）:</strong> 「違う！『昔話』の文脈で『おじいさん』ときたら、高い確率で『おばあさん』だ！」と、AIの脳神経（パラメータ）を修正します。</li>
+      </ol>
+
+      <p>これを、Wikipedia、ニュース記事、ブログ、論文、プログラムコードなど、<strong>数兆単語（Token）</strong>にわたって繰り返します。</p>
+
+      <h3>「知識」ではなく「確率」を覚える</h3>
+      <p>ここが面白い点ですが、AIは知識を「事実」として暗記しているわけではありません。<span class="highlight">「確率的な繋がり」として圧縮して覚えています。</span></p>
+
+      <div class="compare">
+        <div class="compare-item compare-before">
+          <div class="compare-label">人間</div>
+          「日本の首都は東京」という事実を覚える
+        </div>
+        <div class="compare-item compare-after">
+          <div class="compare-label">AI</div>
+          「『日本の首都は』という単語の列が来たら、次に『東京』という単語が来る確率が99.8%だ」というパターンを覚える
+        </div>
+      </div>
+
+      <p>結果的に、歴史も数学もプログラミングも、すべて「単語の確率パズル」として習得してしまいます。このプロセスは、インターネット全体の情報を、巨大な関数（モデル）の中に<strong>「圧縮」</strong>しているとも言えます。</p>
+
+      <h3>コストと規模：電気代だけで数億円</h3>
+      <p>この「事前学習」は、とてつもない計算量が必要です。</p>
+
+      <table>
+        <tbody><tr>
+          <th>項目</th>
+          <th>規模</th>
+        </tr>
+        <tr>
+          <td>GPU（計算機）</td>
+          <td>NVIDIAの最高級GPU（H100など）を数千枚〜数万枚使用</td>
+        </tr>
+        <tr>
+          <td>期間</td>
+          <td>数ヶ月間、24時間フル稼働</td>
+        </tr>
+        <tr>
+          <td>コスト</td>
+          <td>電気代と機材費で、一回の学習に数十億円〜百億円以上</td>
+        </tr>
+      </tbody></table>
+
+      <p>これが、GoogleやOpenAIなどの「ビッグ・テック」しか高性能な基盤モデル（Foundation Model）を作れない理由です。</p>
+
+      <h3>出来上がるもの：「Base Model（ベースモデル）」</h3>
+      <p>こうして数ヶ月の特訓を経て完成したAIを<span class="keyword">「Base Model（ベースモデル）」</span>と呼びます。（例：GPT-4 Base, Llama 3 Baseなど）</p>
+
+      <p>しかし、実はこの時点では、<strong>AIはまだ「チャット（会話）」ができません。</strong>ただの「続きを書くマシーン」だからです。</p>
+
+      <div class="example">
+        <div class="example-title">Base Modelとの会話例</div>
+        <p><strong>人間:</strong> 「おいしいカレーの作り方を教えて」</p>
+        <p><strong>Base Model:</strong> 「...そして、おいしい肉じゃがの作り方はこちら。」</p>
+        <p style="color: #666; font-size: 0.9em;">（解説）AIは「質問に答える」という使命を知りません。ネット上の「レシピ記事の羅列」を学習しているので、「カレーのレシピの次には、他の料理のレシピが続くことが多い」という確率に従って、勝手に続きを書いてしまうのです。</p>
+      </div>
+
+      <div class="summary">
+        <h4>まとめ</h4>
+        <ul>
+          <li><strong>やることは一つ:</strong> ひたすら「次の単語」を予測し続ける</li>
+          <li><strong>規模:</strong> ネット上の数兆語のテキストを読み込む</li>
+          <li><strong>成果物:</strong> 知識は凄いが、空気の読めない「続きを書くマシーン（Base Model）」が完成する</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<section class="chapter" id="ch7">
+  <h2>確率の計算方法 — 記憶ではなく計算</h2>
+
+  <div class="dialogue">
+    <div class="user">
+      次の単語の確率はどこに書いておくの？　膨大な組み合わせについて確率を全て準備するの？
+    </div>
+
+    <div class="ai">
+      <p>いい質問ですね！そこが人間の直感と、AI（ニューラルネットワーク）の仕組みが決定的に違うところです。</p>
+
+      <p>結論から言うと、<span class="highlight">確率は「どこにも書いてありません」。そして、膨大な組み合わせの確率表も「準備していません」。</span></p>
+
+      <p>もし「全ての組み合わせの確率表」を作ろうとしたら、宇宙にある原子の数よりも多くの紙が必要になり、物理的に不可能です。</p>
+
+      <p>ではどうしているのか？ <span class="keyword">「保存している」のではなく、「その場で毎回計算している（算出している）」</span>のです。</p>
+
+      <h3>「辞書」ではなく「計算機（関数）」</h3>
+      <p>AIの中身は、巨大な「対応表（データベース）」だと思われがちですが、実際は巨大な<strong>「計算式（関数）」</strong>です。</p>
+
+      <div class="compare">
+        <div class="compare-item compare-before">
+          <div class="compare-label">対応表方式（辞書）</div>
+          <p>かけ算の答えを全部メモしておく方法。</p>
+          <p>「2×3=6」「2×4=8」……「987×654=…」</p>
+          <p>これだと、桁が増えると無限にメモが必要になりますよね？</p>
+        </div>
+        <div class="compare-item compare-after">
+          <div class="compare-label">計算式方式（LLMはこちら）</div>
+          <p>「かけ算のやり方（筆算のルール）」だけを覚える方法。</p>
+          <p>これなら、「12345×67890」という見たことのない問題が来ても、その場で計算して答えを出せます。</p>
+        </div>
+      </div>
+
+      <p>LLMもこれと同じです。「この単語の並びが来たら、次はこれ」というリストを持っているのではなく、<strong>「今までの文脈を入力すると、次の単語の確率が出力される」という超複雑な計算式（パラメータの塊）</strong>を持っています。</p>
+
+      <h3>確率が出る瞬間の仕組み（Softmax層）</h3>
+      <p>では、どうやって計算結果が「確率」になるのでしょうか？ LLMの最後の最後、96階建てのビルの「屋上」で行われている処理を見てみましょう。</p>
+
+      <p>AIの辞書に単語が<strong>5万個</strong>あるとします。</p>
+
+      <ol>
+        <li><strong>入力:</strong> 「日本の首都は」という文章がビルに入ります。</li>
+        <li><strong>計算:</strong> 96層のフロアを通る過程で、ベクトル（数値）がこねくり回されます。</li>
+        <li><strong>出力（ロジット）:</strong> 最終層から、5万個の数字がドサッと出てきます。これはまだ確率（％）ではなく、ただのスコアです。
+          <table>
+            <tbody><tr><th>単語</th><th>スコア</th></tr>
+            <tr><td>東京</td><td>15.2</td></tr>
+            <tr><td>大阪</td><td>8.4</td></tr>
+            <tr><td>バナナ</td><td>-5.3</td></tr>
+            <tr><td>空</td><td>0.1</td></tr>
+            <tr><td>...（残り49,996個）</td><td>...</td></tr>
+          </tbody></table>
+        </li>
+        <li><strong>変換（Softmax関数）:</strong> この5万個のスコアを、全部足すと100%（1.0）になるように変換します。
+          <table>
+            <tbody><tr><th>単語</th><th>確率</th></tr>
+            <tr><td>東京</td><td>95.5%</td></tr>
+            <tr><td>大阪</td><td>3.2%</td></tr>
+            <tr><td>バナナ</td><td>0.00001%</td></tr>
+            <tr><td>...</td><td>...</td></tr>
+          </tbody></table>
+        </li>
+      </ol>
+
+      <p>こうして、その瞬間に計算された5万個の確率の中から、サイコロを振って（あるいは一番高いものを選んで）次の単語を決定します。</p>
+
+      <h3>1単語ずつ生成される仕組み</h3>
+      <p>重要なのは、LLMは<strong>1トークンずつ</strong>しか生成できないということです。「日本の首都は」と入力すると、まず「東京」が出力され、次に「です」が出力され…という具合に、1つずつ順番に出てきます。</p>
+
+      <p>そして、新しいトークンが生成されるたびに、<strong>Attention機構が全体に対して再計算</strong>されます。つまり：</p>
+      <ol>
+        <li>「日本の首都は」→ Attentionで文脈を理解 → 「東京」を生成</li>
+        <li>「日本の首都は東京」→ <strong>Attentionを再計算</strong>して文脈を更新 → 「です」を生成</li>
+        <li>「日本の首都は東京です」→ <strong>また再計算</strong> → 「。」を生成</li>
+      </ol>
+
+      <p>このように、1単語増えるごとにAttentionが「今までの全体」を見直して、次の1単語を決めています。長い文章を書くときも、毎回この計算を繰り返しているのです。</p>
+
+      <h3>なぜ「見たことない文章」でも続きが書けるのか？</h3>
+      <p>「確率表」を持っていないからこそ、LLMは柔軟なんです。</p>
+
+      <p>もし確率表方式だったら、「昔々、あるところに、ピンク色の象とダンスが大好きなおじいさんがいました」という文章が来た瞬間、「そんな例文はリストにない！」と停止してしまいます。</p>
+
+      <p>しかしLLMは計算式なので：</p>
+      <ul>
+        <li>「ダンスが大好き」 → 「楽しい」「踊る」という要素を加点</li>
+        <li>「おじいさん」 → 「高齢」「男性」という要素を加点</li>
+        <li>それらを総合して計算し、「次は『楽しく』とか『踊って』が来る確率が高いな」と、その場で数値を弾き出せるのです。</li>
+      </ul>
+
+      <div class="summary">
+        <h4>まとめ</h4>
+        <ul>
+          <li><strong>確率はどこにある？:</strong> どこにも保存されていません。入力があるたびに、リアルタイムで計算されます。</li>
+          <li><strong>何を保存している？:</strong> 計算に使うための<strong>「パラメータ（重み）」</strong>という数字だけを保存しています。これが数千億個あります。</li>
+          <li><strong>メリット:</strong> どんなに珍しい文章が来ても、計算式に当てはめれば何かしらの確率（答え）が出せます。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<section class="chapter" id="ch8">
+  <h2>パラメータと行列演算</h2>
+
+  <div class="dialogue">
+    <div class="user">
+      それはワード(トークン？)の持つパラメータの乗算？で導かれるのか
+    </div>
+
+    <div class="ai">
+      <p>その通りです！非常に鋭いですね。AIが行っている計算の正体は、まさに<span class="highlight">「パラメータ（数字）の掛け算と足し算」</span>の嵐です。</p>
+
+      <p>ただ、一つだけ修正するとすれば、「ワード（トークン）が持つパラメータ」だけではなく、<strong>「モデル（脳みそ）が持つパラメータ」との掛け算がメイン</strong>になります。</p>
+
+      <h3>誰がパラメータ（数字）を持っているの？</h3>
+      <p>計算に使われる「数字」は、大きく2箇所に保管されています。</p>
+
+      <table>
+        <tbody><tr>
+          <th>保管場所</th>
+          <th>説明</th>
+          <th>役割</th>
+        </tr>
+        <tr>
+          <td>ワードが持つパラメータ（Embedding）</td>
+          <td>最初に話した「辞書」の部分。「猫」という単語は、固有の数字の列（ベクトル）を持っている。</td>
+          <td>食材（インプット）</td>
+        </tr>
+        <tr>
+          <td>モデルが持つパラメータ（Weights/重み）<br><strong>← ここが圧倒的に多い！</strong></td>
+          <td>96階建てのビルの「壁」や「機械」に埋め込まれている数字。単語に関係なく、固定された巨大な数字の表（行列）。</td>
+          <td>調理器具（プロセッサー）</td>
+        </tr>
+      </tbody></table>
+
+      <h3>具体的にどんな計算をしている？（行列演算）</h3>
+      <p>LLMの中では、次のような「掛け算」が何百億回も行われています。</p>
+
+      <h4>イメージ：ベルトコンベアと加工機</h4>
+      <ol>
+        <li><strong>入力（食材）:</strong> 「猫」というベクトル（例：4,096個の数字の列）が流れてきます。</li>
+        <li><strong>加工（調理）:</strong> そこに、モデルが持つ「巨大なパラメータの行列」がガシャン！とかけ合わされます。
+          <div class="formula">新しいベクトル = 今のベクトル × モデルの行列(パラメータ)</div>
+          <p>この「モデルの行列」には、事前学習で覚えた<strong>「文脈の読み方」や「知識」</strong>が数字として詰まっています。</p>
+        </li>
+        <li><strong>変化:</strong> 掛け算をすると、ベクトルの数字がガラッと変わります。これを96回（96層）繰り返すことで、「ただの猫」というベクトルが、「こたつで丸くなっている猫」という複雑なベクトルへ加工されていきます。</li>
+      </ol>
+
+      <h3>最後の確率を出す瞬間</h3>
+      <p>そして、質問にあった「次の単語の確率」を出す最後の瞬間も、やはり<strong>「ワードのパラメータとの掛け算」</strong>で決まります。</p>
+
+      <p>96階まで加工され終わった「文脈ベクトル（例：こたつ猫）」に対して、辞書にある<strong>全単語（5万語）のパラメータ（Embedding）を一斉に掛け算（内積）</strong>します。</p>
+
+      <ul>
+        <li>「こたつ猫」×「丸くなる」のベクトル → 数字が大きくなる（方向が似ているから）</li>
+        <li>「こたつ猫」×「走る」のベクトル → 数字が小さくなる（方向が違うから）</li>
+      </ul>
+
+      <p>この「掛け算の結果（スコア）」が大きい単語ほど、確率が高いと判定されるのです。</p>
+
+      <div class="summary">
+        <h4>まとめ</h4>
+        <p>ユーザーさんの直感通り、すべては<strong>「パラメータの乗算」</strong>で導かれます。</p>
+        <ul>
+          <li><strong>入力:</strong> ワードのパラメータ（ベクトル）</li>
+          <li><strong>処理:</strong> モデルのパラメータ（行列）との掛け算</li>
+          <li><strong>判定:</strong> 全単語のパラメータとの総当たり掛け算（内積）</li>
+        </ul>
+        <p>この<strong>「足し算と掛け算」を1秒間に何千兆回もできる計算機（GPU）</strong>があるからこそ、今のAIは喋ることができるのです。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<section class="chapter" id="ch9">
+  <h2>誤差逆伝播 — 「罰」の仕組み</h2>
+
+  <div class="dialogue">
+    <div class="user">
+      間違ってたら罰を与える、褒めると言っていたが　どこにどう与えるのか
+    </div>
+
+    <div class="ai">
+      <p>「罰を与える」「褒める」というのは、比喩表現としては分かりやすいですが、エンジニア視点で見ると、もっとドライで<strong>数学的な「引き算」</strong>のことです。</p>
+
+      <p>どこに、どうやって与えるのか。その現場は、さきほどの<strong>「96階建てのビル（モデル）」全体と、そこに住む数千億個のパラメータ（数字）</strong>です。</p>
+
+      <p>専門用語ではこれを<span class="keyword">「誤差逆伝播法（バックプロパゲーション）」</span>と呼びます。</p>
+
+      <h3>「罰」の正体：損失（Loss）</h3>
+      <p>まず、AIが答えを間違えたとき、システムは<strong>「間違いの大きさ（距離）」</strong>を計算します。これを<span class="keyword">「損失（Loss）」</span>と呼びます。</p>
+
+      <div class="example">
+        <ul>
+          <li><strong>正解:</strong> 東京 (ベクトル A)</li>
+          <li><strong>AIの予測:</strong> 大阪 (ベクトル B)</li>
+        </ul>
+        <p>このとき、ベクトルAとBがどれくらいズレているかを計算します。「正解から 0.5 ズレているぞ！」というこの数値（0.5）が、いわゆる<strong>「お説教の強さ」</strong>になります。</p>
+      </div>
+
+      <h3>「どこ」に与えるのか？</h3>
+      <p>罰を受ける対象は、<strong>モデルの中にある全てのパラメータ（行列の中の数字）</strong>です。</p>
+      <p>ただし、「連帯責任」ではありません。<span class="highlight">「誰が戦犯か？」を厳密に特定します。</span></p>
+
+      <h4>現場検証のイメージ（逆伝播）</h4>
+      <ol>
+        <li><strong>屋上（出力層）：</strong> 「おい！答えがズレたぞ！一番上の責任者（パラメータ）出てこい！」</li>
+        <li><strong>責任者:</strong> 「すいません、僕が変な計算をしたのは、その下の部下（下の層）から変なデータが来たからです」</li>
+        <li><strong>下の層:</strong> 「いや、僕のせいじゃなくて、さらにその下の部下が……」</li>
+      </ol>
+      <p>こうして、屋上から1階まで、<strong>「間違いの原因を作ったパラメータ」</strong>を特定しながら、責任（誤差）を分配していきます。これが「逆伝播（Back Propagation）」と呼ばれる理由です。</p>
+
+      <h3>「どう」与えるのか？（数値の更新）</h3>
+      <p>ここが一番のポイントです。「罰」とは具体的に<span class="keyword">「パラメータの数値を書き換えること」</span>です。</p>
+
+      <p>もし、あるパラメータ <code>w</code> が「3.5」という数字を持っていて、それが原因で予測が大きくなりすぎたなら、<strong>「数字を少し減らせ」</strong>という命令が下ります。</p>
+
+      <div class="formula">
+        新しい数値 = 今の数値 − (学習率 × 間違いへの寄与度)
+      </div>
+
+      <div class="example">
+        <div class="example-title">計算例</div>
+        <ul>
+          <li><strong>今の数値:</strong> 3.5</li>
+          <li><strong>間違いへの寄与度（勾配）:</strong> 「お前が数値を上げすぎたせいで誤差が出たんだ！」 → +2.0</li>
+          <li><strong>学習率:</strong> 一気に変えると壊れるので、少しずつ変える → 0.01</li>
+        </ul>
+        <div class="formula">新しい数値 = 3.5 − (0.01 × 2.0) = 3.48</div>
+      </div>
+
+      <p>このように、数千億個あるパラメータのひとつひとつに対して、「お前は上げろ」「お前は下げろ」と微調整を行います。これが「罰を与える」の正体です。</p>
+
+      <h3>「褒める」とは？</h3>
+      <p>この「次単語予測」の段階における「褒める」とは、<strong>「罰を与えない（修正しない）」</strong>ことです。</p>
+      <ul>
+        <li>AIが完璧に正解した場合、<strong>損失（Loss）は「0」</strong>になります。</li>
+        <li>引き算するものが何もないので、パラメータはそのまま維持されます。</li>
+        <li>「今のままでいいよ、その調子！」というわけです。</li>
+      </ul>
+
+      <div class="summary">
+        <h4>まとめ</h4>
+        <ul>
+          <li><strong>どこに？:</strong> モデル内の数千億個のパラメータ（行列の数値）全てに</li>
+          <li><strong>どうやって？:</strong>
+            <ol>
+              <li><strong>特定:</strong> 出力（屋上）から逆算して、誰が間違いの原因か（勾配）を特定する</li>
+              <li><strong>修正:</strong> 原因となったパラメータの数値を、ほんの少しだけプラスまたはマイナスする（勾配降下法）</li>
+            </ol>
+          </li>
+        </ul>
+        <p>これを何兆回も繰り返すことで、パラメータの数字たちは「どんな入力が来ても、正解に近い確率を出せる完璧な数字の組み合わせ」へと徐々に近づいていくのです。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<section class="chapter" id="ch10">
+  <h2>総まとめとファインチューニング</h2>
+
+  <div class="dialogue">
+    <div class="user">
+      ここまでの話を振り返り　自然言語でまとめを書いて　それからファインチューニングの話して
+    </div>
+
+    <div class="ai">
+      <p>かしこまりました。ここまでの冒険は、「ただの記号（文字）」を「賢い知能（AI）」に変えるまでの旅でした。</p>
+
+      <p>まずは、ここまでのあらすじを、専門用語をなるべく使わずに「自然な物語」としてまとめます。</p>
+
+      <h3>第一部：ここまでのあらすじ（LLMが生まれるまで）</h3>
+
+      <h4>1. 言葉を「数字の地図」に変える（ワードベクトル）</h4>
+      <p>コンピュータは言葉が分からないので、すべての単語を「数字の列（座標）」に変換しました。これにより、「王様」と「王子」は地図上で近くにいる、「猫」から「かわいさ」を引くと別の意味になる、といった<strong>「意味の計算」</strong>ができるようになりました。</p>
+
+      <h4>2. 文脈を読み解く「会議室」（Attention / Transformer）</h4>
+      <p>単語たちは、ただ並んでいるだけではありません。「彼は」という単語が、「好きだ」という単語にスポットライトを当てて意味を吸収するように、単語同士がお互いに影響し合って<strong>「文脈」</strong>を作ります。これを何十回も繰り返すことで、AIは深い意味を理解します。</p>
+
+      <h4>3. 知識を圧縮する「計算式」（パラメータ）</h4>
+      <p>AIは知識を「辞書」として持っているのではなく、巨大な「計算式」として持っています。入力された数字に対して、何千億回の掛け算と足し算を行うことで、その場で答え（確率）をひねり出します。</p>
+
+      <h4>4. スパルタ教育（事前学習）</h4>
+      <p>この計算式を完成させるために、AIはインターネット上の文章を読みまくり、ひたすら<strong>「次の単語当てクイズ」</strong>をやらされました。間違えるたびに、脳内の数字（パラメータ）を微調整され続け、最終的に「どんな文章でも続きが書ける物知りなAI（ベースモデル）」が完成しました。</p>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 2px dashed #ccc;">
+
+      <h3>第二部：人間らしく振る舞うための「仕上げ」（ファインチューニング）</h3>
+
+      <p>さて、ここで完成した「ベースモデル」には、致命的な欠点があります。それは、<span class="highlight">「空気が読めない」</span>ことです。</p>
+
+      <div class="example">
+        <div class="example-title">ベースモデルの欠点</div>
+        <p><strong>ユーザー：</strong>「風邪の治し方を教えて」</p>
+        <p><strong>ベースモデル：</strong>「……という質問はよくある。また、骨折の治し方は……」<br>（ネット記事の続きを書いてしまう）</p>
+      </div>
+
+      <p>これでは使い物になりません。そこで行うのが<span class="keyword">「ファインチューニング（微調整）」</span>です。ここには2つの段階があります。</p>
+
+      <h4>ステップ1：会話のルールを教える（Instruction Tuning）</h4>
+      <p>まずは、「質問されたら答えるんだよ」という対話の形式を教え込みます。</p>
+      <ul>
+        <li><strong>やり方：</strong> 人間が作った「良質なQ&amp;A集」をテキストとして読ませます。
+          <ul>
+            <li>入力：「風邪の治し方を教えて」</li>
+            <li>正解：「まずは暖かくして寝ることです。」</li>
+          </ul>
+        </li>
+        <li><strong>効果：</strong> これも「次単語予測」の学習ですが、教材がネットの雑多な文章ではなく「模範解答」なので、AIは<strong>「アシスタントとしての喋り方」</strong>を覚えます。</li>
+      </ul>
+
+      <h4>ステップ2：人間の「好み」を教える（RLHF）</h4>
+      <p>ここが現代AIの真骨頂です。「Reinforcement Learning from Human Feedback（人間のフィードバックによる強化学習）」、略して<span class="keyword">RLHF</span>です。</p>
+      <p>さきほど「間違えたら罰を与える」という話をしましたが、ここでは<strong>「人間が採点官」</strong>になります。</p>
+
+      <ol>
+        <li><strong>答えを比較させる:</strong> AIに、同じ質問に対して2〜3パターンの答えを出させます。
+          <ul>
+            <li>回答A：「風邪？ 寝ろ。」（正しいけど冷たい）</li>
+            <li>回答B：「お辛いですね。水分を摂って暖かくしてください。」（親切）</li>
+          </ul>
+        </li>
+        <li><strong>人間がランク付けする:</strong> 人間がこれを見て、「Bの方が良い！」と評価します。これが<strong>「ご褒美（Reward）」</strong>の元データになります。</li>
+        <li><strong>報酬モデル（Reward Model）を作る:</strong> 人間の評価基準を真似した「採点専用のAI（報酬モデル）」を作ります。「こういう答えだと人間は喜ぶ（高得点）、こういう答えは嫌がる（低得点）」という基準を数値化します。</li>
+        <li><strong>AIを矯正する（強化学習）:</strong> 最後に、本体のLLMに対し、<strong>「この採点専用AIから高得点をもらえるように喋れ」</strong>という特訓を行います。
+          <ul>
+            <li>AIが暴力的なことを言う → 採点AIが「-100点（大罰）」を与える → パラメータが大きく修正される</li>
+            <li>AIが親切なことを言う → 採点AIが「+100点（ご褒美）」を与える → その行動が強化される</li>
+          </ul>
+        </li>
+      </ol>
+
+      <div class="summary">
+        <h4>最終まとめ</h4>
+        <p>こうして、</p>
+        <ol>
+          <li><strong>事前学習:</strong> ネットの海で「言葉の確率」と「知識」を大量に詰め込み（怪物のような知能の誕生）</li>
+          <li><strong>ファインチューニング:</strong> 人間の手で「会話のマナー」と「倫理観」を教え込まれた（社会性の獲得）</li>
+        </ol>
+        <p>その結果、あなたの質問に対して自然な日本語で、かつ役に立つように答えるAIが完成したのです。</p>
+      </div>
+
+      <p style="text-align: center; margin-top: 2rem; font-size: 1.1rem;">
+        🎉 <strong>これで、LLMの仕組みについての解説は完了です！</strong> 🎉
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>執筆: orangeさん / 対話相手: Gemini（Google AI）</p>
+  <p>2026年2月</p>
+</footer>
+
+
+
+</body></html>
