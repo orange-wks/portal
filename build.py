@@ -230,7 +230,7 @@ def build():
   <meta property="og:image" content="{SITE_URL}/assets/orange.png">
   <meta property="og:url" content="{SITE_URL}/">
   <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:card" content="summary">
   <style>{PORTAL_CSS}  </style>
 </head>
 <body>
@@ -269,7 +269,7 @@ def build():
   <meta property="og:image" content="{SITE_URL}/assets/orange.png">
   <meta property="og:url" content="{SITE_URL}/archive.html">
   <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:card" content="summary">
   <style>{PORTAL_CSS}  </style>
 </head>
 <body>

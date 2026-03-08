@@ -53,7 +53,7 @@ def build_article_html(title, date, tags, body_html, slug, description, source_u
         f'  <meta property="og:image" content="{og_image}">',
         f'  <meta property="og:url" content="{SITE_URL}/articles/{slug}/">',
         f'  <meta property="og:type" content="article">',
-        f'  <meta name="twitter:card" content="summary_large_image">',
+        f'  <meta name="twitter:card" content="summary">',
         ARTICLE_CSS_LINK,
         "</head>",
         "<body>",
