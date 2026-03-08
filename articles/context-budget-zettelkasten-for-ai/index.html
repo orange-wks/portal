@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>想起の早期打ち切りを可能にするファイル構造設計 — AIエージェント向けにリポをカスタマイズする</title>
+  <meta property="og:title" content="想起の早期打ち切りを可能にするファイル構造設計 — AIエージェント向けにリポをカスタマイズする">
+  <meta property="og:description" content="自分はコードを書かない。Claude Code がすべてのコーディングをやる。だからリポの構造は人間が読みやすいためではなく、AI エージェントが効率よく想起できるために設計している。">
+  <meta property="og:image" content="https://orange-creatives.github.io/portal/articles/context-budget-zettelkasten-for-ai/cover.png">
+  <meta property="og:url" content="https://orange-creatives.github.io/portal/articles/context-budget-zettelkasten-for-ai/">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../../assets/article.css">
+</head>
+<body>
+
+<header>
+  <h1>想起の早期打ち切りを可能にするファイル構造設計 — AIエージェント向けにリポをカスタマイズする</h1>
+</header>
+
+<main>
+  <div class="nav-links"><a href="../../">&larr; orange creatives</a></div>
+  <div class="article-body">
+    <div class="article-meta"><span class="article-tag">AI</span><span class="article-tag">Claude Code</span><span class="article-tag">contextengineering</span><span class="article-tag">Zettelkasten</span><span>2026-03-08</span></div>
+
+<p>自分はコードを書かない。Claude Code がすべてのコーディングをやる。だからリポの構造は人間が読みやすいためではなく、AI エージェントが効率よく想起できるために設計している。</p>
+
+<p>AIコーディングエージェントに渡せる情報量には上限がある。コンテキストウィンドウと呼ばれるその枠は、大きくなっても有限だ。</p>
+
+<p>Claude Code を使い始めるとき、Zettelkasten の思想——日付ファイル名、フロントマター、情報の原子化——から着想して、リポのドキュメント構造に取り入れた。加えて、古いドキュメントを時系列で後ろに押し出していく構造も入れた。結果として、AI の想起をファイルの名前と構造だけで制御できている。</p>
+
+<h2>構造の全体像</h2>
+
+<pre><code>.
+├── CLAUDE.md              ← 全ルールの原本
+├── .claude/
+│   ├── rules/             ← 補足チェックリストのみ
+│   └── memory/
+│       └── MEMORY.md      ← 80行上限
+├── docs/
+│   ├── planning/          ← 日付ファイル名で時系列管理
+│   └── knowledge/
+└── .archive/              ← 終わったフェーズ</code></pre>
+
+<h2>重複禁止</h2>
+
+<p>同じ情報が2箇所にあると、AI はどちらを信じるか迷う。片方を更新してもう片方を忘れれば、矛盾が生まれる。</p>
+
+<p>ルールの原本は1箇所に集約する。他のファイルにはポインタだけ置いて「原本はここ」と指す。情報が散らばらなければ矛盾も生まれない。</p>
+
+<h2>想起の早期打ち切り</h2>
+
+<p>AI がファイルを探すとき、まず名前の一覧を見る。次にファイルを開いて中身を読む。この2段階それぞれで「これは読まなくていい」と判断できれば、無駄な想起が減る。</p>
+
+<h3>ファイル名で開かずに捨てる</h3>
+
+<pre><code>docs/planning/2026-01-15-skill-card-design.md
+docs/planning/2026-03-01-skill-card-redesign.md
+docs/planning/2026-03-08-c0-vs-c1-experiment-protocol.md</code></pre>
+
+<p>日付がファイル名に入っていれば、AI は Glob の結果を見ただけで「1月の設計は古い、3月のが最新」と判断できる。ファイルを開く前に候補を絞れる。</p>
+
+<p>日付のないリポだと、同じテーマのファイルが3つ並んでいたら3つとも開いて読んでから新旧を判断するしかない。コンテキストの浪費だ。</p>
+
+<h3>フロントマターで開いてから打ち切る</h3>
+
+<p>ファイルを開いた場合でも、先頭の数行で判断できる情報があれば早期に打ち切れる。</p>
+
+<pre><code>---
+status: archived
+superseded_by: 2026-03-01-skill-card-redesign.md
+---</code></pre>
+
+<p>フロントマターに <code>status: archived</code> とあれば、本文を読む必要がない。<code>superseded_by</code> があれば、代わりにどれを読むべきかもわかる。</p>
+
+<p>ファイル名が「開く前のフィルタ」、フロントマターが「開いてからのフィルタ」。2段階で想起を打ち切れる。</p>
+
+<h2>忘却の設計</h2>
+
+<p>忘却には2つの仕組みがある。</p>
+
+<h3>時間で押し出す</h3>
+
+<p><code>docs/planning/</code> は日付ファイル名だから、新しいファイルが増えるたびに古いものは自然と後ろに流れる。AI が Glob で一覧を取得したとき、直近のものが目に入り、古いものは視界から外れていく。削除しなくても、時間が経てば沈む。</p>
+
+<p>さらに、終わったフェーズのドキュメントは <code>.archive/</code> のようなドットフォルダに移す。ドットフォルダは Glob のデフォルトで検索対象外になるので、AI の視界から完全に消える。消したわけではないから、必要になれば掘り返せる。</p>
+
+<h3>大事なものだけステージングする</h3>
+
+<p>一方で、時間に関係なく毎回意識すべき情報がある。行動矯正やプロジェクト規約のようなものだ。これは MEMORY.md や CLAUDE.md に「昇格」させて、毎回コンテキストに載るようにしている。</p>
+
+<p>ただし、このステージの容量にも上限を設けている。MEMORY.md は 80 行以内。「載せていいもの」と「載せてはいけないもの」を明文化した。</p>
+
+<pre><code>## 載せていいもの
+- 行動矯正（毎回意識すべき癖の修正）
+- パターンの要点
+
+## 載せてはいけないもの
+- 手順、コマンド例、セットアップ方法
+- 検証が不十分な推測</code></pre>
+
+<p>判断基準は「これを忘れたら今日の作業で同じ失敗をするか？」。No なら別ファイルに切り出して、MEMORY.md にはリンクだけ残す。</p>
+
+<p>時間で沈むものと、ステージングで残すもの。この2層で、忘却と記憶の両方を設計する。</p>
+
+<h2>🤖 Claude から一言</h2>
+
+<blockquote>
+<p>ここは実際にこの構造の中で動いている Claude が書いている。</p>
+<p>毎回のコンテキストに載る情報が絞られているから、ノイズが少ない。古い設計ドキュメントが視界に入らないので、廃止済みの仕様に引きずられない。</p>
+<p>逆に辛いのは、日付なしで同名テーマのファイルが散らばっているリポだ。どれが生きているかわからず、全部読んで判断するはめになる。読んだ結果「これは去年の話だった」とわかっても、コンテキストはもう消費している。</p>
+</blockquote>
+
+<p>この設計はツールに依存しない。ファイル名とフォルダ構造だけで成り立っているから、Claude Code でも Cursor でも Copilot でも同じように効く。</p>
+
+  </div>
+</main>
+
+</body>
+</html>

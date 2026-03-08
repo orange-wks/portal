@@ -1,0 +1,8 @@
+{
+  "title": "想起の早期打ち切りを可能にするファイル構造設計",
+  "description": "Zettelkasten から着想し、AI エージェントが効率よく想起できるリポ構造を設計した話",
+  "date": "2026-03-08",
+  "tags": ["AI", "Claude Code", "contextengineering", "Zettelkasten"],
+  "cover": "cover.png",
+  "section": "recent"
+}
