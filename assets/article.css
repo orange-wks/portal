@@ -339,16 +339,16 @@ footer {
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-color: #1a1a1a;
-    --text-color: #d4d4d8;
-    --text-muted: #a1a1aa;
+    --text-color: #f1f1f1;
+    --text-muted: #a0a0a0;
     --user-bg: #252525;
     --user-border: #e8622a;
     --ai-bg: #1f1f1f;
     --ai-border: #52525b;
-    --heading-color: #fdba74;
-    --code-bg: #262626;
-    --accent: #f4a261;
-    --border-color: #333;
+    --heading-color: #e8622a;
+    --code-bg: #2a2a2a;
+    --accent: #54a5a5;
+    --border-color: #444444;
   }
 
   header { border-bottom-color: var(--border-color); }
