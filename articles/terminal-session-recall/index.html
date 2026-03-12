@@ -154,6 +154,15 @@ flowchart TB
       <li><a href="https://github.com/orangewk/terminal-session-recall">GitHub</a></li>
       <li>ライセンス: MIT</li>
     </ul>
+
+    <h2>追記（v1.0.4）</h2>
+    <p>v1.0.0 公開後、主にセッションのライフサイクル管理を改善した。</p>
+    <ul>
+      <li><strong>v1.0.2</strong> — ゾンビセッション対策。起動時にOSプロセスの生存を確認し、死んだセッションを自動で inactive にするようにした。PID とプロセス作成時刻を記録して PID 再利用にも対応。</li>
+      <li><strong>v1.0.3</strong> — Windows 11 でゾンビセッションが残り続ける問題を修正。プロセス確認を <code>wmic</code> から PowerShell に切り替えた。</li>
+      <li><strong>v1.0.4</strong> — VSCode の Full Close → Restart 後に autoRestore が動作しない問題を修正。</li>
+    </ul>
+
 <div class="bottom-nav"><a href="../../">&larr; orange-wks</a></div>
   </div>
 </main>
