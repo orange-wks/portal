@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>「夜明かし」という曲を作ってみた</title>
+  <meta property="og:title" content="「夜明かし」という曲を作ってみた">
+  <meta property="og:description" content="ずっとしっくりこなかった歌のタイトルが「村下孝蔵がつけるとしたら？」で決まった。AI画像生成、Remotion動画制作、YouTubeアップロード自動化までの記録。">
+  <meta property="og:image" content="https://orange-wks.github.io/portal/articles/yoakashi-lyric-video/cover.png">
+  <meta property="og:url" content="https://orange-wks.github.io/portal/articles/yoakashi-lyric-video/">
+  <meta property="og:type" content="article">
+  <meta name="twitter:image" content="https://orange-wks.github.io/portal/articles/yoakashi-lyric-video/cover.png">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../../assets/article.css">
+</head>
+<body>
+
+<header>
+  <h1>「夜明かし」という曲を作ってみた</h1>
+</header>
+
+<main>
+  <div class="nav-links"><a href="../../">&larr; orange-wks</a></div>
+  <div class="article-body">
+    <div class="article-meta"><span class="article-tag">AI</span><span class="article-tag">CreativeAI</span><span class="article-tag">Remotion</span><span class="article-tag">音楽制作</span><span>2026-03-14</span></div>
+    <img class="article-cover" src="cover.png" alt="「夜明かし」という曲を作ってみた">
+
+    <h2>ずっとしっくりきてなかった</h2>
+
+<p>だいぶ昔に書いた歌詞がある。いいワード書いたと思ってた。
+でも聴いた人に何を表現してる歌か伝わってない気がしてた。「恋時間」というタイトルで呼んでいたが、これ自体もしっくりきてなかった。</p>
+
+<p>この歌の持っている反逆的な熱さ——おとぎ話の「おしまい」を拒否し続ける感じ——が抜けてるなあって。でもどうつければいいか思いつかなかった。</p>
+
+<p>いまsunoつかえるようになって新しい音源ができた。動画を作ろうとなったとき、まずタイトルを書き込まなきゃいけない。</p>
+
+<p>Claude と雑談しながらタイトルを探った。「恋昇り」「昇月」——方向は悪くないが、ださい。</p>
+
+<p>ふと「村下孝蔵がつけるとしたら？」と聞いてみた。
+「夜明かし」がでてきた。
+全部の歌詞が夜を明かすことを歌っている。午前零時の鐘が鳴り終わっても。まだ寝かさないで。キャンドル灯して。答えは最初から決まってた。
+こんだけ時間をあけてしっくりするタイトルがでたｗ</p>
+
+    <h2>短いプロンプトが「一貫性」を生む</h2>
+
+<p>背景画像は Gemini 3 Pro Image（Nano Banana Pro）で生成した。ポータルサイトの Art Bible に「ラフ、手描き、3色以内」とあるので、それをそのままプロンプトにした。</p>
+
+<pre><code>rough hand-drawn sketch on dark black paper.
+wobbly ink lines. Only 3 colors: black, cream-white, warm orange.</code></pre>
+
+<p>これだけで、何回生成しても同じ人が描いた感じになる。構図もモチーフも毎回違うのに。Art Bible に書いてあることをそのまま英語にしただけなのに、なんで？</p>
+
+<p>試しに歌詞を丸ごとプロンプトに入れてみた。完全に別の画風になった。セミリアルの絵画調、フルカラー、人物入り。夢女子アート。</p>
+
+<p>プロンプトが長くなると、スタイル指示より歌詞の内容のほうが勝つ。短いキーワードのほうが画風が安定するのは、モデルに「どう描くか」の判断を委ねてるからだと思う。制約だけ渡して、あとは任せる。</p>
+
+    <h2>Remotion で歌詞スクロール動画</h2>
+
+<p>動画は Remotion で組んだ。歌詞が下から上にスクロールするだけ。</p>
+
+<p>いま歌ってるあたりの行だけ明るくして、離れた行は薄くした。間奏ではスクロールを止めて、歌い出しに合わせて再開。タイミングは自分で聴いて合わせた。</p>
+
+<p>最後はキャンドルが消える背景にクロスフェードして、フェードアウト。背景画像を3枚生成して切り替えてるだけ。フォントは Klee One。</p>
+
+    <h2>YouTube アップロード自動化</h2>
+
+<p>前回は手動でアップロードした。今回は YouTube Data API v3 でスクリプトにした。</p>
+
+<p>OAuth2 のセットアップがめんどくさい。API 有効化、クライアント ID 作成、テストユーザー追加、スコープ設定、認証。アップロード用と更新用でスコープが違うのでトークン取り直しもあった。</p>
+
+<p>でも一回やれば次からはコマンド一発で上がる。限定公開で上げて確認、よければ公開。</p>
+
+    <h2>できたもの</h2>
+
+<p>歌詞スクロールするだけの動画。でも画像生成→動画組み立て→アップロードまで全部スクリプトで回せるようになった。次はもうちょっとちゃんとした PV を作りたい。</p>
+
+<p><iframe width="560" height="315" src="https://www.youtube.com/embed/4DbW1Tes868" title="夜明かし — Lyric Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></p>
+
+  </div>
+</main>
+
+</body>
+</html>
