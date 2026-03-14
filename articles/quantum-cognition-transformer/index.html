@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xで流れてた超難解画像をClaudeに渡したら何が書いてあるかわかった（ような気がする）のでそのあと知性とはLLMと相似なんじゃねえのみたいな会話をした</title>
+  <meta property="og:title" content="Xで流れてた超難解画像をClaudeに渡したら何が書いてあるかわかった（ような気がする）のでそのあと知性とはLLMと相似なんじゃねえのみたいな会話をした">
+  <meta property="og:description" content="Xで流れてきた池上高志の板書をClaudeに解説させたら、量子認知→Transformer同型性という未踏領域に辿り着いた対話記録。">
+  <meta property="og:image" content="https://orange-wks.github.io/portal/assets/ogp.jpg">
+  <meta property="og:url" content="https://orange-wks.github.io/portal/articles/quantum-cognition-transformer/">
+  <meta property="og:type" content="article">
+  <meta name="twitter:image" content="https://orange-wks.github.io/portal/assets/ogp.jpg">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../../assets/article.css">
+</head>
+<body>
+
+<header>
+  <h1>Xで流れてた超難解画像をClaudeに渡したら<br>何が書いてあるかわかった（ような気がする）ので<br>そのあと知性とはLLMと相似なんじゃねえの<br>みたいな会話をした</h1>
+</header>
+
+<main>
+  <div class="nav-links"><a href="../../">&larr; orange-wks</a></div>
+  <div class="article-body">
+    <div class="article-meta">
+      <span class="article-tag">AI</span>
+      <span class="article-tag">認知科学</span>
+      <span>2026-03-14</span>
+    </div>
+    <img class="article-cover" src="../../assets/ogp.jpg" alt="板書画像をLLMに投げたら「Attentionは量子測定では」まで飛んだ">
+
+    <p>Xで池上高志の講義の板書が流れてきた。なにがなんだかわからん画像だったが、LLMに投げたらキーワードや矢印にアノテーションつけて解説してくれるんじゃないかと思って聞いてみた。</p>
+
+    <blockquote class="twitter-tweet"><p lang="ja" dir="ltr">池上高志さんの最終講義に出ました。人工知能の研究が非線形から線形のモデルに移り変わったことの説明図。これはよく分かる。YouTubeに動画もあります。 <a href="https://t.co/vfHdf8JpIV">pic.twitter.com/vfHdf8JpIV</a></p>&mdash; Kengo Hirachi (@kengohirachi) <a href="https://twitter.com/kengohirachi/status/2032627785362190669?ref_src=twsrc%5Etfw">March 14, 2026</a></blockquote>
+
+    <!-- ===== 1. 板書の解読 ===== -->
+    <h2>板書の解読</h2>
+
+    <div class="dialogue">
+      <div class="user">
+        これは何の講義の板書？
+      </div>
+      <div class="ai">
+        <p>池上高志（東大・複雑系研究者）による<strong>「When Linear Systems become Intelligent?」</strong>（線形システムはいつ知的になるか）という講義。</p>
+        <p>知性を<span class="keyword">NLS（非線形システム）</span>と<span class="keyword">LS（線形システム）</span>の二項対立で整理している。</p>
+        <table>
+          <tr><th></th><th>NLS（非線形）</th><th>LS（線形）</th></tr>
+          <tr><td>自由度</td><td>小</td><td>大</td></tr>
+          <tr><td>特徴</td><td>カオス・同期・創発</td><td>MapReduce・PageRank</td></tr>
+          <tr><td>知性観</td><td>パターン生成器</td><td>大規模データベース</td></tr>
+          <tr><td>入力</td><td>貧しい入力で豊かな出力</td><td>大量データで大量処理</td></tr>
+          <tr><td>複雑性</td><td>動的複雑性</td><td>組合せ複雑性</td></tr>
+        </table>
+        <p>池上のスタンスはNLS側——<span class="highlight">「少ない自由度から創発するパターン生成こそ知性の本質だ」</span>という立場。ChatGPT的なスケーリング知性はLS側に分類される。</p>
+      </div>
+    </div>
+
+    <!-- ===== 2. 第三の枠組み ===== -->
+    <h2>どっちでもなくない？</h2>
+
+    <div class="dialogue">
+      <div class="user">
+        わし量子重ね合わせ派なんでこの二元論じゃないかも
+      </div>
+      <div class="ai">
+        <p>鋭い指摘。量子重ね合わせ的な見方だと「観測前は両方同時に真」なので、NLSかLSかという問い自体が崩れる。</p>
+        <p>実はそういう学派がある。<span class="keyword">Quantum Cognition（量子認知）</span>。Jerome Busemeyer（インディアナ大学）らが構築している認知科学の一分野で、「脳が量子コンピュータ」という話ではなく、<span class="highlight">人間の認知が量子確率の数学で記述できる</span>という主張。</p>
+      </div>
+    </div>
+
+    <div class="dialogue">
+      <div class="user">
+        なんで普通の確率論じゃダメなの？
+      </div>
+      <div class="ai">
+        <p>古典確率（ベイズ）では説明できない認知現象がある。</p>
+        <ul>
+          <li><strong>質問順序効果</strong> — 「Aは正直か→Bは正直か」と逆順で聞くと回答率が変わる。古典確率では P(A∩B)=P(B∩A) なので説明不能</li>
+          <li><strong>連言錯誤</strong> — 「フェミニストの銀行員」が「銀行員」より確率高く感じる。論理的にはありえない</li>
+          <li><strong>選言効果</strong> — 囚人のジレンマで相手の行動が不明だと、なぜか協力率が上がる</li>
+        </ul>
+        <p>量子認知はこれらを<span class="highlight">「測定が状態を変える」「状態は重ね合わせとして存在する」</span>という原理で統一的に説明する。ペンローズの「脳は量子コンピュータ」とは別路線で、あくまで数学的モデルとしての量子論。</p>
+      </div>
+    </div>
+
+    <!-- ===== 3. Transformer との同型性 ===== -->
+    <h2>これTransformerの話では</h2>
+
+    <div class="dialogue">
+      <div class="user">
+        これLLMトランスフォーマーの話に聞こえるけど
+      </div>
+      <div class="ai">
+        <p>ほぼ同型だと思う。</p>
+        <table>
+          <tr><th>量子認知</th><th>Transformer</th></tr>
+          <tr><td>状態ベクトル |ψ⟩</td><td>トークンの埋め込みベクトル</td></tr>
+          <tr><td>測定基底への射影</td><td>AttentionのQ・K内積</td></tr>
+          <tr><td>測定が状態を変える</td><td>各LayerがResidual streamを書き換える</td></tr>
+          <tr><td>非可換性（順序依存）</td><td>因果Attention・位置エンコーディング</td></tr>
+          <tr><td>重ね合わせ</td><td>Residual streamの線形重ね合わせ</td></tr>
+          <tr><td>干渉項</td><td>Attention headの競合・打ち消し</td></tr>
+        </table>
+        <p>Attentionの本質は<span class="highlight">「どの軸で射影するかを動的に決める操作」</span>で、量子測定における基底の選択とほぼ同じ構造をしている。</p>
+        <p>Anthropicの<span class="keyword">Superposition Hypothesis</span>も「Transformerは次元数より多くの特徴を重ね合わせとしてResidual streamに詰め込む」と述べており、量子状態の重ね合わせと用語レベルで一致する。</p>
+      </div>
+    </div>
+
+    <!-- ===== 4. じゃあ何が違う？ ===== -->
+    <h2>じゃあ何が違う？</h2>
+
+    <div class="dialogue">
+      <div class="user">
+        同じ日にタイムリーな論文紹介が流れてきた。脳とLLMの言語予測を比較した研究
+        <blockquote class="twitter-tweet"><p lang="ja" dir="ltr">LLMは「次の単語」を予測するだけでここまで賢くなった。では人間の脳も同じ仕組みで言語を理解しているのか?<br>実際に人間の脳活動をMEG+EEGで同時計測した研究が、興味深い答えを出しています。… <a href="https://t.co/byMhgZZEKU">pic.twitter.com/byMhgZZEKU</a></p>&mdash; AIDB (@ai_database) <a href="https://twitter.com/ai_database/status/2032660623281336701?ref_src=twsrc%5Etfw">March 14, 2026</a></blockquote>
+      </div>
+      <div class="ai">
+        <p>Kölbl et al. (2026) の MEG+EEG 同時計測研究。脳もLLMも文脈から次の品詞を予測している点は共通だが、決定的な違いがある。</p>
+        <p>名詞を聞いたとき、脳は聴覚野だけでなく<span class="highlight">感覚運動野まで活性化</span>していた。「リンゴ」と聞けば、触った記憶・見た記憶が呼び起こされる。テキストだけで訓練されたLLMには、この「身体に根差した意味の層」が原理的に欠けている。</p>
+        <p>量子認知の文脈で読み直すと面白い。脳の「測定」はテキスト空間だけでなく、身体経験という次元も射影基底に含んでいる。LLMのAttentionはテキスト空間内の射影しかできない。</p>
+        <p><span class="highlight">構造は同型だが、射影できる次元数が違う。</span></p>
+      </div>
+    </div>
+
+    <div class="dialogue">
+      <div class="user">
+        記号接地問題に対する脳科学側からの回答、ってことか
+      </div>
+      <div class="ai">
+        <p>そう。文法はテキストから学べるが、意味の深い理解には現実世界との接点が要る——というのがこの論文の示唆。量子認知の言葉で言えば、脳はより高次元の空間で射影を行っていて、LLMはそのうちテキスト次元だけを使った部分モデルということになる。</p>
+      </div>
+    </div>
+
+    <div class="source-link">
+      きっかけ: <a href="https://x.com/kengohirachi/status/2032627785362190669" target="_blank">X (@kengohirachi)</a> / 論文: <a href="https://x.com/ai_database/status/2032660623281336701" target="_blank">X (@ai_database)</a>
+    </div>
+
+    <div class="bottom-nav"><a href="../../">&larr; orange-wks</a></div>
+  </div>
+</main>
+
+<footer><p>orange</p></footer>
+<script async src="https://platform.twitter.com/widgets.js"></script>
+<script src="../../assets/share.js"></script>
+</body>
+</html>
