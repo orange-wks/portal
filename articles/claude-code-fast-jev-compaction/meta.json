@@ -3,7 +3,7 @@
   "description": "Claude Code の compaction（context が溢れそうなときの会話圧縮）を、組込みの要約から fast-jev-compaction に替えました。Desktop app の session で 187,635 token を 33,447 token（82% 削減）に圧縮する...",
   "date": "2026-09-19",
   "tags": [
-    "llm",
+    "jev",
     "typesafe"
   ],
   "cover": "assets/ogp.jpg",
