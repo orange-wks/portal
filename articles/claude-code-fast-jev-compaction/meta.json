@@ -1,0 +1,13 @@
+{
+  "title": "fast-jev-compaction (Jev) で Claude Code の compaction を間引きに替えたら 1.4 秒",
+  "description": "Claude Code の compaction（context が溢れそうなときの会話圧縮）を、組込みの要約から fast-jev-compaction に替えました。Desktop app の session で 187,635 token を 33,447 token（82% 削減）に圧縮する...",
+  "date": "2026-09-19",
+  "tags": [
+    "llm",
+    "typesafe"
+  ],
+  "cover": "assets/ogp.jpg",
+  "platform": "Zenn",
+  "source_url": "https://zenn.dev/orangewk/articles/claude-code-fast-jev-compaction",
+  "section": "recent"
+}
