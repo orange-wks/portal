@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fast-jev-compaction (Jev) で Claude Code の compaction を間引きに替えたら 1.4 秒</title>
+  <meta property="og:title" content="fast-jev-compaction (Jev) で Claude Code の compaction を間引きに替えたら 1.4 秒">
+  <meta property="og:description" content="Claude Code の compaction（context が溢れそうなときの会話圧縮）を、組込みの要約から fast-jev-compaction に替えました。Desktop app の session で 187,635 token を 33,447 token（82% 削減）に圧縮する...">
+  <meta property="og:image" content="https://orange-wks.github.io/portal/assets/ogp.jpg">
+  <meta property="og:url" content="https://orange-wks.github.io/portal/articles/claude-code-fast-jev-compaction/">
+  <meta property="og:type" content="article">
+  <meta name="twitter:image" content="https://orange-wks.github.io/portal/assets/ogp.jpg">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../../assets/article.css">
+</head>
+<body>
+
+<header>
+  <h1>fast-jev-compaction (Jev) で Claude Code の compaction を間引きに替えたら 1.4 秒</h1>
+</header>
+
+<main>
+  <div class="nav-links"><a href="../../">&larr; orange-wks</a></div>
+  <div class="article-body">
+    <div class="article-meta"><span class="article-tag">llm</span><span class="article-tag">typesafe</span><span class="article-tag">Claude Code</span><span class="article-tag">contextengineering</span><span>2026-09-19</span></div>
+    <img class="article-cover" src="../../assets/ogp.jpg" alt="fast-jev-compaction (Jev) で Claude Code の compaction を間引きに替えたら 1.4 秒">
+    <p data-line="0" class="code-line">Claude Code の compaction（context が溢れそうなときの会話圧縮）を、組込みの要約から <a href="https://github.com/tamaratran/fast-jev-compaction" target="_blank" rel="nofollow noopener noreferrer">fast-jev-compaction</a> に替えました。Desktop app の session で 187,635 token を 33,447 token（82% 削減）に圧縮するのに 1.4 秒でした。組込みの要約は同じ規模で数十秒かかります。要約文を書かないので、会話本文に書いた file:line や実測値はそのまま残ります。</p>
+<h2 id="%E8%A9%A6%E3%81%97%E3%81%9F%E6%9D%A1%E4%BB%B6" data-line="2" class="code-line">
+<a class="header-anchor-link" href="#%E8%A9%A6%E3%81%97%E3%81%9F%E6%9D%A1%E4%BB%B6" aria-hidden="true"></a> 試した条件</h2>
+<ul data-line="4" class="code-line">
+<li data-line="4" class="code-line">2026-09-19 の 1 日、session 3 本（terminal 2 回、Desktop app 1 回の compaction）</li>
+<li data-line="5" class="code-line">Windows 11、Claude Code native 2.1.277（terminal）と Desktop app 同梱 2.1.275</li>
+<li data-line="6" class="code-line">対象 repo は自分の TypeScript プロジェクト。会話は日本語、tool 出力は英語混じり</li>
+<li data-line="7" class="code-line">plugin の設定は default のまま</li>
+</ul>
+<p data-line="9" class="code-line">n=3 です。長期運用した結果ではありません。</p>
+<h2 id="%E4%BD%95%E3%82%92%E3%81%99%E3%82%8B%E3%81%8B" data-line="11" class="code-line">
+<a class="header-anchor-link" href="#%E4%BD%95%E3%82%92%E3%81%99%E3%82%8B%E3%81%8B" aria-hidden="true"></a> 何をするか</h2>
+<p data-line="13" class="code-line">Claude Code の compaction は、context が上限に近づくと会話全体を model に読ませて要約文を書かせ、それを新しい context の先頭に置きます。fast-jev-compaction は要約文を書きません。会話中の tool 呼び出し（Read、Bash、Grep など）とその結果を 1 件ずつ「この先まだ要るか」と判定し、要らないものを削除するか先頭 300 文字に切り詰めます。user と assistant の本文は変更しません。</p>
+<p data-line="15" class="code-line">判定は <a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" target="_blank" rel="nofollow noopener noreferrer">Jev</a> に投げます。TypeSafe AI が 2026-09-15 に early access で出した、文章を生成しない判定専用 model です。yes / no の質問に較正済み確率で答えます。料金は入力 $0.042 / 1M token、出力は無料、応答は 70〜500 ms です。</p>
+<p data-line="17" class="code-line">Claude Code 側は function hooks（2.1.274 以降、<code>CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1</code> が必要）の <code>session.compact</code> event を横取りする形で入ります。<code>/compact</code> を手で打ったときも auto-compact のときも同じ event が飛ぶので、両方に効きます。Jev への request が失敗したときや削減率が 25% 未満のときは組込みの要約に戻ります。</p>
+<h2 id="%E5%85%A5%E3%82%8C%E6%96%B9" data-line="19" class="code-line">
+<a class="header-anchor-link" href="#%E5%85%A5%E3%82%8C%E6%96%B9" aria-hidden="true"></a> 入れ方</h2>
+<p data-line="21" class="code-line">前提は 3 つです。</p>
+<ul data-line="23" class="code-line">
+<li data-line="23" class="code-line">Claude Code 2.1.274 以上（<code>claude --version</code>）</li>
+<li data-line="24" class="code-line">環境変数 <code>TYPESAFE_API_KEY</code>（TypeSafe の early access で取得）</li>
+<li data-line="25" class="code-line">環境変数 <code>CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1</code>
+</li>
+</ul>
+<p data-line="27" class="code-line">まず 1 session だけで試しました。repo を clone して <code>--plugin-dir</code> で起動します。runtime 依存が無いので <code>npm install</code> は不要です。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="29"><span class="line"><span style="color:#B392F0">git</span><span style="color:#9ECBFF"> clone</span><span style="color:#9ECBFF"> https://github.com/tamaratran/fast-jev-compaction</span><span style="color:#9ECBFF"> /c/dev/fast-jev-compaction</span></span>
+<span class="line"><span style="color:#E1E4E8">CLAUDE_CODE_ENABLE_FUNCTION_HOOKS</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">1</span><span style="color:#B392F0"> claude</span><span style="color:#79B8FF"> --plugin-dir</span><span style="color:#9ECBFF"> /c/dev/fast-jev-compaction</span></span>
+<span class="line"></span></code></pre></div><p data-line="34" class="code-line">この起動方法だと <code>/plugin</code> の一覧には出ません。動いているかは <code>/compact</code> を打って <code>fast-jev-compaction:</code> で始まる toast が出るかで確認します。会話が短いうちは <code>fallback to built-in summary (below 25% minimum: 0% reduction; no tool calls ...)</code> と出ます。これで hook は通っています。</p>
+<p data-line="36" class="code-line">常用するには user scope で install します。marketplace の出所は local clone にしました。作者の push が勝手に入らず、更新は自分で <code>git pull</code> したときだけです。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="38"><span class="line"><span style="color:#B392F0">claude</span><span style="color:#9ECBFF"> plugin</span><span style="color:#9ECBFF"> marketplace</span><span style="color:#9ECBFF"> add</span><span style="color:#9ECBFF"> /c/dev/fast-jev-compaction</span></span>
+<span class="line"><span style="color:#B392F0">claude</span><span style="color:#9ECBFF"> plugin</span><span style="color:#9ECBFF"> install</span><span style="color:#9ECBFF"> fast-jev-compaction@fast-jev-compaction</span><span style="color:#79B8FF"> --scope</span><span style="color:#9ECBFF"> user</span></span>
+<span class="line"></span></code></pre></div><p data-line="43" class="code-line"><code>~/.claude/settings.json</code> に flag を書きます。</p>
+<div class="code-block-container"><pre class="shiki github-dark" style="background-color:#151e2c;color:#e1e4e8"><code class="code-line" data-line="45"><span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "env"</span><span style="color:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#79B8FF">    "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"1"</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span></code></pre></div><p data-line="53" class="code-line">これで新しく開く session すべてに効きます。Desktop app（Claude Desktop の Code tab）は同梱の Claude Code が別 process で動いていて、settings.json と installed plugin を共有します。Desktop app を再起動したら、開きっぱなしだった既存 session にも効きました。</p>
+<h2 id="%E5%AE%9F%E6%B8%AC" data-line="55" class="code-line">
+<a class="header-anchor-link" href="#%E5%AE%9F%E6%B8%AC" aria-hidden="true"></a> 実測</h2>
+<table data-line="57" class="code-line">
+<thead data-line="57" class="code-line">
+<tr data-line="57" class="code-line">
+<th>session</th>
+<th>compaction 前</th>
+<th>後</th>
+<th>削減</th>
+<th>所要</th>
+</tr>
+</thead>
+<tbody data-line="59" class="code-line">
+<tr data-line="59" class="code-line">
+<td>terminal 1 回目</td>
+<td>114 message</td>
+<td>46 message</td>
+<td>86%</td>
+<td>記録なし</td>
+</tr>
+<tr data-line="60" class="code-line">
+<td>terminal 2 回目</td>
+<td>57 message</td>
+<td>49 message</td>
+<td>40%</td>
+<td>記録なし</td>
+</tr>
+<tr data-line="61" class="code-line">
+<td>Desktop</td>
+<td>187,635 token</td>
+<td>33,447 token</td>
+<td>82%</td>
+<td>1,351 ms</td>
+</tr>
+</tbody>
+</table>
+<p data-line="63" class="code-line">terminal の数字は plugin の toast、Desktop の数字は transcript（<code>~/.claude/projects/&lt;repo&gt;/&lt;session&gt;.jsonl</code>）の <code>compact_boundary</code> record から取りました。</p>
+<p data-line="65" class="code-line">terminal 1 回目の内訳は、tool 呼び出し 35 件のうち削除 34 件（Bash 32、Write 1、PowerShell 1）、結果の切り詰め 1 件、原文のまま残したもの 0 件です。Jev が返した「呼び出しを残す」確率は最小 0.19、中央値 0.26、最大 0.50 で、閾値 0.5 を超えたものはありませんでした。「結果を残す」確率は最大 0.20 でした。Jev に送った state は約 14,200 token で、request は 1 回です。</p>
+<p data-line="67" class="code-line">Bash の出力は「再実行すれば戻る」側に判定されています。compaction 後の tool 呼び出し 10 件のうち 3 件は前に打ったものと同じ command でしたが、作業の流れとして打ち直したものと区別がつかず、compaction が原因かは分かりません。</p>
+<p data-line="69" class="code-line">費用は 1 回の compaction で state（上限 25,000 token）を request ごとに再送します。1 request に入る質問は約 80 問（tool 呼び出し 40 件分）です。</p>
+<table data-line="71" class="code-line">
+<thead data-line="71" class="code-line">
+<tr data-line="71" class="code-line">
+<th>tool 呼び出し数</th>
+<th>request 数</th>
+<th>送信 token</th>
+<th>費用</th>
+</tr>
+</thead>
+<tbody data-line="73" class="code-line">
+<tr data-line="73" class="code-line">
+<td>40</td>
+<td>1</td>
+<td>約 28k</td>
+<td>$0.001</td>
+</tr>
+<tr data-line="74" class="code-line">
+<td>150</td>
+<td>4</td>
+<td>約 115k</td>
+<td>$0.005</td>
+</tr>
+<tr data-line="75" class="code-line">
+<td>400</td>
+<td>10</td>
+<td>約 290k</td>
+<td>$0.012</td>
+</tr>
+</tbody>
+</table>
+<h2 id="%E6%B3%A8%E6%84%8F%E7%82%B9" data-line="77" class="code-line">
+<a class="header-anchor-link" href="#%E6%B3%A8%E6%84%8F%E7%82%B9" aria-hidden="true"></a> 注意点</h2>
+<p data-line="79" class="code-line"><strong>日本語で token 推定が外れる可能性があります。</strong> plugin の token 見積りは非 ASCII 1 文字 = 0.9 token で、英語で較正されています。Jev の tokenizer が日本語をこれより細かく刻む場合、推定 25k が実際には 32k の上限を超えて 4xx になり、組込み要約に fallback します。今回の 3 回は state が 14k 以下で当たりませんでした。当たった場合は toast に <code>Jev request failed (4xx)</code> と出るので、user settings の <code>pluginConfigs["fast-jev-compaction@fast-jev-compaction"].options.maxStateTokens</code> を下げます。</p>
+<p data-line="81" class="code-line"><code>/compact 〇〇を残して</code> の指示は読まれません。hook は <code>event.instructions</code> を参照していません。</p>
+<p data-line="83" class="code-line">Bash の出力に出た実測値は、上の結果のとおりほぼ消えます。残したい数字は assistant の本文に書かせるか、file に落とします。本文は削られません。</p>
+<p data-line="85" class="code-line">plugin 独自の auto-compact が context 60% で走ります（組込みは 90% 台）。本文だけで 60% を超えた session では、削るものが無く 25% 未満で fallback し、組込み要約が標準より早く走ります。手動 <code>/compact</code> だけにしたい場合は <code>compactAtPercent</code> を 999 にします。</p>
+<p data-line="87" class="code-line">直近 6 message（tool 往復 3 回分）は判定対象外です。4 回前に Read した file は削除されうるので、再 Read が 1 回増えます。</p>
+<p data-line="89" class="code-line">画像の tool 結果（screenshot など）は text が空扱いで、削除されると画像ごと消えます。組込み要約でも消えるので現状維持です。</p>
+<p data-line="91" class="code-line"><code>--resume</code> や Desktop app の session 復元で、圧縮後の状態が transcript に永続化されるかは確認していません。</p>
+<p data-line="93" class="code-line">止めるときは <code>claude plugin disable fast-jev-compaction@fast-jev-compaction</code> です。</p>
+<h2 id="%E5%8F%82%E7%85%A7" data-line="95" class="code-line">
+<a class="header-anchor-link" href="#%E5%8F%82%E7%85%A7" aria-hidden="true"></a> 参照</h2>
+<ul data-line="97" class="code-line">
+<li data-line="97" class="code-line"><a href="https://github.com/tamaratran/fast-jev-compaction" target="_blank" rel="nofollow noopener noreferrer">tamaratran/fast-jev-compaction</a></li>
+<li data-line="98" class="code-line"><a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" target="_blank" rel="nofollow noopener noreferrer">TypeSafe AI: Introducing System One Models &amp; Jev</a></li>
+<li data-line="99" class="code-line"><a href="https://docs.typesafe.ai/concepts/system-one" target="_blank" rel="nofollow noopener noreferrer">TypeSafe docs: System One</a></li>
+<li data-line="100" class="code-line"><a href="https://www.langchain.com/blog/building-a-harness-with-jev" target="_blank" rel="nofollow noopener noreferrer">LangChain: Building a harness with Jev</a></li>
+</ul>
+
+    <div class="source-link">初出: <a href="https://zenn.dev/orangewk/articles/claude-code-fast-jev-compaction" target="_blank" rel="noopener">Zenn</a></div>
+    <div class="bottom-nav"><a href="../../">&larr; orange-wks</a></div>
+  </div>
+</main>
+
+<footer><p>orange</p></footer>
+
+<script src="../../assets/share.js"></script>
+</body>
+</html>
