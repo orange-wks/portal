@@ -14,7 +14,19 @@ import sys, os, json, re, html as html_lib, urllib.request, argparse, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 BLOG_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ZENN_DIR = os.path.join(os.path.dirname(BLOG_DIR), "zenn-content", "articles")
+def _find_zenn_dir():
+    """zenn-content/articles の場所。env ZENN_CONTENT_DIR > portal の隣 > C:/dev の順で探す。"""
+    candidates = [
+        os.environ.get("ZENN_CONTENT_DIR"),
+        os.path.join(os.path.dirname(BLOG_DIR), "zenn-content"),
+        os.path.join("C:\dev", "zenn-content"),
+    ]
+    for c in candidates:
+        if c and os.path.isdir(os.path.join(c, "articles")):
+            return os.path.join(c, "articles")
+    return os.path.join(candidates[1], "articles")
+
+ZENN_DIR = _find_zenn_dir()
 ZENN_USERNAME = "orangewk"
 SITE_URL = "https://orange-wks.github.io/portal"
 
