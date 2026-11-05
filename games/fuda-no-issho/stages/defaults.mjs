@@ -1,0 +1,16 @@
+export const DEFAULTS = {
+  startBody: 5, maxBody: 10, startStore: 0,
+  oldAgeFrom: 46, oldAgeLoss: 1, maxAge: 75,
+  goalWeight: 2, disasterChance: 0.15, adultFrom: 15, quietAfterBig: true,
+  firstMarriageAges: [20, 30], feudGap: 6, demandPerStore: 6, birthSurvive: 0.8, featuredChildren: 3, featuredChance: 0.4,
+  marriageUntil: 60, childbearingUntil: 42, maxMistresses: 2, affairMeetBoost: 2, keepLoverHearts: 2,
+  concubineStore: 8, affairOdds: 3, affairConflictsForDivorce: 2, meetingWeight: 24, visitWeight: 24, claimGap: 2,
+  hireCost: 2, temptChance: 0.5, pastBoost: 3, pastLv3Boost: 3, lv3Threshold: 0.67, decayHead: 0.03, decayBody: 0.015,
+  abilityDecay: true, guardBoost: 2,
+  polishStore: { 2: 3, 3: 6 }, polishBody: { 2: 1, 3: 2 }, polishOddsPaid: { 2: 5, 3: 2 }, polishOddsSelf: { 2: 3, 3: 1 },
+  tiredAt: 3, tiredWeight: 3, intuitionStart: 3, intuitionMax: 3,
+  goalShare: 0.5, scopeWeight: 3, stackOnce: true, reachOdds: { 3: 3, 4: 1 }, reachTries: { 4: 1 }, scoreGainsOnly: true,
+  grandchildren: { item: 'grandchild', after: 'heirwed', every: 3, max: 3 },
+  quietAuto: true, bodyCeiling: true, bodyMaxStart: 3, bodyMaxAdult: 8, bodyMaxGrowFrom: 7, adultAge: 18, agingFrom: 40, agingEvery: 3,
+  diyInjury: 'wound',
+};
