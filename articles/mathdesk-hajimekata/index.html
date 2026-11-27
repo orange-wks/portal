@@ -24,6 +24,7 @@
     .intro-video { margin: 1.2em 0 1.6em; text-align: center; }
     .intro-video video { display: block; width: 100%; max-width: 300px; height: auto; margin: 0 auto; border-radius: 8px; background: #0b1220; }
     .intro-video figcaption { margin-top: 0.5em; font-size: 0.85em; opacity: 0.8; }
+    .intro-video.wide video { max-width: 560px; }
   </style>
 </head>
 <body>
@@ -40,7 +41,7 @@
       <span>2026-11-21</span>
     </div>
 
-    <p>MathDesk は、共通テストの数学（数学I・A・II・B・C）と、その前提になる中学・小学校の範囲を、先生役の AI と対話しながら学ぶアプリです。この記事では、スマホでログインしてから最初の授業で質問するまでを、6 つの手順と実際の画面で説明します。</p>
+    <p>MathDesk は、共通テストの数学（数学I・A・II・B・C）と、その前提になる中学・小学校の範囲を、先生役の AI と対話しながら学ぶアプリです。この記事では、スマホでログインしてから最初の授業で質問するまでを、5 つの手順と実際の画面で説明します。</p>
 
     <p><a class="start-link" href="https://mathdesk-273476962244.asia-northeast1.run.app">MathDesk を始める</a></p>
 
@@ -53,10 +54,17 @@
       <figcaption>はじめる、まなぶ、たしかめるの順に、この記事の手順を画面で見せます（音楽あり、声なし）</figcaption>
     </figure>
 
+    <figure class="intro-video wide">
+      <video controls playsinline preload="none" poster="video/hajimete-wide-poster.jpg" width="1920" height="1080">
+        <source src="video/hajimete-wide.mp4" type="video/mp4">
+      </video>
+      <figcaption>同じ内容の横型です。パソコンなど、横長の画面で見るとき向け</figcaption>
+    </figure>
+
     <p>動画では、次の順に画面が進みます。</p>
 
     <ol>
-      <li><strong>はじめる</strong>: 数学を選ぶ、Google でログインする、招待されていなければ利用を申請する、はじめの質問に 3 つ答える、学習データの使い方を選ぶ。</li>
+      <li><strong>はじめる</strong>: Google でログインする、招待されていなければ利用を申請する、はじめの質問に 3 つ答える、学習データの使い方を選ぶ。</li>
       <li><strong>まなぶ</strong>: ペンギン先生の案内を読む（閉じても「使い方」で読み直せる）、ホームから先生に聞く、授業で分からないところを質問する、先生が筋道から説明する、図で確かめる、目次と地図で前に学ぶ単元をたどる。</li>
       <li><strong>たしかめる</strong>: 実力テストで今の位置を確かめる、間違えた問題を解説で見直す、これまでの記録から続きを始める。</li>
     </ol>
@@ -84,29 +92,20 @@
       <li>Google アカウント（ログインに使います）</li>
     </ul>
 
-    <p>MathDesk は招待制の無料βとして運営しています。現時点で利用料金はかかりません。招待されていないアカウントでは、利用の申請から始まります（手順 3）。</p>
+    <p>MathDesk は招待制の無料βとして運営しています。現時点で利用料金はかかりません。招待されていないアカウントでは、利用の申請から始まります（手順 2）。</p>
 
     <h2>最初の画面から授業まで</h2>
 
-    <h3>1. 科目を選ぶ</h3>
+    <h3>1. Google でログインする</h3>
 
-    <p>MathDesk を開くと「科目を選ぶ」が表示されます。「数学」を押します。</p>
-
-    <figure class="shot">
-      <img src="img/s01-subject.jpg" alt="科目を選ぶ画面。数学と生物のボタンが並んでいる" width="600" height="1006" loading="lazy">
-      <figcaption>「数学」を押す</figcaption>
-    </figure>
-
-    <h3>2. Google でログインする</h3>
-
-    <p>「Googleでログイン」を押し、自分の Google アカウントを選びます。パスワードを MathDesk に登録する必要はありません。</p>
+    <p>MathDesk を開くと、ログインの画面が表示されます。「Googleでログイン」を押し、自分の Google アカウントを選びます。パスワードを MathDesk に登録する必要はありません。</p>
 
     <figure class="shot">
       <img src="img/s02-login.jpg" alt="ログイン画面。招待制の無料β版の説明と、Googleでログインのボタン" width="600" height="1006" loading="lazy">
       <figcaption>「Googleでログイン」を押す</figcaption>
     </figure>
 
-    <h3>3. 招待されていない場合は、利用を申請する</h3>
+    <h3>2. 招待されていない場合は、利用を申請する</h3>
 
     <p>まだ招待されていないアカウントでは「β利用を申請します」が表示されます。氏名（表示名）と、必要なら一言メッセージを書いて、「β利用を申請する」を押します。運営が承認したら、同じ画面の「再確認」を押すと先へ進めます。招待済みのアカウントでは、この画面は出ません。</p>
 
@@ -115,7 +114,7 @@
       <figcaption>招待されていない場合だけ表示される</figcaption>
     </figure>
 
-    <h3>4. はじめの質問に答える</h3>
+    <h3>3. はじめの質問に答える</h3>
 
     <p>「はじめに少しだけ教えてください」と、3 つの質問が順に出ます。</p>
 
@@ -139,7 +138,7 @@
       <figcaption>「同意する」か「同意しない」を押す</figcaption>
     </figure>
 
-    <h3>5. ホームでペンギン先生の案内を読む</h3>
+    <h3>4. ホームでペンギン先生の案内を読む</h3>
 
     <p>ホームに、ペンギン先生と「こんにちは。数学や使い方で気になることは、ここから聞いてね。」という入力欄が表示されます。その下に、初めての人向けの案内が出ます。</p>
 
@@ -159,7 +158,7 @@
 
     <p>案内の下には、学年に合わせた実力テスト（10 分前後）の入口も表示されます。テストの結果から始める場所を決めることも、テストを受けずに授業から始めることもできます。</p>
 
-    <h3>6. 授業を始めて、質問する</h3>
+    <h3>5. 授業を始めて、質問する</h3>
 
     <p>授業の始め方は 2 つあります。</p>
 
